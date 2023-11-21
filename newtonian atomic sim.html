@@ -1,0 +1,478 @@
+<head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;        
+    margin: 0;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+canvas {
+    border: 2px solid #00aaff;
+    background-color: #111;
+}
+
+#data {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#avgVChart {
+    margin-top: 20px;
+}
+
+button {
+    background-color: #00aaff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0077aa;
+}
+
+input[type="number"] {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+    padding: 8px 12px;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+input[type="file"] {
+    color: #ffffff;
+    margin-top: 10px;
+}
+
+label {
+    margin-bottom: 8px;
+}
+
+input[type="file"] {
+    color: #ffffff;
+    margin-top: 10px;
+    
+}
+
+.custom-file-input {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.custom-file-input:hover {
+    background-color: #444;
+}
+
+
+
+</style>
+</head>
+<h1>Atomic Element Simulator based on Newtonian Mechanics</h1>
+<i>Developed by Nihal Gazi</i>
+<br>
+<br>
+<br>
+  <form id="protonForm">
+    <label for="protons">Number of Protons(red):</label>
+    <input type="number" id="protons" name="protons" required value="10">
+    <br>
+    <label for="neutrons">Number of Neutrons(green):</label>
+    <input type="number" id="neutrons" name="neutrons" required value="42">
+    <br>
+    <label for="electrons">Number of Electrons(yellow):</label>
+    <input type="number" id="electrons" name="electrons" required value="12">
+    <br>
+    
+    <button type="button"  onclick='downloadAtomsAsJSON()'>Download atom</button>
+    <br><br>
+    <input type="file" id="atomsFile" accept=".json" class="custom-file-input">
+    <br><br>
+
+    <button type="button" id="loader" onclick='loadAtomsFromJSON()'>Load atoms from file</button>
+    <br><br>
+    <button type="submit" >Simulate</button>
+    <br><br>
+
+  </form>
+
+
+
+<canvas id="life" width="500" height="500"></canvas>
+
+<div id="data">
+<p id="particle_data"></p>
+<p id="particle_meta"></p>
+<p id="system"></p>
+
+
+
+
+<canvas id="avgVChart" width="500" height="200"></canvas><br><br>
+
+</div>
+
+
+
+
+
+<script>
+  //simulation code by Hunar Ahmad @ brainxyz
+  //modified by Nihal Gazi
+  
+      var numProtons = parseInt(document.getElementById("protons").value);
+      var numNeutrons = parseInt(document.getElementById("neutrons").value);
+      var numElectrons = parseInt(document.getElementById("electrons").value);
+	  
+	   var avg_v=0;
+       var avgVData = [];
+	   var avgVData_label = [];
+       
+       var index=0;
+       
+       var final_proton=0;
+       var final_electron=0;
+       var final_neutron=0;
+       var name="";
+       
+       
+	  
+  
+	  var m = document.getElementById("life").getContext("2d");
+	  
+	  
+	  
+	  
+    protonForm.addEventListener("submit", function (event) {
+	
+		event.preventDefault();
+      numProtons = parseInt(document.getElementById("protons").value);
+      numNeutrons = parseInt(document.getElementById("neutrons").value);
+      numElectrons = parseInt(document.getElementById("electrons").value);
+	  
+	  if(numProtons>0 && numElectrons>0 && numNeutrons>0){
+	    atoms = [];
+	  	avgVData.length=0;
+	    avgVData_label.length=0;
+        index=0;
+        final_proton=0;
+        final_electron=0;
+        final_neutron=0;
+        name="";
+	  
+      
+	  
+	  
+	  
+	    yellow = create(numElectrons, "yellow");//electrons
+  
+		red = create(numProtons, "red");//protons
+  
+		green = create(numNeutrons, "green");//neutrons
+		}
+		
+      
+    });
+  
+ 
+
+  draw = (x, y, c, s) => {
+    m.fillStyle = c;
+    m.fillRect(x, y, s, s);
+  };
+  
+  draw_arc = (x, y, c, s) => {
+    m.fillStyle = c;
+    m.beginPath();
+    m.arc(x, y, s / 2, 0, Math.PI * 2);
+    m.fill();
+};
+  
+  
+  
+function generateSystemName(atoms) {
+    let totalVx = 0;
+    let totalVy = 0;
+    final_proton=0;
+    final_electron=0;
+    final_neutron=0;
+  
+
+    for (let i = 0; i < atoms.length; i++) {
+    if(atoms[i].x<500 && atoms[i].x>0 && atoms[i].y<500 && atoms[i].y>0){
+        if(atoms[i].color=='red'){
+        totalVx += atoms[i].vx;
+        totalVy += atoms[i].vy;
+        final_proton++;
+        }
+        
+        if(atoms[i].color=='yellow'){final_electron++;}
+        
+        if(atoms[i].color=='green'){final_neutron++;}
+        
+       } 
+    }
+    
+    
+    name = decodeString(final_electron + "" + final_neutron + "" + final_proton);
+    
+    
+
+    const averageVx = totalVx / atoms.length;
+    const averageVy = totalVy / atoms.length;
+	
+	//avg_v =( (Math.abs(Math.tanh(averageVx + averageVy)/2))  +avg_v)/2    ;
+    
+    avg_v =( Math.abs(averageVx + averageVy)/2)  + (2*avg_v)/3    ;
+    
+    
+
+    if (avg_v > 0.3 ) {
+        return "Unstable System";
+    } else if (avg_v > 0.015 ) {
+        return "Dynamic System";
+    } else {
+        return "Stagnant System";
+    }
+    
+    
+}
+
+
+
+
+function downloadAtomsAsJSON() {
+    const jsonContent = JSON.stringify(atoms);
+    const blob = new Blob([jsonContent], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name+".json";
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function loadAtomsFromJSON() {
+console.log(atoms);
+    const fileInput = document.getElementById("atomsFile");
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    reader.onload = function(event) {
+        const jsonData = event.target.result;
+        try {
+            const newAtoms = JSON.parse(jsonData);
+            for (let i = 0; i < newAtoms.length; i++) {
+                const { x, y, color } = newAtoms[i];
+                const atomToAdd = atom(x, y, color);
+                atoms.push(atomToAdd);
+                
+                if (color === "yellow") {
+                    yellow.push(atomToAdd);
+                } else if (color === "red") {
+                    red.push(atomToAdd);
+                } else if (color === "green") {
+                    green.push(atomToAdd);
+                }
+            }
+            
+            console.log(newAtoms);
+            
+            
+        } catch (error) {
+            console.error("Error parsing JSON file: ", error);
+        }
+    };
+
+    reader.readAsText(file);
+    console.log(atoms);
+}
+
+
+function decodeString(input) {
+    const elementMap = {
+        '0': 'nil',
+        '1': 'un',
+        '2': 'bi',
+        '3': 'tri',
+        '4': 'quad',
+        '5': 'pent',
+        '6': 'hex',
+        '7': 'sept',
+        '8': 'oct',
+        '9': 'enn'
+    };
+
+    let result = '';
+    for (let i = 0; i < input.length; i++) {
+        const digit = input[i];
+        if (elementMap.hasOwnProperty(digit)) {
+            result += elementMap[digit];
+        } else {
+            result += 'unknown';
+        }
+    }
+
+    return result + 'ium';
+}
+
+  var ctx = document.getElementById("avgVChart").getContext("2d");
+    avgVChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: avgVData_label , 
+            datasets: [{
+                label: 'Average Velocity Magnitude',
+                data: avgVData,
+                backgroundColor: 'rgba(192, 75, 75, 0.2)',
+                borderColor: 'rgba(192, 75, 75, 1)',
+                borderWidth: 1
+                
+            }]
+        },
+        options: {
+            elements: {
+        line: {
+            tension: 0.7
+        }
+    },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+function addData(chart, label, newData) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(newData);
+    });
+    chart.update();
+}
+
+
+
+  
+function removeData(chart) {
+    chart.data.labels.shift();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.shift();
+    });
+    chart.update();
+}
+  
+  
+  atom = (x, y, c) => {
+    return { x: x, y: y, vx: 0, vy: 0, color: c };
+  };
+  
+  random = () => {
+    return Math.random() * 400 + 50;
+  };
+  
+  var atoms=[];
+  
+  create = (number, color) => {
+
+    group = [];
+    for (let i = 0; i < number; i++) {
+      group.push(atom(random(), random(), color));
+      atoms.push(group[i]);
+    }
+    return group;
+  };
+  
+  
+  rule = (atoms1, atoms2, g) => {
+ 
+    for (let i = 0; i < atoms1.length; i++) {
+      var fx = 0;
+      var fy = 0;
+      for (let j = 0; j < atoms2.length; j++) {
+
+        var a = atoms1[i];
+        var b = atoms2[j];
+        
+        var dx = a.x - b.x;
+        var dy = a.y - b.y;
+        d = Math.sqrt(dx * dx + dy * dy);
+        if (d > 0 && d < (500*500*2)) {
+          F = (g * 1) / d;
+          fx += F * dx;
+          fy += F * dy;
+        }
+      }
+      a.vx = (a.vx + fx) * 0.5;
+      a.vy = (a.vy + fy) * 0.5;
+      a.x += a.vx;
+      a.y += a.vy;
+      //if (a.x <= 0 || a.x >= 500) { a.vx *= -1; }
+      //if (a.y <= 0 || a.y >= 500) { a.vy *= -1; }
+    }
+  };
+  
+  
+	var yellow = create(numElectrons, "yellow");//electrons
+  
+	var	red = create(numProtons, "red");//protons
+  
+	var	green = create(numNeutrons, "green");//neutrons
+  
+  
+  update = () => {
+    
+  
+    rule(green, red, 0);
+    rule(green, green, 1);
+    rule(green, yellow, -1);
+    
+    rule(red, red, 1);
+    rule(red, green, 0);
+    rule(red, yellow, -1);
+    
+    rule(yellow, red, -1);
+    rule(yellow, green, -1);
+    rule(yellow, yellow, 1);
+    
+
+if(index%5==0){
+if(avgVData.length>20){}
+else{addData(avgVChart, index, avg_v);}}
+index++;
+
+	document.getElementById("system").innerHTML=generateSystemName(atoms) + "<br> (average velocity = "+avg_v+")";
+    
+    document.getElementById("particle_data").innerHTML=" Current protons = "+final_proton+" <br> Current neutrons = "+final_neutron+" <br> Current electrons = "+final_electron+"";
+    
+    document.getElementById("particle_meta").innerHTML="Name: "+name;
+    
+    m.clearRect(0, 0, 500, 500);
+    draw(0, 0, "black", 500);
+    for (i = 0; i < atoms.length; i++) {
+      draw_arc(atoms[i].x, atoms[i].y, atoms[i].color, 5);
+    }
+    requestAnimationFrame(update);
+  };
+  
+ update();
+ 
+</script>
