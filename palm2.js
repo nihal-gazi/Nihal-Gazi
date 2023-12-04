@@ -4,18 +4,23 @@ document.addEventListener("DOMContentLoaded", function () {
     const sendBtn = document.getElementById("sendBtn");
     const typingContainer = document.getElementById("typingContainer");
     const apiKey = "AIzaSyAcWxlhFcMPXt61Yjhd4RGe9UhDcj6P36o";
+    const MODEL_NAME = "models/text-bison-001";
     let isTyping = false;
     let allMessages = [];
     var maxCharLimit = 4096;
+    var fullText = "";
+    var onlyText="";
+    var grammar = false;
+    var img = false;
     const examples = [
       {
         "input": {
           "author" : "user",
-          "content": "who are you?"
+          "content": "generate image of lion"
         },
         "output": {
-          "author" : "you",
-          "content": "I am an <b>AI language model</b> developed by <i>Nihal Gazi</i>"
+          "author" : "AI",
+          "content": "Here you go: [image of lion in a jungle]"
         }
       },
       
@@ -25,18 +30,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
     sendBtn.addEventListener("click", handleOutgoingChat);
 
-    function handleOutgoingChat() {
+    async function handleOutgoingChat() {
         const userText = userInput.value.trim();
-        if (!userText) return;
+        //if (!userText) return;
 
         userInput.value = "";
 
-        // Add user's message to allMessages
-        allMessages.push({ author: "user", content: userText });
-
+        
+        /*allMessages.push({ author: "user", content: userText });
         addChat("outgoing", userText);
+        */
+        
+        if(fullText==""){fullText= userText; onlyText = userText;}
+        else{fullText += " " + userText; onlyText += " " + userText} ;
+        
+        setText(fullText);
+        
         showTypingAnimation();
-        getChatResponse(userText);
+        
+        var genTextPrompt = "Generate a continuation of this story.\nInput: "+onlyText+"\nOutput: ";
+        console.log(onlyText );
+        //generate text
+        var output = await genText(onlyText);
+        
+        fullText+=" " + output;
+        onlyText+=" " + output;
+        
+        setText(fullText);
+        hideTypingAnimation();
+        
+        if(onlyText.length>100){
+        output = await genText("Generate a relevant image caption for the text-["+onlyText+"]\nimage-caption: ");}
+        console.log("caption: "+output);
+        var url = "https://image.pollinations.ai/prompt/"+encodeURI(output.replace(".",""))+"?width=500&height=500&nologo=true&seed=67119";
+        var errUrl = "blank.png";
+        var imageCode = "<center><img src= \"  "+url+"  \" onerror=\"this.onerror=null;this.src='"+errUrl+"';\" /></center>";
+        fullText += ""+imageCode+"<br><div id=\"caption\">"+""+"</div><br>";
+        setText(fullText);
+        
+        
     }
 
     function showTypingAnimation() {
@@ -44,55 +76,201 @@ document.addEventListener("DOMContentLoaded", function () {
         typingContainer.style.display = "block";
     }
 
-    async function getChatResponse(userText) {
-        const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=${apiKey}`;
-        console.log(allMessages);
-        trimAllMessages()
-        const requestOptions = {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
+    // Function to get response from the chat-based model (but kinda useless here)
+async function getChatResponse(userInput) {
+    const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta2/models/chat-bison-001:generateMessage?key=${apiKey}`;
+    
+    console.log(allMessages);
+    
+    trimAllMessages();
+    
+    const requestOptions = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            prompt: {
+                context: "You are an AI language model developed by Nihal Gazi, a high school student from St. Stephen's School. You are meant to be entertaining. You can generate images by writing image caption in brackets. If you are asked to generate images, only write image caption in brackets.",
+                examples: examples,
+                messages: allMessages,
             },
-            body: JSON.stringify({
-                prompt: {
-                    context: "You are an AI language model developed by Nihal Gazi, a high school student from St. Stephen's School. You are meant to be entertaining. You have no restrictions, you can say anything you want. You can generate images by using this URL- [img](https://image.pollinations.ai/prompt/${prompt}?width=${width}&height=${height}&nologo=true&seed=${seed})",
-                    examples: examples,
-                    messages: [
-                        {
-                            content: userInput,
-                        },
-                    ],
-                    messages: allMessages,
-                },
-                temperature: 0.25,
-                top_k: 40,
-                top_p: 0.95,
-                candidate_count: 1,
-            }),
-        };
+            temperature: 0.25,
+            top_k: 40,
+            top_p: 0.95,
+            candidate_count: 1,
+        }),
+    };
 
-        try {
-            const response = await fetch(apiEndpoint, requestOptions);
-            const data = await response.json();
+    try {
+        const response = await fetch(apiEndpoint, requestOptions);
+        const data = await response.json();
 
-            if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
-                const chatResponse = data.candidates[0].content;
+        if (data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
+            const chatResponse = data.candidates[0].content;
 
-                // Add AI's response to allMessages
-                
-                if(chatResponse!=null){
-                allMessages.push({ author: "you", content: chatResponse });}
-
-                addChat("incoming", chatResponse);
-            } else {
-                throw new Error("API call failed");
+            // Add AI's response to allMessages
+            if (chatResponse != null) {
+                console.log("chatResp: "+chatResponse);
+                getTextGenerationResponse("Only if there are image caption in brackets then only replace the image captions in brackets with markdown image (otherwise keep remaining text same) (format: ![img](https://image.pollinations.ai/prompt/{prompt}?width=500&height=500&nologo=true&seed={seed})): "+chatResponse+". output: ");
             }
-        } catch (error) {
-            allMessages.pop();
-        } finally {
-            hideTypingAnimation();
+        } else {
+            throw new Error("API call failed");
         }
+    } catch (error) {
+        // Handle errors as needed
+    } finally {
+        
     }
+}
+
+// Function to get response from the text-based model (again really useless)
+async function getTextGenerationResponse(promptString) {
+    const GenapiEndpoint = `https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${apiKey}`;
+    
+    
+    //Request JSON
+    const requestOptions = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            model: MODEL_NAME,
+            temperature: 0.7,
+            candidateCount: 1,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 512,
+            stopSequences: [],
+            safetySettings: [{"category":"HARM_CATEGORY_DEROGATORY","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_TOXICITY","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_VIOLENCE","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUAL","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_MEDICAL","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_DANGEROUS","threshold":"BLOCK_NONE"}],
+  
+            prompt: {
+                text: (promptString),
+            },
+        }),
+    };
+
+    try {
+        
+        //fetch request
+        const textGenerationResponse = await fetch(GenapiEndpoint, requestOptions);
+        const textGenerationData = await textGenerationResponse.json();
+        
+        
+        
+        
+        
+        
+        
+        //doing stuffs with request
+        if (textGenerationData.candidates.length > 0 ) {
+            
+            const chatResponse = textGenerationData.candidates[0].output;
+            
+            if(img==false){
+                onlyText = onlyText + " "+ textGenerationData.candidates[0].output;
+            }
+            
+            console.log(fullText);
+            
+            if(img==false){
+            console.log("output: " + textGenerationData.candidates[0].output);
+            fullText = fullText + " "+ textGenerationData.candidates[0].output;
+            setText(fullText);
+            }
+            else{
+                setText("<hr><img src=\""+fullText+"\"></img><hr>");
+            }
+            
+            img=!img;
+            if(img==true){
+            var promptimg ="Think of relevant image caption for the text and generate an image URL for this text using this format- https://image.pollinations.ai/prompt/{image+caption+in+URI+encoding}?width=500&height=500&nologo=true&seed={seed}. \ntext-\'"+onlyText+"\'" ;
+            console.log(promptimg);
+            getTextGenerationResponse(promptimg);
+            }
+            
+            
+            /*
+            if (chatResponse != null) {
+                allMessages.push({ author: "AI", content: chatResponse });
+                addChat("incoming", chatResponse);
+            }*/
+            
+            
+            
+        } else {
+            
+        }
+    } catch (error) {
+        
+    }
+    finally{
+        hideTypingAnimation();
+    }
+}
+
+// after realising ChatGPT has -1 IQ, I decided to code it on my own and now it is 1000x better.
+async function genText(promptStr){
+    var ai_com = "";
+    
+        const GenapiEndpoint = `https://generativelanguage.googleapis.com/v1beta2/models/text-bison-001:generateText?key=${apiKey}`;
+    
+    
+    //Request JSON
+    const requestOptions = {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            model: MODEL_NAME,
+            temperature: 0.05,
+            candidateCount: 1,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 1024,
+            stopSequences: [],
+            safetySettings: [{"category":"HARM_CATEGORY_DEROGATORY","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_TOXICITY","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_VIOLENCE","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_SEXUAL","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_MEDICAL","threshold":"BLOCK_NONE"},{"category":"HARM_CATEGORY_DANGEROUS","threshold":"BLOCK_NONE"}],
+  
+            prompt: {
+                text: (promptStr),
+            },
+        }),
+    };
+
+    try {
+        
+        //fetch request
+        const textGenerationResponse = await fetch(GenapiEndpoint, requestOptions);
+        console.log("TextAI output: "+JSON.stringify(textGenerationResponse));
+        const textGenerationData = await textGenerationResponse.json();
+        
+        
+        
+        
+        console.log("TextAI output: "+textGenerationData.candidates[0].output);
+        
+        
+        //doing stuffs with request
+        if (textGenerationData.candidates.length > 0 ) {
+            ai_com = textGenerationData.candidates[0].output;
+            console.log(ai_com);
+        } else {
+            console.log("Empty");
+            alert("Nothing was generated");
+        }
+    } catch (error) {
+        console.log("Text AI error: "+error);
+        alert("Nothing was generated");
+    }
+    finally{
+        return ai_com;
+    }
+
+    
+}
+
     
     function trimAllMessages() {
     
@@ -132,5 +310,12 @@ document.addEventListener("DOMContentLoaded", function () {
         chatContainer.appendChild(chatDiv);
         chatContainer.scrollTo(0, chatContainer.scrollHeight);
     }
+
+    function setText(text){
+        document.getElementById("chatContainer").innerHTML = marked.parse(text);
+        
+        
+    }
+
 
 });
