@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var onlyText="";
     var grammar = false;
     var img = false;
+    var btn = document.getElementById("sendBtn");
     const examples = [
       {
         "input": {
@@ -31,6 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     sendBtn.addEventListener("click", handleOutgoingChat);
 
     async function handleOutgoingChat() {
+        
+        btn.disabled = true;
         const userText = userInput.value.trim();
         //if (!userText) return;
 
@@ -41,8 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
         addChat("outgoing", userText);
         */
         
-        if(fullText==""){fullText= userText; onlyText = userText;}
-        else{fullText += " " + userText; onlyText += " " + userText} ;
+        if(fullText==""){fullText= userText+"<hr id=\"sep\">"; onlyText = userText;}
+        else{fullText += userText+"<hr id=\"sep\">"; onlyText += " " + userText} ;
         
         setText(fullText);
         
@@ -52,22 +55,29 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log(onlyText );
         //generate text
         var output = await genText(onlyText);
-        
-        fullText+=" " + output;
+        if(output.length>0){
+        fullText+="<br><div id=\"ai_txt\">" + output + "</div><hr id=\"sep\"><br>";
         onlyText+=" " + output;
         
         setText(fullText);
         hideTypingAnimation();
+        btn.disabled = false;
         
-        if(onlyText.length>100){
-        output = await genText("Generate a relevant image caption for the text-["+onlyText+"]\nimage-caption: ");}
+        if(onlyText.length>600){
+        output = await genText("Generate a relevant image caption for the text-["+output+"]\nimage-caption: ");
+        
+        output += ", (cinemtic), 4K, detailed";
         console.log("caption: "+output);
         var url = "https://image.pollinations.ai/prompt/"+encodeURI(output.replace(".",""))+"?width=500&height=500&nologo=true&seed=67119";
-        var errUrl = "blank.png";
+        var errUrl = "blank trans.png";
         var imageCode = "<center><img src= \"  "+url+"  \" onerror=\"this.onerror=null;this.src='"+errUrl+"';\" /></center>";
-        fullText += ""+imageCode+"<br><div id=\"caption\">"+""+"</div><br>";
+        fullText += ""+imageCode+"<br><div id=\"caption\">"+""+"</div><br><hr id=\"sep\">";
         setText(fullText);
-        
+        }}
+        else{
+        hideTypingAnimation();
+        btn.disabled = false;
+        }
         
     }
 
@@ -262,7 +272,7 @@ async function genText(promptStr){
         }
     } catch (error) {
         console.log("Text AI error: "+error);
-        alert("Nothing was generated");
+        alert("Sorry, I could continue the story further. Please try refreshing.");
     }
     finally{
         return ai_com;
