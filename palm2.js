@@ -64,14 +64,14 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.disabled = false;
         
         if(onlyText.length>600){
-        output = await genText("Generate a relevant image caption for the text-["+output+"]\nimage-caption: ");
+        output = await genText("Generate a relevant image caption for the text-["+userText+"\n"+output+"]\nimage-caption: ");
         
-        output += ", (cinemtic), 4K, detailed";
+        //output += ", (cinemtic), 4K, detailed";
         console.log("caption: "+output);
-        var url = "https://image.pollinations.ai/prompt/"+encodeURI(output.replace(".",""))+"?width=500&height=500&nologo=true&seed=67119";
+        var url = "https://image.pollinations.ai/prompt/"+encodeURI(output.replace(".",""))+"?width=500&height=500&nologo=true&seed="+generateRandomNumber();
         var errUrl = "blank trans.png";
         var imageCode = "<center><img src= \"  "+url+"  \" onerror=\"this.onerror=null;this.src='"+errUrl+"';\" /></center>";
-        fullText += ""+imageCode+"<br><div id=\"caption\">"+""+"</div><br><hr id=\"sep\">";
+        fullText += ""+imageCode+"<br><div id=\"caption\">"+""+"</div><hr id=\"sep\">";
         setText(fullText);
         }}
         else{
@@ -327,5 +327,10 @@ async function genText(promptStr){
         
     }
 
+function generateRandomNumber() {
+    // Generate a random number between 10000 and 99999
+    const randomNumber = Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000;
+    return randomNumber;
+}
 
 });
