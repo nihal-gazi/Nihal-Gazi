@@ -63,7 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
         hideTypingAnimation();
         btn.disabled = false;
         
-        if(onlyText.length>600){
+        if(onlyText.length>50){
         output = await genText("Generate a relevant image caption for the text-["+userText+"\n"+output+"]\nimage-caption: ");
         
         //output += ", (cinemtic), 4K, detailed";
