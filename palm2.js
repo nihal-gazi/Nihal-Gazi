@@ -272,7 +272,7 @@ async function genText(promptStr){
         }
     } catch (error) {
         console.log("Text AI error: "+error);
-        alert("Sorry, I could continue the story further. Please try refreshing.");
+        alert("Sorry, I could not continue the story further. Please try refreshing.");
     }
     finally{
         return ai_com;
