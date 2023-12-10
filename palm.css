@@ -38,6 +38,10 @@ body {
     
 }
 
+#usermsg{
+  text-align:right;
+}
+
 #ai{
     
     min-height: 50vh;
