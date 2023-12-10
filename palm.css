@@ -39,7 +39,7 @@ body {
 }
 
 #usermsg{
-  text-align:right;
+  text-align:right !important;
 }
 
 #ai{
