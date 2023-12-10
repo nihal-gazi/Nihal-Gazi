@@ -44,8 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
         addChat("outgoing", userText);
         */
         
-        if(fullText==""){fullText= userText+"<hr id=\"sep\">"; onlyText = userText;}
-        else{fullText += userText+"<hr id=\"sep\">"; onlyText += " " + userText} ;
+        if(fullText==""){fullText= "<div id=\"usermsg\">"+userText+"</div><hr id=\"sep\">"; onlyText = userText;}
+        else{fullText += "<div id=\"usermsg\">"+userText+"</div><hr id=\"sep\">"; onlyText += " " + userText} ;
         
         setText(fullText);
         
