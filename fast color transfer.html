@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing</title>
+	<style>
+    
+    @font-face {
+  font-family: 'Product Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(https://fonts.gstatic.com/s/productsans/v5/HYvgU2fE2nRJvZ5JFAumwegdm0LZdjqr5-oayXSOefg.woff2) format('woff2');
+}
+
+        body {
+            font-family: 'Product Sans', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        input {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        #img1Holder, #img2Holder, #outputHolder {
+            width: 70%;
+            border-radius: 8px;
+            margin: 10px;
+            display: block;
+        }
+        
+        #img5Holder{
+            width:100%;
+            display: none;
+        }
+        
+        #gradientHolder{
+            height: auto;
+            border-radius: 8px;
+            margin: 10px;
+            display: block;
+        }
+        
+        div {
+            max-width: 100%;
+            background-color: #ffffff;
+            border-radius: 8px;
+            display: block;
+            
+        }
+
+        #i, #o {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+        
+        #txt1{
+            border-radius: 8px;
+            color: rgb(100,100,100);
+            background-color: rgb(220,220,220);
+            font-size: 10px;
+            width: 100%;
+            padding: 8px;
+        }
+        
+        #faq{
+        padding: 8px;
+        }
+
+        button {
+            padding: 15px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+        
+        
+        #load {
+    display: none;
+    background-color: rgba(0,0,0,0);
+    padding: 5px;
+    margin-left: 20px;
+    border-radius: 5px;
+    position: relative;
+    color:rgb(20,20,20);
+    
+    animation: fadeInOut 1s infinite;
+}
+
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+    </style>
+</head>
+<body>
+<img id="img5Holder" src="vecore.png">
+<h1>Image LUT Extractor and Color Grading (using VeCoRe-2 AI Algorithm)</h1>
+
+    
+    
+    
+
+
+
+    <!-- Image holders -->
+    
+    <div id="i">
+        <div id="txt1">Load the source image. (The image whose color grading will be analyzed.)<br></div>
+        <input type="file" id="img1Input" accept="image/*">
+        <img id="img1Holder" >
+    </div>
+    
+    <br>
+    
+    <div id="i">
+        <div id="txt1">Load the target image. (The image to be color graded)<br></div>
+        <input type="file" id="img2Input" accept="image/*">
+        <img id="img2Holder" >
+    </div>
+    
+    <br>
+    
+    <button id="processButton">Process Images</button>
+    <br>
+    <br>
+    <div id="load">Color grading...</div>
+    <br>
+    
+    
+    <div id="o">
+        <div id="txt1">Color pallette of source image, as analyzed by the AI algorithm<br></div>
+        <img id="gradientHolder">
+    </div>
+    <br>
+    <div id="o">
+        <div id="txt1">Output Image<br></div>
+        <img id="outputHolder" >
+    </div>
+    
+	<br><br>
+    
+    <hr width=50%>
+    
+    <br><br>
+    <div id="faq">
+    <br>
+    <h2>Frequently Asked Questions(FAQs)</h2>
+    <p>Q1. Have you gone mad?</p>
+
+<p>Ans- Yes.</p>
+
+<p>&nbsp;</p>
+
+<p>Q2. What is Source image and Target image?</p>
+
+<p>Ans- The source image is the image which the AI analyzes and extracts the LUT(color-grading filter) from. The target image is the image on which the LUT(or color-grading filter) is applied. Basically it copies the color style of the source image into target image. It saves time in manual color grading and has potential application in commercial film editing purposes.</p>
+
+<p>&nbsp;</p>
+
+<p>Q3. Can it color grade my pictures into a batman movie style?</p>
+
+<p>Ans- Yes. Just give it proper Source image, and you are good to go!</p>
+
+<p>&nbsp;</p>
+
+<p>Q4. Is it free?</p>
+
+<p>Ans- It is 100% free and it so fast that it works completely offline on your browser, without the need of any server.</p>
+
+<p>&nbsp;</p>
+
+<p>Q5. What&#39;s the name of this algorithm? And who made it?</p>
+
+<p>Ans- The algorithm is a Novel&nbsp; algorithm solely invented by <strong>Nihal Gazi</strong>. The full name of this algorithm is:<span style="font-family:Arial,Helvetica,sans-serif"> <strong><span style="font-size:14px">Vectorised</span>(<span style="font-size:14px">Approximated) Color Correlation for Fast Non-Linear Color Transfer between Two Images</span></strong></span>[modified v2.0].</p>
+
+<p>&nbsp;</p>
+
+<p>Q6. Did you just send a ballistic missile to my home?</p>
+
+<p>Ans- Yes.</p>
+
+<p>&nbsp;</p>
+
+<p>Q7. If I load an image here, will it pop out of the screen and become 3D?</p>
+
+<p>Ans- Quite possibly, yes.</p>
+
+<p>&nbsp;</p>
+
+<p>Q8. Can I easily launch Intercontinental ballistic missiles using this?</p>
+
+<p>Ans- Certainly!</p>
+
+<p>&nbsp;</p>
+
+
+    </div>
+    
+
+    <script>
+    const load = document.getElementById("load");
+        const imf = {
+            ImageToArray3D: async function (inputId) {
+                const input = document.getElementById(inputId);
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = function (event) {
+                        const img = new Image();
+                        img.onload = function () {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                            const imageArray = new Array(canvas.width);
+                            for (let x = 0; x < canvas.width; x++) {
+                                imageArray[x] = new Array(canvas.height);
+                                for (let y = 0; y < canvas.height; y++) {
+                                    imageArray[x][y] = [
+                                        imageData[(y * canvas.width + x) * 4],          // Red
+                                        imageData[(y * canvas.width + x) * 4 + 1],      // Green
+                                        imageData[(y * canvas.width + x) * 4 + 2],      // Blue
+                                    ];
+                                }
+                            }
+
+                            resolve(imageArray);
+                        };
+
+                        img.src = event.target.result;
+                    };
+
+                    reader.readAsDataURL(input.files[0]);
+                });
+            },
+        displayArray3DAsImage: function (array, imageId) {
+                const image = document.getElementById(imageId);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = array.length;
+                canvas.height = array[0].length;
+
+                const imageData = ctx.createImageData(canvas.width, canvas.height);
+                for (let x = 0; x < array.length; x++) {
+                    for (let y = 0; y < array[0].length; y++) {
+                        const index = (y * array.length + x) * 4;
+                        imageData.data[index] = array[x][y][0];
+                        imageData.data[index + 1] = array[x][y][1];
+                        imageData.data[index + 2] = array[x][y][2];
+                        imageData.data[index + 3] = 255;
+                    }
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+                image.src = canvas.toDataURL();
+            },
+            blurArray1D: function (array) {
+            const radius = 5; // Adjust the blur radius as needed
+            const result = new Array(array.length).fill().map(() => new Array(3).fill(0));
+
+            for (let i = 0; i < array.length; i++) {
+                for (let k = 0; k < 3; k++) {
+                    let sum = 0;
+                    let count = 0;
+
+                    for (let j = -radius; j <= radius; j++) {
+                        const index = i + j;
+
+                        if (index >= 0 && index < array.length) {
+                            sum += array[index][k];
+                            count++;
+                        }
+                    }
+
+                    result[i][k] = Math.round(sum / count);
+                }
+            }
+
+            return result;
+        }
+    };
+        
+
+        let globalCounter = 0;
+
+        function gradientInterpolate(arr) {
+            console.log("\t\tstretching start...");
+            let stretchPos = 0;
+
+            if (arr[0][0] === -1) {
+                for (let i = 1; i < arr.length; i++) {
+                    if (arr[i][0] !== -1 && arr[i - 1][0] === -1) {
+                        stretchPos = i;
+                        break;
+                    }
+                }
+                for (let i = 0; i < stretchPos; i++) {
+                    for (let j = 0; j < arr[0].length; j++) {
+                        arr[i][j] = arr[stretchPos][j];
+                    }
+                }
+            }
+            console.log("\t\tstretching end...");
+            stretchPos = arr.length - 1;
+            if (arr[arr.length - 1][arr[0].length - 1] === -1) {
+                for (let i = arr.length - 2; i >= 0; i--) {
+                    if (arr[i][0] !== -1 && arr[i + 1][0] === -1) {
+                        stretchPos = i;
+                        break;
+                    }
+                }
+                for (let i = arr.length - 1; i >= stretchPos; i--) {
+                    for (let j = 0; j < arr[0].length; j++) {
+                        arr[i][j] = arr[stretchPos][j];
+                    }
+                }
+            }
+
+            console.log("\t\tinterpolating...");
+            let select = false;
+            let p1 = 0;
+            let p2 = 0;
+            for (let i = 1; i < arr.length - 1; i++) {
+                
+                if (arr[i][0] !== -1 && arr[i + 1][0] === -1 && !select) {
+                    p1 = i;
+                    select = true;
+                } else if (arr[i][0] !== -1 && arr[i - 1][0] === -1 && select) {
+                    p2 = i;
+
+                    for (let k = 0; k < 3; k++) {
+                        const v1 = arr[p1][k];
+                        const v2 = arr[p2][k];
+
+                        let count = 1;
+                        const size = p2 - p1;
+                        for (let x = p1 + 1; x < p2; x++, count++) {
+                            const v3 = Math.floor(((count / size) * (v2 - v1)) + v1);
+                            arr[x][k] = v3;
+                        }
+                    }
+                    select = false;
+                    i -= 1;
+                }
+            }
+        }
+        
+        function blurGradientArray(arr) {
+            console.log("\tblurring gradient array...");
+            const blurredArray = imf.blurArray1D(arr);
+            return blurredArray;
+        }
+        
+        function showMap(arr) {
+            const outputHeight = 50;
+            const map = new Array(outputHeight).fill(arr);
+
+            console.log("\tcreating map image...");
+            console.log("\texploring map image...");
+            imf.displayArray3DAsImage(map, 'gradientHolder');
+            console.log("\tmap image exported...");
+        }
+
+        async function processImages() {
+            load.style.display = "block";
+            globalCounter = 0;
+            console.log("extracting images...");
+
+            const img1 = await imf.ImageToArray3D('img1Input');
+            const img2 = await imf.ImageToArray3D('img2Input');
+
+            var colorMap = new Array(256).fill().map(() => new Array(3).fill(-1));
+            
+            var avg_threshold =0   ;
+            console.log("making color_map...");
+            for (let x = 0; x < img1.length; x++) {
+                for (let y = 0; y < img1[0].length; y++) {
+                    const magnitude = Math.floor((img1[x][y][0] + img1[x][y][1] + img1[x][y][2]) / 3);
+                    
+                    if(colorMap[magnitude][0]>avg_threshold){colorMap[magnitude][0] = (colorMap[magnitude][0]+img1[x][y][0])/2;}
+                    else{colorMap[magnitude][0] = img1[x][y][0];}
+                    
+                    
+                    if(colorMap[magnitude][1]>avg_threshold){colorMap[magnitude][1] = (colorMap[magnitude][1]+img1[x][y][1])/2;}
+                    else{colorMap[magnitude][1] = img1[x][y][1];}
+                    
+                    
+                    if(colorMap[magnitude][2]>avg_threshold){colorMap[magnitude][2] = (colorMap[magnitude][2]+img1[x][y][2])/2;}
+                    else{colorMap[magnitude][2] = img1[x][y][2];}
+                    
+                    globalCounter++;
+                }
+            }
+
+            gradientInterpolate(colorMap);
+            colorMap = blurGradientArray(colorMap);
+            showMap(colorMap);
+            console.log("color grading...");
+
+            for (let x = 0; x < img2.length; x++) {
+                for (let y = 0; y < img2[0].length; y++) {
+                    const magnitude = Math.floor((img2[x][y][0] + img2[x][y][1] + img2[x][y][2]) / 3);
+
+                    img2[x][y][0] = colorMap[magnitude][0];
+                    img2[x][y][1] = colorMap[magnitude][1];
+                    img2[x][y][2] = colorMap[magnitude][2];
+                }
+            }
+
+            console.log("exporting...");
+
+            imf.displayArray3DAsImage(img2, 'outputHolder');
+
+            console.log("processing complete.");
+            load.style.display = "none";
+        }
+
+        document.getElementById('img1Input').addEventListener('change', () => imf.ImageToArray3D('img1Input').then(array => imf.displayArray3DAsImage(array, 'img1Holder')));
+        document.getElementById('img2Input').addEventListener('change', () => imf.ImageToArray3D('img2Input').then(array => imf.displayArray3DAsImage(array, 'img2Holder')));
+
+        document.getElementById('processButton').addEventListener('click', processImages);
+    </script>
+</body>
+</html>
