@@ -11,6 +11,7 @@ body {
 	padding-left: 10px;	
 	text-align: left;
 	color: rgba(0,0,0,0.7);
+	font-size:1.5vh;
 }
 
 table{
@@ -18,34 +19,44 @@ table{
   font-family: arial, sans-serif;
   width: 100%;
   
+  
 }
 
 #bottom_table{
 	padding: 20px;
 	text-align: left;
+	font-size:2vh;
+	color: rgba(0,0,0,0.8);
 }
 
 #bar{
+	overflow-x:auto;
 	position: fixed;
 	width: 100%;
 	background-color: rgb(0,0,0);
 	text-align:left;	
+	
 }
 
 #bar_2{
 	width: 100%;
 	background-color: rgb(0,0,0);
-	text-align:left;	
+	text-align:left;
+	margin-bottom: 2vh;
 }
 
 #head_table{
 	text-align:right;	
 	width: 100%;
 	padding: 5px;
+	font-size:2vh;
+	padding-right: 1.2vh;
 }
 
 #logo{
 	width: 2em;
+	padding: 0.1em;
+	border-radius: 1vh;
 	
 }
 
@@ -73,6 +84,7 @@ table{
 
 #news_content{
 	background-color: rgb(255, 255, 255); 
+	padding: 0.5vh;
 }
 
 .container {
