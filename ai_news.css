@@ -6,6 +6,13 @@ body {
     background-color: rgba(0,0,0,0.3); 
 }
 
+#extra{
+	font-family: arial, sans-serif;	
+	padding-left: 10px;	
+	text-align: left;
+	color: rgba(0,0,0,0.7);
+}
+
 table{
   
   font-family: arial, sans-serif;
