@@ -55,7 +55,7 @@ set("details" , detail.replace("[Your Name]","Travis Trails"));
 
 
 //image generation
-if(false){
+if(true){
     console.log("Generating image caption: ");
     var caption = await genText("Generate a relevant image caption for the text-["+detail+"]\nimage-caption: ", 1024,0.7);
 
