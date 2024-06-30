@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whiteboard29 - Online Whiteboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="shortcut icon" type="image/x-icon" href="web whiteboard logo.png" />
+    <style>
+        body, html {
+            font-family: A, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Hide default scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+        }
+
+        #canvas-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scrollbars */
+            position: relative;
+            
+        }
+
+        #canvas {
+            background-color: black;
+            cursor: none; /* Hide default cursor */
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            transition: transform 0.3s ease;
+        }
+
+        /* Custom scrollbar styles */
+        #canvas-wrapper {
+            scrollbar-width: medium-thin; /* Firefox */
+            scrollbar-color: rgba(255, 255, 255, 0.5) transparent; /* Firefox */
+            padding: 2px;
+        }
+
+        #canvas-wrapper::-webkit-scrollbar {
+            width: 8px; /* Width of vertical scrollbar */
+            height: 8px; /* Height of horizontal scrollbar */
+        }
+
+        #canvas-wrapper::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.5); /* Color of scrollbar thumb */
+            border-radius: 10px;
+        }
+
+        #canvas-wrapper::-webkit-scrollbar-track {
+            background-color: transparent; /* Color of scrollbar track */
+            border-radius: 10px;
+        }
+
+        #canvas-wrapper::-webkit-scrollbar-corner {
+            background-color: transparent; /* Color of scrollbar corner */
+        }
+
+        #controls {
+            width: 2vw;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100; /* Ensure controls are above canvas */
+        }
+        
+        #slide-buttons{
+            
+            position: fixed;
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            z-index: 100; /* Ensure buttons are above canvas */
+            padding-right: 10px;
+        }
+
+        .icon {
+            font-size: 2.6vh;
+            width: 3em;
+            height: 3em;
+            text-align: center; 
+            background-color: white;
+            padding: 0.5em;
+            margin: 0.5vh;
+            cursor: pointer;
+            border: none;
+            color: black; /* Adjust icon color as needed */
+            border-radius: 50%; /* Make icons circular */
+            position: relative;
+        }
+
+        .selected::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgb(255, 102, 102);
+            border-radius: 50%;
+            box-sizing: border-box;
+        }
+
+        #slide-indicator {
+            font-family: Arial, sans-serif;
+            position: fixed;
+            top: 3vh; /* Adjust top position */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%);
+            color: black; /* Adjust text color */
+            font-size: 3vh;
+            font-weight: normal;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.5); /* White background with 50% opacity */
+            border-radius: 10px; /* Rounded corners */
+            z-index: 1000;
+        }
+
+
+        /* Custom cursor styles */
+        .custom-cursor {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            pointer-events: none; /* Ensure cursor doesn't interfere with mouse events on canvas */
+            transform: translate(-50%, -50%);
+            transition: opacity 0.08s ease, width 0.08s ease, height 0.08s ease;
+            opacity: 1; /* Initially visible */
+        }
+
+        .custom-cursor.active {
+            opacity: 0.5; /* Semi-transparent when active (mouse pressed) */
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Color selection dialog */
+        #color-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(50, 50, 50, 0.9); /* Adjusted background color */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 200; /* Ensure the dialog is above everything */
+        }
+
+        .color-option {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            cursor: pointer;
+            background-color: transparent;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 5px;
+            font-size: 24px;
+        }
+        
+        
+        @keyframes slideFadePrev {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideFadeNext {
+            0% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-animation-prev {
+            animation: slideFadePrev 0.2s ease;
+        }
+
+        .slide-animation-next {
+            animation: slideFadeNext 0.2s ease;
+        }
+        
+        .slide-notification {
+            position: fixed;
+            bottom: 20px; /* Position at the bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            animation: slideFadeIn 0.5s ease;
+        }
+
+        @keyframes slideFadeIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, 20px); /* Start from below */
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0); /* Slide up to final position */
+            }
+        }
+
+
+
+        
+        
+    </style>
+</head>
+<body>
+    <div id="notification-container"></div>
+
+
+
+    <div id="canvas-container">
+        <div id="canvas-wrapper">
+            <canvas id="canvas"></canvas>
+        </div>
+    </div>
+    <div id="controls">
+        <button class="icon" id="draw"><i class="fas fa-pen"></i></button>
+        <button class="icon" id="erase"><i class="fas fa-eraser"></i></button>
+        <button class="icon" id="line"><i class="fas fa-slash"></i></button>
+        <button class="icon" id="color-palette"><i class="fas fa-palette"></i></button>
+
+        <button class="icon" id="zoom-in"><i class="fas fa-search-plus"></i></button>
+        <button class="icon" id="zoom-out"><i class="fas fa-search-minus"></i></button>
+        
+        <button id="download" class="icon"><i class="fas fa-download">
+
+    </div>
+    
+    <div id="slide-buttons">
+            <button class="icon" id="prev-slide"><i class="fas fa-arrow-left"></i></button>
+            <button class="icon" id="next-slide"><i class="fas fa-arrow-right"></i></button>
+    </div>
+    <div id="slide-indicator">Slide: 1</div>
+
+    <!-- Color selection dialog -->
+    <div id="color-dialog">
+        <button class="close-btn" id="close-dialog">&times;</button>
+        <div class="color-option" style="background-color: red;" data-color="red"></div>
+        <div class="color-option" style="background-color: aqua;" data-color="aqua"></div>
+        <div class="color-option" style="background-color: orange;" data-color="orange"></div>
+        <div class="color-option" style="background-color: green;" data-color="green"></div>
+        <div class="color-option" style="background-color: white;" data-color="white"></div>
+    </div>
+
+    <script src="web-whiteboard-script.js"></script>
+</body>
+</html>
