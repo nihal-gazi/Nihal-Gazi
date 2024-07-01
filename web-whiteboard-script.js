@@ -20,6 +20,9 @@ window.onload = function() {
     const customCursor = document.createElement('div');
     customCursor.classList.add('custom-cursor');
     document.body.appendChild(customCursor);
+    
+    
+    const customCursorElement = document.getElementById('custom-cursor');
 
     drawButton.classList.add('selected');
     initializeCanvas();
@@ -202,6 +205,7 @@ window.onload = function() {
         colorDialog.style.display = 'none';
         
         colorPaletteButton.style.backgroundColor = selectedColor;
+        customCursor.style.backgroundColor = selectedColor;
     }
 
     function createEmptySlide() {
