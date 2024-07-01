@@ -137,6 +137,9 @@
             height: 12px;
             background-color: white;
             border-radius: 50%;
+            border-style: solid;
+            border-color: rgba(255,255,255,0.5);
+            border-width: 1px;
             pointer-events: none; /* Ensure cursor doesn't interfere with mouse events on canvas */
             transform: translate(-50%, -50%);
             transition: opacity 0.08s ease, width 0.08s ease, height 0.08s ease;
@@ -144,7 +147,7 @@
         }
 
         .custom-cursor.active {
-            opacity: 0.5; /* Semi-transparent when active (mouse pressed) */
+            opacity: 0.3; /* Semi-transparent when active (mouse pressed) */
             width: 12px;
             height: 12px;
         }
