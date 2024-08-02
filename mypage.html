@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Page</title>
+    <link rel="stylesheet" href="mypage.css">
+</head>
+<body>
+    <div id="login">
+        <h1>My Page</h1>
+        <label for="pageID ">Page ID(case sensitive):</label>
+        <input type="text" id="pageID" required>
+        <label for="password">Password:</label>
+        <input type="text" id="password" required> <!-- Changed type to text -->
+        <button id="openCreateBtn">Open/Create</button>
+    </div>
+    <div id="content" style="display: none;">
+        <h1 id="pageTitle"></h1>
+        <textarea id="dataArea" rows="10" cols="50"></textarea>
+        <button id="submitDataBtn">Submit</button>
+        <button id="showPasswordBtn">Show Password</button>
+    </div>
+
+    <div id="loading">Loading...</div>
+    <div id="notification"></div>
+
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.4.0/dist/index.min.js";
+
+        function showLoading() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#dc3545' : '#28a745'; // Red for error, green for success
+            notification.style.display = 'block';
+            notification.style.opacity = '1';
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 500); // match this with the transition time in CSS
+            }, 3000); // show for 3 seconds
+        }
+
+        // Event handler for open/create button
+        document.getElementById('openCreateBtn').addEventListener('click', async function() {
+            const pageID = document.getElementById('pageID').value;
+            const password = document.getElementById('password').value;
+
+            showLoading();
+            const client = await Client.connect("NihalGazi/MyPage");
+
+            const result = await client.predict("/predict", { 		
+                ID: pageID, 		
+                password: password, 		
+                action: 1,  // Always set to 1 for login
+                meta: "" 
+            });
+            hideLoading();
+
+            if (result.data[0].meta === "200" || result.data[0].meta === "199") {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+                document.getElementById('pageTitle').textContent = pageID;
+                document.getElementById('dataArea').value = result.data[0].data;
+            } else {
+                showNotification("Incorrect password.", 'error');
+            }
+        });
+
+        // Event handler for submit button
+        document.getElementById('submitDataBtn').addEventListener('click', async function() {
+            const pageID = document.getElementById('pageID').value;
+            const password = document.getElementById('password').value;
+            const dataContent = document.getElementById('dataArea').value;
+
+            showLoading();
+            const client = await Client.connect("NihalGazi/MyPage");
+
+            const result = await client.predict("/predict", { 		
+                ID: pageID, 		
+                password: password, 		
+                action: 2, 		
+                meta: dataContent 
+            });
+            hideLoading();
+
+            if (result.data[0].meta === "202") {
+                showNotification("Data saved successfully.");
+            } else {
+                showNotification("Error saving data.", 'error');
+            }
+        });
+
+        // Event handler for show password button
+        document.getElementById('showPasswordBtn').addEventListener('click', function() {
+            const password = document.getElementById('password').value;
+            alert("Password: " + password);
+        });
+    </script>
+</body>
+</html>

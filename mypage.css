@@ -1,0 +1,108 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background: #121212; /* Dark background color */
+    color: #e0e0e0; /* Light text color for contrast */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#login, #content {
+    background: #1f1f1f; /* Slightly lighter background for the content boxes */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+    width: 90%;
+    max-width: 500px; /* Increased max-width for better appearance */
+    text-align: center;
+    margin-right: 20px; /* Add padding on the right */
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 2em; /* Larger font size for the title */
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em; /* Slightly larger font size for labels */
+}
+
+input, textarea {
+    width: calc(100% - 20px); /* Adjust width to account for padding */
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    background: #2c2c2c; /* Darker background for input fields */
+    color: #e0e0e0; /* Light text color */
+}
+
+textarea {
+    resize: none; /* Make textarea non-resizable */
+}
+
+button {
+    background: #3b3b3b; /* Darker button background */
+    color: #e0e0e0; /* Light text color */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background: #575757; /* Lighter background on hover */
+}
+
+#loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: white;
+    border-radius: 5px;
+    z-index: 1000;
+    text-align: center;
+    font-size: 1.2em;
+    animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+#notification {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    background: #28a745;
+    color: #fff;
+    border-radius: 5px;
+    font-size: 1em;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
