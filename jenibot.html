@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff9800;
+        }
+
+        h2 {
+            color: #ff5722;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #333;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            background-color: #444;
+        }
+
+        button {
+            background-color: #6200ea;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #3700b3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #loadingNotification {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #000;
+            color: #ff5722;
+            padding: 15px 30px;
+            border-radius: 20px;
+            font-size: 18px;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            animation: fadeInOut 2s infinite;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #output {
+            background-color: #222;
+            color: #e0e0e0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chatbot Configuration</h1>
+    <div id="loadingNotification">Loading...</div>
+
+    <label for="character">Chatbot Character:</label>
+    <input type="text" id="character">
+    
+    <label for="knowledge">Chatbot Knowledge:</label>
+    <input type="text" id="knowledge">
+    
+    <label for="style">Chatbot Chatting Style:</label>
+    <input type="text" id="style">
+    
+    <button id="getCharacter">Get Character</button>
+    <button id="getKnowledge">Get Knowledge</button>
+    <button id="getStyle">Get Style</button>
+    <button id="submit">Submit</button>
+    
+    <h2>Output</h2>
+    <p id="output"></p>
+
+
+    <script type="module">
+	const outputElement = document.getElementById('output');
+        const loadingNotification = document.getElementById('loadingNotification');
+	showLoading()
+	
+        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client@latest";
+
+        const app = await client("NihalGazi/Jeni-bot");
+
+        
+		
+		getData();
+		console.log("ok");
+
+        function showLoading() {
+            loadingNotification.style.display = 'block';
+        }
+
+        function hideLoading() {
+            loadingNotification.style.display = 'none';
+        }
+		
+		
+		async function getData() {
+		
+		
+            try {
+                const result = await app.predict("/on_get_character", []);
+                document.getElementById("character").value = result.data[0];
+            } finally {
+					try {
+						const result = await app.predict("/on_get_knowledge", []);
+						document.getElementById("knowledge").value = result.data[0];
+					} finally {
+						try {
+							const result = await app.predict("/on_get_style", []);
+							document.getElementById("style").value = result.data[0];
+						} finally {
+							hideLoading();
+						}
+					}
+					
+            }
+        }
+		
+		
+
+        async function getCharacter() {
+            showLoading();
+            try {
+                const result = await app.predict("/on_get_character", []);
+                outputElement.textContent = result.data[0];
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function getKnowledge() {
+            showLoading();
+            try {
+                const result = await app.predict("/on_get_knowledge", []);
+                outputElement.textContent = result.data[0];
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function getStyle() {
+            showLoading();
+            try {
+                const result = await app.predict("/on_get_style", []);
+                outputElement.textContent = result.data[0];
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function submitConfig() {
+            showLoading();
+            try {
+                const character = document.getElementById('character').value;
+                const knowledge = document.getElementById('knowledge').value;
+                const style = document.getElementById('style').value;
+
+                const result = await app.predict("/on_submit", [character, knowledge, style]);
+                outputElement.textContent = "Updated successfully!";
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function fetchInitialValues() {
+            showLoading();
+            try {
+                const characterResult = await app.predict("/on_get_character", []);
+                const knowledgeResult = await app.predict("/on_get_knowledge", []);
+                const styleResult = await app.predict("/on_get_style", []);
+
+                document.getElementById('character').value = characterResult.data[0];
+                document.getElementById('knowledge').value = knowledgeResult.data[0];
+                document.getElementById('style').value = styleResult.data[0];
+            } finally {
+                hideLoading();
+            }
+        }
+
+        document.getElementById('getCharacter').addEventListener('click', getCharacter);
+        document.getElementById('getKnowledge').addEventListener('click', getKnowledge);
+        document.getElementById('getStyle').addEventListener('click', getStyle);
+        document.getElementById('submit').addEventListener('click', submitConfig);
+
+        // Fetch initial values before page loads
+        window.addEventListener('load', fetchInitialValues);
+    </script>
+</body>
+</html>
