@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public CLI</title>
+    <style>
+	body {
+    margin: 0;
+    font-family: monospace;
+    background-color: #1e1e1e;
+    color: #00ff00;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#terminal {
+    width: 80%;
+    height: 80%;
+    background-color: #000000;
+    border-radius: 5px;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    position: relative;
+}
+
+#output {
+    white-space: pre-wrap;
+    margin-bottom: 10px;
+}
+
+#input-line {
+    display: flex;
+    align-items: center;
+}
+
+#prompt {
+    margin-right: 5px;
+    color: #00ff00;
+}
+
+#cmd-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    outline: none;
+    caret-color: #00ff00;
+    font-family: monospace;
+}
+
+/* Add custom styling to scrollbars */
+#terminal::-webkit-scrollbar {
+    width: 8px;
+}
+
+#terminal::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+#terminal::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 10px;
+    border: 2px solid #1e1e1e;
+}
+
+#footer-text {
+    font-family: Helvetica;
+    font-size: 14px;
+    color: rgb(255,255,255,0.7);
+    opacity: 0.6;
+    text-align: center;
+    position: absolute;
+    bottom: 20px;
+}
+
+	</style>
+</head>
+<body>
+    <div id="terminal">
+        <div id="output"></div>
+        <div id="input-line">
+            <span id="prompt">$</span>
+            <input type="text" id="cmd-input" autocomplete="off" autofocus>
+        </div>
+    </div>
+    <div id="footer-text">Running Amazon Linux 2 Kernel. Wait few seconds after you send command.</div>
+    <script type="module" >
+	import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.4.0/dist/index.min.js";
+
+const terminal = document.getElementById("terminal");
+const outputElement = document.getElementById("output");
+const cmdInput = document.getElementById("cmd-input");
+
+const client = await Client.connect("NihalGazi/python-cli");
+
+cmdInput.addEventListener("keydown", async (event) => {
+    if (event.key === "Enter") {
+        const cmd = cmdInput.value.trim();
+        if (cmd) {
+            // Display the command in the output
+            appendToOutput(`$ ${cmd}`);
+
+            // Disable input field until the response is received
+            cmdInput.disabled = true;
+
+            // Clear input field
+            cmdInput.value = "";
+
+            // Send the command to the API and get the result
+            await client.predict("/run_command", { cmd });
+
+            // Fetch and display the output in real-time
+            await getCommandOutput();
+
+            // Re-enable the input field after output is fetched
+            cmdInput.disabled = false;
+            cmdInput.focus(); // Refocus on the input field
+        }
+    }
+});
+
+async function getCommandOutput() {
+    try {
+        const result = await client.predict("/get_output", {});
+        appendToOutput(result.data);
+    } catch (error) {
+        appendToOutput("Error retrieving output.");
+    }
+}
+
+function appendToOutput(text) {
+    outputElement.textContent += `${text}\n`;
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
+	</script>
+</body>
+</html>
