@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src = "https://cdnjs.cloudflare.com/ajax/libs/marked/14.0.0/marked.min.js"></script>
+    <title>Chemistry Rationalizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .step {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        .step button {
+            margin-top: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        .mechanism {
+            background: #e9ecef;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        .whyButton {
+            margin-top: 10px;
+        }
+		
+		
+		#loadingOverlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.5);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 1000;
+			backdrop-filter: blur(5px);
+			visibility: hidden; /* Hidden by default */
+		}
+
+		#loadingMessage {
+			color: white;
+			font-size: 20px;
+			font-weight: bold;
+			animation: fadeInOut 0.7s infinite;
+		}
+
+		@keyframes fadeInOut {
+			0% {
+				opacity: 0;
+			}
+			50% {
+				opacity: 1;
+			}
+			100% {
+				opacity: 0;
+			}
+		}
+
+		#loadingMessage {
+			color: white;
+			font-size: 20px;
+		}
+    </style>
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client@1.4.0/dist/index.min.js";
+
+        async function initialize() {
+            try {
+				
+				
+				showLoading();
+                const client = await Client.connect("NihalGazi/Chem_Rationalizer");
+				hideLoading();
+
+
+                document.getElementById('submitButton').addEventListener('click', async () => {
+					
+                    try {
+						showLoading();
+                        const reactants = document.getElementById('reactants').value;
+                        const products = document.getElementById('products').value;
+
+                        if (!reactants || !products) {
+                            alert("Please provide both reactants and products.");
+                            return;
+							hideLoading();
+                        }
+						
+						
+                        const result = await client.predict("/predict", { reactants, products });
+						
+
+                        if (!result.data || !Array.isArray(result.data)) {
+							hideLoading();
+                            console.error("Invalid API response:", result.data);
+                            alert("Error: Invalid API response.");
+                            return;
+                        }
+
+                        displaySteps(result.data, document.getElementById('stepsContainer'));
+						hideLoading();
+                    } catch (error) {
+                        console.error("Error fetching data:", error);
+						hideLoading();
+                    }
+                });
+				
+				function showLoading() {
+					document.getElementById('loadingOverlay').style.visibility = 'visible';
+				}
+
+				function hideLoading() {
+					document.getElementById('loadingOverlay').style.visibility = 'hidden';
+				}
+
+
+                function createStepDiv(stepKey, step) {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'step';
+                    stepDiv.innerHTML = `
+                        <h3>${stepKey}</h3>
+                        <p><strong>Reactants:</strong> ${step.reactants.join(', ')}</p>
+                        <p><strong>Products:</strong> ${step.products.join(', ')}</p>
+                        <div class="mechanism">
+                            <strong>Mechanism:</strong> ${step.mechanism || 'Not available'}
+                            <button type="button" class="whyButton">Why?</button>
+                        </div>
+                        <p><strong>Reagent:</strong> ${step.reagent || 'Not available'}</p>
+                        <p><strong>Conditions:</strong> ${step.conditions || 'Not available'}</p>
+                        <button type="button" class="howButton">How?</button>
+                        <div class="hidden furtherDetails"></div>
+                    `;
+                    return stepDiv;
+                }
+
+                async function handleWhyButtonClick(button, step) {
+					
+                    button.addEventListener('click', async () => {
+						showLoading();
+                        try {
+                            const mechanismDiv = button.parentElement;
+                            const prompt = mechanismDiv.innerHTML.toString().trim();
+							
+							
+                            const detailClient = await Client.connect("NihalGazi/gemini-1.5-flash");
+							
+                            const result = await detailClient.predict("/predict", {
+                                system_instruction: "You are extremely logical chemist, who can explain mechanism with absolute logic by breaking things down. You are here to explain the logical reason(in terms of chemistry) behind a passage that are said to you, so that, there is no questions left. put so much logic, that it has to be the only way it could happen. Write your answer short absolutely to-the-point, extremely lucid, in a neutral tone.",
+                                prompt: prompt
+                            });
+							
+							console.log(result.data);
+
+							var parsed = marked.parse(result.data.toString());
+                           
+
+                            const newMechanismDiv = document.createElement('div');
+                            newMechanismDiv.className = 'mechanism';
+                            newMechanismDiv.innerHTML = `
+                                <strong>Mechanism:</strong> ${parsed}
+                                <button type="button" class="whyButton">Why?</button>
+                            `;
+
+                            mechanismDiv.appendChild(newMechanismDiv);
+                            handleWhyButtonClick(newMechanismDiv.querySelector('.whyButton'), { mechanism: result.data });
+							hideLoading();
+                        } catch (error) {
+                            console.error("Error fetching detailed explanation:", error);
+							alert("Maximum simplification reached.");
+							hideLoading();
+							
+                        }
+                    });
+                }
+
+                function handleHowButtonClick(button, step, stepKey) {
+					
+                    button.addEventListener('click', async () => {
+                        try {
+							showLoading();
+							
+                            const reactants = step.reactants.join(', ');
+                            const products = step.products.join(', ');
+
+                            const result = await client.predict("/predict", { reactants, products });
+
+                            const furtherDetailsDiv = button.nextElementSibling;
+                            if (JSON.stringify(result.data[0].reactants) === JSON.stringify(step.reactants) &&
+                                JSON.stringify(result.data[0].products) === JSON.stringify(step.products)) {
+                                furtherDetailsDiv.innerHTML = "Analyzation limitation reached";
+                            } else {
+                                displaySteps(result.data, furtherDetailsDiv);
+                            }
+                            furtherDetailsDiv.classList.toggle('hidden');
+							hideLoading();
+                        } catch (error) {
+                            console.error("Error fetching further details:", error);
+							alert("Unable to generate");
+							hideLoading();
+                        }
+                    });
+                }
+
+                function displaySteps(data, container) {
+                    container.innerHTML = '';
+
+                    data.forEach(item => {
+                        Object.keys(item).forEach(stepKey => {
+                            if (stepKey !== 'products' && stepKey !== 'reactants') {
+                                const step = item[stepKey];
+                                const stepDiv = createStepDiv(stepKey, step);
+                                container.appendChild(stepDiv);
+                                handleHowButtonClick(stepDiv.querySelector('.howButton'), step, stepKey);
+                                handleWhyButtonClick(stepDiv.querySelector('.whyButton'), step);
+                            }
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error("Error initializing client:", error);
+            }
+        }
+
+        initialize();
+    </script>
+</head>
+<body>
+	<div id="loadingOverlay">
+		<div id="loadingMessage">LOADING...</div>
+	</div>
+
+    <div class="container">
+        <h1>Chemistry Rationalizer</h1>
+        <div id="reactionForm">
+            <label for="reactants">Reactants (comma-separated):</label>
+            <input type="text" id="reactants" required>
+            <br>
+            <label for="products">Products (comma-separated):</label>
+            <input type="text" id="products" required>
+            <br>
+            <button type="button" id="submitButton">Submit</button>
+        </div>
+        <div id="stepsContainer"></div>
+    </div>
+</body>
+</html>
