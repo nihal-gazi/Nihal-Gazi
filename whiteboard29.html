@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Whiteboard29 - Online Whiteboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="shortcut icon" type="image/x-icon" href="web whiteboard logo.png" />
@@ -42,6 +45,7 @@
             left: 0;
             transform-origin: top left;
             transition: transform 0.3s ease;
+            touch-action: none;
         }
 
         /* Custom scrollbar styles */
@@ -244,7 +248,63 @@
         }
 
 
+        
+        @media (max-width: 768px) {
+            #controls {
+                width: auto;
+                bottom: 10px;
+                top: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                background-color: rgba(255,255,255,0.9);
+                border-radius: 25px;
+                padding: 5px;
+            }
 
+           
+
+            .icon {
+                font-size: 1em;
+                width: 1em; 
+                height: 1em;
+                min-width: 40px;
+                min-height: 40px;
+                margin: 1vw;
+                text-align: center; 
+            }
+
+            #color-dialog {
+                width: 80%;
+                padding: 15px;
+            }
+
+            .color-option {
+                width: 15vw;
+                height: 15vw;
+                margin: 3vw;
+            }
+
+            #slide-indicator {
+                font-size: 2vh;
+                top: 1vh;
+            }
+        }
+
+        /* Prevent blue highlight on touch */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Hide custom cursor on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            .custom-cursor {
+                display: none !important;
+            }
+        }
         
         
     </style>
