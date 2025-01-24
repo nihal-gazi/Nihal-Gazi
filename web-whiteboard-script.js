@@ -1,4 +1,6 @@
 window.onload = function() {
+    
+    const passiveOptions = { passive: false }
     const canvas = document.getElementById('canvas');
     const canvasWrapper = document.getElementById('canvas-wrapper');
     const context = canvas.getContext('2d');
@@ -50,6 +52,49 @@ window.onload = function() {
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
     canvas.addEventListener('mouseout', stopDrawing);
+    
+    // Add pointer event listeners
+    canvas.addEventListener('pointermove', (e) => {
+        updateCursorPosition(e);
+        if (!e.pointerType === 'mouse') draw(e);
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        updateCursorPosition(e);
+        draw(e);
+    });
+
+    canvas.addEventListener('pointerover', () => {
+        customCursor.style.display = 'block';
+    });
+
+    canvas.addEventListener('pointerout', () => {
+        customCursor.style.display = 'none';
+    });
+
+    // Add touch event fallbacks
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouch(e);
+    }, passiveOptions);
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        handleTouch(e);
+    }, passiveOptions);
+    canvas.addEventListener('touchend', stopDrawing);
+    
+    const updateCursorPosition = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scrollLeft = canvasWrapper.scrollLeft;
+        const scrollTop = canvasWrapper.scrollTop;
+        const x = e.clientX - rect.left + scrollLeft;
+        const y = e.clientY - rect.top + scrollTop;
+        updateCursor(x, y);
+    };
+
+    
+    
     drawButton.addEventListener('click', handleDrawClick);
     eraseButton.addEventListener('click', () => {
         setDrawingMode('erase');
@@ -84,7 +129,9 @@ window.onload = function() {
 
     function initializeCanvas() {
         context.fillStyle = 'black';
-        context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.lineCap = 'round'; // Add this for better line endings
+        context.lineJoin = 'round'; // Add this for better line connections
     }
     
     function downloadCanvas() {
@@ -113,18 +160,64 @@ window.onload = function() {
     
     
     
+    
+    // Update coordinate handling
+    function getCanvasCoordinates(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scrollLeft = canvasWrapper.scrollLeft;
+        const scrollTop = canvasWrapper.scrollTop;
+        
+        let clientX, clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        
+        return {
+            x: (clientX - rect.left + scrollLeft) / scale,
+            y: (clientY - rect.top + scrollTop) / scale
+        };
+    }
+    
+    
+    function handleTouch(e) {
+        if (e.touches.length > 1) return;
+        const touch = e.touches[0];
+        const fakeEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            touches: [touch], // Important for coordinate calculation
+            preventDefault: () => {} // Add empty preventDefault
+        };
+        
+        if (e.type === 'touchstart') startDrawing(fakeEvent);
+        else if (e.type === 'touchmove') draw(fakeEvent);
+    }
+    
+    
+    
+    
+    
+    
 
     function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        const rect = canvasWrapper.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
         loadCurrentSlide();
     }
 
     function startDrawing(e) {
         if (isDrawing) return;
         isDrawing = true;
-        [lastX, lastY] = [e.offsetX, e.offsetY];
-        [startX, startY] = [e.offsetX, e.offsetY];
+        const coords = getCanvasCoordinates(e);
+        lastX = coords.x;
+        lastY = coords.y;
+        startX = coords.x;
+        startY = coords.y;
         customCursor.classList.add('active');
         if (selectedTool === 'line') {
             isDrawingLine = true;
@@ -133,27 +226,31 @@ window.onload = function() {
 
     function draw(e) {
         if (!isDrawing) return;
+        const coords = getCanvasCoordinates(e);
+        
+        // Set common stroke properties
+        context.strokeStyle = strokeColor;
+        context.lineWidth = lineWidth;
+        context.lineCap = 'round'; // Add this for better line endings
+
         if (selectedTool === 'line') {
             if (isDrawingLine) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
                 context.drawImage(slides[currentSlide], 0, 0);
                 context.beginPath();
                 context.moveTo(startX, startY);
-                context.lineTo(e.offsetX, e.offsetY);
-                context.strokeStyle = strokeColor;
-                context.lineWidth = lineWidth;
+                context.lineTo(coords.x, coords.y);
                 context.stroke();
             }
         } else {
             context.beginPath();
             context.moveTo(lastX, lastY);
-            context.lineTo(e.offsetX, e.offsetY);
-            context.strokeStyle = strokeColor;
-            context.lineWidth = lineWidth;
+            context.lineTo(coords.x, coords.y);
             context.stroke();
-            [lastX, lastY] = [e.offsetX, e.offsetY];
+            [lastX, lastY] = [coords.x, coords.y];
         }
     }
+
 
     function stopDrawing() {
         if (!isDrawing) return;
@@ -176,17 +273,19 @@ window.onload = function() {
 
     function setDrawingMode(mode) {
         selectedTool = mode;
+        context.globalCompositeOperation = 'source-over'; // Reset composition
+        
         if (mode === 'draw') {
             strokeColor = selectedColorOption ? selectedColorOption.dataset.color : 'white';
             lineWidth = 2;
         } else if (mode === 'erase') {
             strokeColor = 'black';
             lineWidth = 10;
+            context.globalCompositeOperation = 'destination-out'; // Proper erase mode
         } else if (mode === 'line') {
             strokeColor = selectedColorOption ? selectedColorOption.dataset.color : 'white';
             lineWidth = 2;
         }
-        
     }
 
     function deselectTools() {
@@ -334,14 +433,8 @@ window.onload = function() {
 
     function applyZoom() {
         canvas.style.transform = `scale(${scale})`;
-        canvas.style.transformOrigin = 'top left';
-
-        // Toggle scrollbar visibility based on scale
-        if (scale === 1.0) {
-            canvasWrapper.style.overflow = 'hidden';
-        } else {
-            canvasWrapper.style.overflow = 'auto';
-        }
+        canvasWrapper.style.overflow = scale === 1 ? 'hidden' : 'auto';
+        resizeCanvas();
     }
 
     function updateCursor(x, y) {
