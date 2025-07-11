@@ -10,26 +10,26 @@
   <meta name="author" content="Nihal Gazi" />
   <meta name="robots" content="index, follow" />
 
-
+  <!-- Open Graph Meta -->
   <meta property="og:title" content="Nihal Gazi - AI Developer and VFX Creator" />
   <meta property="og:description" content="Explore projects and tools by Nihal Gazi. AI, Generative Art, and VFX all in one place." />
   <meta property="og:image" content="https://nihal-gazi.github.io/Nihal-Gazi/assets/og-image.jpg" />
   <meta property="og:url" content="https://nihal-gazi.github.io/Nihal-Gazi/" />
   <meta property="og:type" content="website" />
 
-
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Nihal Gazi - AI Developer and Researcher" />
   <meta name="twitter:description" content="AI tools, research, and VFX by Nihal Gazi. Explore now." />
   <meta name="twitter:image" content="https://nihal-gazi.github.io/Nihal-Gazi/assets/og-image.jpg" />
 
-
+  <!-- Favicon -->
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-
+  <!-- Font -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700&display=swap" rel="stylesheet" />
 
-
+  <!-- Structured Data (Schema.org) -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -39,7 +39,7 @@
       "sameAs": [
         "https://huggingface.co/NihalGazi",
         "https://github.com/nihal-gazi",
-        "https://www.instagram.com/i_make_ai_for_fun/"
+        "https://www.instagram.com/nihal_gazi_io/"
       ],
       "jobTitle": "AI Developer, VFX Artist, Researcher",
       "worksFor": {
@@ -54,203 +54,223 @@
     }
   </script>
 
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 2em;
+  }
 
-  <style>
-         a {
-            font-family: 'Roboto', sans-serif;
-            color: rgba(255, 255, 255, 0.7); /* Text color with 0.7 alpha (transparency) */
-            text-decoration: none; /* Remove underline from links */
-            transition: color 0.3s ease; /* Smooth transition for color change */
-        }
+  h1 {
+    font-size: 3.5em;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 0.2em;
+  }
 
-        a:hover {
-            color: rgba(255, 255, 255, 1); /* Text color with full opacity on hover */
-            text-decoration: underline; /* Underline links on hover */
-        }
+  h2 {
+    font-size: 2em;
+    font-weight: 300;
+    margin-bottom: 1em;
+  }
 
-	
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #000; /* Dark black background */
-            color: #fff;
-            text-align: center;
-            perspective: 800px; /* Perspective for 3D effect */
-        }
-        
-        #sc{
-        border-radius: 10px;
-		background-color: rgba(255,255,255,0.1);
-        width: 70%;
-        padding:5px;
-        }
-        
-        #sc-item{
-        border-radius: 10px;
-		background-color: rgba(255,255,255,0.1);
-        width: auto;
-        padding:5px;
-        margin: 3px;
-        }
-        
+  p {
+    font-size: 1.1em;
+    font-weight: 300;
+    color: #ccc;
+  }
 
-        topic {
-            font-size: 5em; 
-            font-weight: 100; /* Sleek text */
-            display: block;
-            margin: auto; /* Center the text */
-            padding: 1em;
-        }
+  .about {
+    width: 75%;
+    margin: 2em auto;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2em;
+    border-radius: 15px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.05);
+  }
 
-        .cube-container {
-            position: relative;
-            width: 200px; /* Adjust the size of the cube */
-            height: 200px;
-            margin: 20px auto;
-            transform-style: preserve-3d; /* Enable 3D transformations */
-            animation: rotateCube 5s infinite linear; /* Rotate the cube infinitely */
-            animation-timing-function: ease-in-out; /* Non-linear animation */
-            cursor: pointer; /* Change cursor to pointer */
-        }
+  ul {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+  }
 
-        .cube {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            transform-style: preserve-3d; /* Enable 3D transformations for the cube */
-        }
+  li {
+    margin-bottom: 0.8em;
+    color: #ccc;
+  }
 
-        .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            cursor: pointer; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(2px); /* Background blur effect */
-            border: 2px solid #fff;
-        }
+  .social-grid {
+    display: inline-flex;
+    gap: 1em;
+    margin-top: 1em;
+  }
 
-        .face-text {
-            font-size: 1.5em;
-            font-weight: 500;
-        }
+  .social-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
 
-        .perceptron {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotateX(45deg) rotateY(45deg);
-            box-sizing: border-box;
-            border: 2px solid #fff; /* Specify the wireframe color */
-            cursor: pointer; /* Change cursor to pointer */
-        }
+  .social-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    transform: scale(1.05);
+  }
 
-        .face:nth-child(1) {
-            transform: rotateY(0deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.0); /* Background color with transparency */
-        }
+  .social-item img {
+    width: 24px;
+    height: 24px;
+  }
 
-        .face:nth-child(2) {
-            transform: rotateY(90deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.00);
-        }
+  a {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 400;
+  }
 
-        .face:nth-child(3) {
-            transform: rotateY(180deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.0);
-        }
+  a:hover {
+    text-decoration: underline;
+  }
 
-        .face:nth-child(4) {
-            transform: rotateY(-90deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.00);
-        }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1em;
+  }
 
-        .face:nth-child(5) {
-            transform: rotateX(90deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.0);
-        }
+  .project-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
 
-        .face:nth-child(6) {
-            transform: rotateX(-90deg) translateZ(100px);
-            background-color: rgba(255, 255, 255, 0.00);
-        }
+  .project-card:hover {
+    background: rgba(0, 255, 255, 0.1);
+    transform: scale(1.02);
+  }
 
-        @keyframes rotateCube {
-            0% {
-                transform: rotateX(0deg) rotateY(0deg);
-            }
-            100% {
-                transform: rotateX(360deg) rotateY(360deg); /* Rotate the cube */
-            }
-        }
-  </style>
+  .cool-button {
+    display: inline-block;
+    margin-top: 1.5em;
+    padding: 0.8em 1.5em;
+    font-size: 1em;
+    font-weight: 500;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+    border: none;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
 
-  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+  .cool-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 170, 255, 0.3);
+  }
+
+  @media screen and (max-width: 768px) {
+    h1 {
+      font-size: 2.5em;
+    }
+
+    .about {
+      width: 95%;
+    }
+  }
+</style>
+
 </head>
 
 <body>
-  <topic id="main-topic">Nihal Gazi</topic>
-  <p style="font-weight: 300; font-size: 1.2em; color: #ccc; margin-top: -1em;">
-    AI Developer · VFX Artist · Researcher
-  </p>
+  <h1>Nihal Gazi</h1>
+  <p>AI Developer · VFX Artist · Research-Driven Engineer</p>
 
-  <center>
-    <div id="sc">
-      <h2>Find Me On</h2>
+  <a href="tools.html" class="cool-button">Explore My Tools</a>
 
-      <a href="https://huggingface.co/NihalGazi" target="_blank">
-        <div id="sc-item">
-          <ion-icon name="logo-code-slash"></ion-icon><br> Hugging Face
-        </div>
+  <div class="about">
+    <h2>Find Me On</h2>
+    <div class="social-grid">
+      <a href="mailto:nihalg2006@gmail.com" class="social-item">
+        <ion-icon name="mail-outline"></ion-icon>
+        <span>nihalg2006@gmail.com</span>
       </a>
-
-      <a href="https://github.com/nihal-gazi" target="_blank">
-        <div id="sc-item">
-          <ion-icon name="logo-github"></ion-icon><br> GitHub
-        </div>
+      <a href="https://huggingface.co/NihalGazi" target="_blank" class="social-item">
+        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face Logo" />
+        <span>@NihalGazi</span>
       </a>
-
-      <a href="https://www.instagram.com/i_make_ai_for_fun/" target="_blank">
-        <div id="sc-item">
-          <ion-icon name="logo-instagram"></ion-icon><br> Instagram
-        </div>
+      <a href="https://github.com/nihal-gazi" target="_blank" class="social-item">
+        <ion-icon name="logo-github"></ion-icon>
+        <span>nihal-gazi</span>
       </a>
-    </div>
-  </center>
-
-  <br><br><br><br><br>
-
-  <!-- Your 3D Cube Section -->
-  <div class="cube-container">
-    <div class="cube">
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <a href="tools.html" target="_blank" class="face"><span class="face-text">AI Tools</span></a>
-      <div class="perceptron"></div>
+      <a href="https://www.instagram.com/nihal_gazi_io/" target="_blank" class="social-item">
+        <ion-icon name="logo-instagram"></ion-icon>
+        <span>@nihal_gazi_io</span>
+      </a>
     </div>
   </div>
 
-  <br><br>
+  <div class="about">
+    <h2>Impact Highlights</h2>
+    <ul>
+      <li>🔊 <strong>Realistic TTS Unlimited</strong>: 100K+ visits on Hugging Face, trending for 2+ months.</li>
+      <li>🧠 Built a neural net library from scratch in Java at age 17.</li>
+      <li>🧬 Invented novel handwriting AI without neural nets.</li>
+      <li>📄 Written research paper on color transfer (IJNRD accepted, 94% uniqueness).</li>
+      <li>🎓 Finalist in PAIR program by MIT-linked FABRIC, personally interviewed by David Girardo.</li>
+      <li>🌐 Full-stack dev, created my own social media app from scratch.</li>
+    </ul>
+  </div>
 
+  <div class="about">
+    <h2>Featured Projects</h2>
+    <div class="project-grid">
+      <a href="https://huggingface.co/spaces/NihalGazi/Text-To-Speech-Unlimited" target="_blank" class="project-card">
+        <h3>Text-To-Speech Unlimited</h3>
+        <p>Ultra-realistic TTS using OpenAI + optimizations. 100K+ visits.</p>
+      </a>
+      <a href="https://github.com/nihal-gazi/Azinet-Simple-Java-Neural-Network-library-for-beginners" target="_blank" class="project-card">
+        <h3>Azinet (Java NN Lib)</h3>
+        <p>Simple from-scratch neural net library in Java. Educational and performant.</p>
+      </a>
+      <a href="https://huggingface.co/spaces/NihalGazi/Flux-Pro-Unlimited" target="_blank" class="project-card">
+        <h3>Flux Pro</h3>
+        <p>Highly optimized real-time inference & control interface. 170K+ visits.</p>
+      </a>
+      <a href="https://huggingface.co/spaces/NihalGazi/Stranger-Chat" target="_blank" class="project-card">
+        <h3>Stranger Chat</h3>
+        <p>Social chat replica with full backend & frontend. Talk with AI strangers in real-time.</p>
+      </a>
+    </div>
+  </div>
 
-  <div style="width: 70%; margin: auto; margin-top: 4em; margin-bottom: 1em; background-color: rgba(255,255,255,0.05); border-radius: 10px; padding: 1em;">
-    <h2>About Me</h2>
-    <p style="font-weight: 300; line-height: 1.6;">
-      I'm Nihal Gazi — an AI developer, researcher, and VFX artist with 8+ years of experience in programming and digital creativity.
-      My work spans generative AI, realistic text-to-speech, 3D graphics, mobile apps, and more. 
-      My Hugging Face spaces have been globally trending, and I continue to innovate at the intersection of code, cognition, and art.
+  <div class="about">
+    <h2>Why I Build</h2>
+    <p>
+      I’ve always believed technology is a tool for empowerment. I started coding at 9, not for school, but to solve creative problems—
+      whether that meant building VFX in Blender, generating handwriting without neural nets, or composing music with procedural AI.
+      I don't just learn frameworks — I build systems. My goal is to create things that are useful, intuitive, and deeply technical.
     </p>
   </div>
+
+  <div class="about">
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:nihalg2006@gmail.com">nihalg2006@gmail.com</a><br>
+       GitHub: <a href="https://github.com/nihal-gazi" target="_blank">nihal-gazi</a><br>
+       Hugging Face: <a href="https://huggingface.co/NihalGazi" target="_blank">@NihalGazi</a><br>
+       Instagram: <a href="https://www.instagram.com/nihal_gazi_io/" target="_blank">@nihal_gazi_io</a>
+    </p>
+  </div>
+
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 
 </html>
