@@ -1,346 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Franck-Hertz Experiment Simulation</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nihal Gazi - AI Developer, Researcher, and VFX Creator</title>
+  <meta name="description" content="Official website of Nihal Gazi, AI Developer, Researcher, and VFX Artist. Explore cutting-edge AI tools, open-source projects, and media art." />
+  <meta name="keywords" content="Nihal Gazi, AI Developer, Hugging Face, VFX Artist, Java, Open Source, Text to Speech, Generative AI, Blender, Machine Learning, Deep Learning, Full Stack Developer, India" />
+  <meta name="author" content="Nihal Gazi" />
+  <meta name="robots" content="index, follow" />
 
-        .experiment-box {
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 25px;
-            width: 100%;
-            max-width: 650px; /* Reduced width as schematic is removed */
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
-            grid-template-areas:
-                "controls"
-                "graph";
-        }
+  <!-- Open Graph Meta -->
+  <meta property="og:title" content="Nihal Gazi - AI Developer and VFX Creator" />
+  <meta property="og:description" content="Explore projects and tools by Nihal Gazi. AI, Generative Art, and VFX all in one place." />
+  <meta property="og:image" content="https://nihal-gazi.github.io/Nihal-Gazi/assets/og-image.jpg" />
+  <meta property="og:url" content="https://nihal-gazi.github.io/Nihal-Gazi/" />
+  <meta property="og:type" content="website" />
 
-        /* --- Controls Section --- */
-        .controls {
-            grid-area: controls;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background-color: #e9eef2;
-            border: 2px solid #d0d8e0;
-            border-radius: 10px;
-            padding: 20px;
-        }
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Nihal Gazi - AI Developer and Researcher" />
+  <meta name="twitter:description" content="AI tools, research, and VFX by Nihal Gazi. Explore now." />
+  <meta name="twitter:image" content="https://nihal-gazi.github.io/Nihal-Gazi/assets/og-image.jpg" />
 
-        .knob-container {
-            position: relative;
-            width: 150px;
-            height: 150px;
-            margin-bottom: 25px;
-        }
-        #knob {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #e6e6e6, #ffffff);
-            box-shadow: 5px 5px 10px #c4c4c4, -5px -5px 10px #ffffff;
-            cursor: grab;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-        #knob:active { cursor: grabbing; }
-        #knob::after {
-            content: '';
-            position: absolute;
-            width: 8px;
-            height: 25px;
-            background-color: #0056b3;
-            border-radius: 4px;
-            top: 15px;
-        }
-        
-        .interactive-panel {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            width: 100%;
-        }
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-        .display-panel {
-            display: flex;
-            gap: 15px;
-        }
-        .display {
-            background-color: #0d1b2a;
-            color: #39ff14; /* Neon green */
-            font-family: 'Orbitron', sans-serif;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-align: center;
-            border: 2px solid #415a77;
-            width: 150px;
-        }
-        .display .label {
-            font-size: 14px;
-            color: #b0c4de;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .display .value {
-            font-size: 28px;
-            font-weight: 500;
-            text-shadow: 0 0 4px #39ff14, 0 0 8px rgba(57, 255, 20, 0.5);
-            letter-spacing: 2px;
-        }
-        
-        #lever-switch {
-            width: 60px;
-            height: 30px;
-            background-color: #778da9;
-            border-radius: 15px;
-            padding: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #lever-switch .handle {
-            width: 24px;
-            height: 24px;
-            background-color: #e0e1dd;
-            border-radius: 50%;
-            box-shadow: inset 0 -2px 3px rgba(0,0,0,0.3);
-            transition: transform 0.3s ease-in-out;
-        }
-        /* States for the switch handle based on voltage mode */
-        #lever-switch.mode-0 .handle { transform: translateX(0px); }
-        #lever-switch.mode-1 .handle { transform: translateX(15px); }
-        #lever-switch.mode-2 .handle { transform: translateX(30px); }
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700&display=swap" rel="stylesheet" />
+
+  <!-- Structured Data (Schema.org) -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Nihal Gazi",
+      "url": "https://nihal-gazi.github.io/Nihal-Gazi/",
+      "sameAs": [
+        "https://huggingface.co/NihalGazi",
+        "https://github.com/nihal-gazi",
+        "https://www.instagram.com/nihal_gazi_io/"
+      ],
+      "jobTitle": "AI Developer, VFX Artist, Researcher",
+      "worksFor": {
+        "@type": "Organization",
+        "name": "KindSynapse (Founder)"
+      },
+      "alumniOf": {
+        "@type": "CollegeOrUniversity",
+        "name": "IEM Salt Lake"
+      },
+      "description": "AI Developer and Researcher with expertise in Generative AI, Text-to-Speech, and Computer Vision. Creator of several popular tools on Hugging Face."
+    }
+  </script>
+
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 2em;
+  }
+
+  h1 {
+    font-size: 3.5em;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 0.2em;
+  }
+
+  h2 {
+    font-size: 2em;
+    font-weight: 300;
+    margin-bottom: 1em;
+  }
+
+  p {
+    font-size: 1.1em;
+    font-weight: 300;
+    color: #ccc;
+  }
+
+  .about {
+    width: 75%;
+    margin: 2em auto;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 2em;
+    border-radius: 15px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.05);
+  }
+
+  ul {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    margin-bottom: 0.8em;
+    color: #ccc;
+  }
+
+  .social-grid {
+    display: inline-flex;
+    gap: 1em;
+    margin-top: 1em;
+  }
+
+  .social-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+  }
+
+  .social-item:hover {
+    background: rgba(0, 255, 255, 0.1);
+    transform: scale(1.05);
+  }
+
+  .social-item img {
+    width: 24px;
+    height: 24px;
+  }
+
+  a {
+    color: #00ffff;
+    text-decoration: none;
+    font-weight: 400;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1em;
+  }
+
+  .project-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1em;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .project-card:hover {
+    background: rgba(0, 255, 255, 0.1);
+    transform: scale(1.02);
+  }
+
+  .cool-button {
+    display: inline-block;
+    margin-top: 1.5em;
+    padding: 0.8em 1.5em;
+    font-size: 1em;
+    font-weight: 500;
+    color: #0a0a0a;
+    background: linear-gradient(135deg, #00ffff 0%, #00aaff 100%);
+    border: none;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .cool-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0, 170, 255, 0.3);
+  }
+
+  @media screen and (max-width: 981px) {
+    h1 {
+      font-size: 2.5em;
+    }
+
+    .about {
+    }
+
+    .social-grid {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
 
 
-        #voltageSlider {
-            width: 80%;
-            margin-top: 25px;
-        }
-
-        /* --- Graph Section --- */
-        .graph-container {
-            grid-area: graph;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid #d0d8e0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .graph-container button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-bottom: 15px;
-            transition: background-color 0.2s;
-        }
-        .graph-container button:hover { background-color: #0056b3; }
-        #chartContainer {
-            width: 100%;
-            height: 300px;
-        }
-    </style>
 </head>
+
 <body>
+  <h1>Nihal Gazi</h1>
+  <p>AI Developer · VFX Artist · Research-Driven Engineer</p>
 
-    <div class="experiment-box">
-        
-        <div class="controls">
-            <div class="knob-container">
-                <div id="knob" role="slider" aria-valuemin="0" aria-valuemax="44" aria-valuenow="0" title="Adjust Accelerating Voltage"></div>
-            </div>
+  <a href="tools.html" class="cool-button">Explore My Tools</a>
 
-            <div class="interactive-panel">
-                <div id="lever-switch" class="mode-2" title="Toggle Voltage Display">
-                    <div class="handle"></div>
-                </div>
-                <div class="display-panel">
-                    <div class="display">
-                        <span class="label" id="voltage-label">V<sub>g2k</sub></span>
-                        <span class="value" id="voltage-display">1.00</span>
-                    </div>
-                    <div class="display">
-                        <span class="label">I<sub>a</sub> (µA)</span>
-                        <span class="value" id="ia-display">0.00</span>
-                    </div>
-                </div>
-            </div>
-
-            <input type="range" id="voltageSlider" min="0" max="44" value="0" step="1">
-        </div>
-
-        <div class="graph-container">
-            <button id="plotButton">Show / Update Graph</button>
-            <div id="chartContainer">
-                <canvas id="franckHertzChart"></canvas>
-            </div>
-        </div>
-
+  <div class="about">
+    <h2>Find Me On</h2>
+    <div class="social-grid">
+      <a href="mailto:nihalg2006@gmail.com" class="social-item">
+        <ion-icon name="mail-outline"></ion-icon>
+        <span>nihalg2006@gmail.com</span>
+      </a>
+      <a href="https://huggingface.co/NihalGazi" target="_blank" class="social-item">
+        <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face Logo" />
+        <span>@NihalGazi</span>
+      </a>
+      <a href="https://github.com/nihal-gazi" target="_blank" class="social-item">
+        <ion-icon name="logo-github"></ion-icon>
+        <span>nihal-gazi</span>
+      </a>
+      <a href="https://www.instagram.com/nihal_gazi_io/" target="_blank" class="social-item">
+        <ion-icon name="logo-instagram"></ion-icon>
+        <span>@nihal_gazi_io</span>
+      </a>
     </div>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // --- DATA & CONSTANTS ---
-            const voltages = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89];
-            const currents = [0, 0.01, 0.07, 0.24, 0.35, 0.38, 0.40, 0.42, 0.39, 0.59, 0.70, 0.70, 0.64, 0.57, 0.52, 0.78, 0.92, 0.95, 0.98, 0.78, 0.71, 0.89, 1.07, 1.12, 1.19, 1.08, 1.00, 1.11, 1.28, 1.38, 1.39, 1.37, 1.36, 1.42, 1.53, 1.69, 1.79, 1.85, 1.87, 1.92, 2.00, 2.12, 2.24, 2.33, 2.41];
-            const maxIndex = voltages.length - 1;
-            const V_G1K = 1.5;
-            const V_G2A = 7.5;
+  <div class="about">
+    <h2>Impact Highlights</h2>
+    <ul>
+      <li>🔊 <strong>Realistic TTS Unlimited</strong>: 100K+ visits on Hugging Face, trending for 2+ months.</li>
+      <li>🧠 Built a neural net library from scratch in Java at age 17.</li>
+      <li>🧬 Invented novel handwriting AI without neural nets.</li>
+      <li>📄 Written research paper on color transfer (IJNRD accepted, 94% uniqueness).</li>
+      <li>🎓 Finalist in PAIR program by MIT-linked FABRIC, personally interviewed by David Girardo.</li>
+      <li>🌐 Full-stack dev, created my own social media app from scratch.</li>
+    </ul>
+  </div>
 
-            // --- STATE ---
-            let currentIndex = 0;
-            let voltageDisplayMode = 2; // 0: Vg1k, 1: Vg2a, 2: Vg2k
-            let chart;
+  <div class="about">
+    <h2>Featured Projects</h2>
+    <div class="project-grid">
+      <a href="https://huggingface.co/spaces/NihalGazi/Text-To-Speech-Unlimited" target="_blank" class="project-card">
+        <h3>Text-To-Speech Unlimited</h3>
+        <p>Ultra-realistic TTS using OpenAI + optimizations. 100K+ visits.</p>
+      </a>
+      <a href="https://github.com/nihal-gazi/Azinet-Simple-Java-Neural-Network-library-for-beginners" target="_blank" class="project-card">
+        <h3>Azinet (Java NN Lib)</h3>
+        <p>Simple from-scratch neural net library in Java. Educational and performant.</p>
+      </a>
+      <a href="https://huggingface.co/spaces/NihalGazi/Flux-Pro-Unlimited" target="_blank" class="project-card">
+        <h3>Flux Pro</h3>
+        <p>Highly optimized real-time inference & control interface. 170K+ visits.</p>
+      </a>
+      <a href="https://huggingface.co/spaces/NihalGazi/Stranger-Chat" target="_blank" class="project-card">
+        <h3>Stranger Chat</h3>
+        <p>Social chat replica with full backend & frontend. Talk with AI strangers in real-time.</p>
+      </a>
+    </div>
+  </div>
 
-            // --- ELEMENT SELECTORS ---
-            const knob = document.getElementById('knob');
-            const slider = document.getElementById('voltageSlider');
-            const voltageLabel = document.getElementById('voltage-label');
-            const voltageDisplay = document.getElementById('voltage-display');
-            const iaDisplay = document.getElementById('ia-display');
-            const leverSwitch = document.getElementById('lever-switch');
-            const plotButton = document.getElementById('plotButton');
-            const ctx = document.getElementById('franckHertzChart').getContext('2d');
-            
-            // --- DISPLAY UPDATE FUNCTIONS ---
-            function updateVoltageDisplay() {
-                leverSwitch.className = `mode-${voltageDisplayMode}`;
-                switch (voltageDisplayMode) {
-                    case 0: // Vg1k
-                        voltageLabel.innerHTML = 'V<sub>g1k</sub> (Filament)';
-                        voltageDisplay.textContent = V_G1K.toFixed(2);
-                        break;
-                    case 1: // Vg2a
-                        voltageLabel.innerHTML = 'V<sub>g2a</sub> (Retarding)';
-                        voltageDisplay.textContent = V_G2A.toFixed(2);
-                        break;
-                    case 2: // Vg2k
-                        voltageLabel.innerHTML = 'V<sub>g2k</sub> (Accelerating)';
-                        voltageDisplay.textContent = voltages[currentIndex].toFixed(2);
-                        break;
-                }
-            }
+  <div class="about">
+    <h2>Why I Build</h2>
+    <p>
+      I’ve always believed technology is a tool for empowerment. I started coding at 9, not for school, but to solve creative problems—
+      whether that meant building VFX in Blender, generating handwriting without neural nets, or composing music with procedural AI.
+      I don't just learn frameworks — I build systems. My goal is to create things that are useful, intuitive, and deeply technical.
+    </p>
+  </div>
 
-            // --- CORE UPDATE FUNCTION ---
-            function updateExperiment(index) {
-                currentIndex = Math.max(0, Math.min(index, maxIndex));
-                
-                // Update current display
-                iaDisplay.textContent = currents[currentIndex].toFixed(2);
+  <div class="about">
+    <h2>Contact</h2>
+    <p>Email: <a href="mailto:nihalg2006@gmail.com">nihalg2006@gmail.com</a><br>
+       GitHub: <a href="https://github.com/nihal-gazi" target="_blank">nihal-gazi</a><br>
+       Hugging Face: <a href="https://huggingface.co/NihalGazi" target="_blank">@NihalGazi</a><br>
+       Instagram: <a href="https://www.instagram.com/nihal_gazi_io/" target="_blank">@nihal_gazi_io</a>
+    </p>
+  </div>
 
-                // Update voltage display (in case it's showing Vg2k)
-                updateVoltageDisplay();
-
-                // Sync slider
-                slider.value = currentIndex;
-                
-                // Sync knob rotation
-                const degrees = (currentIndex / maxIndex) * 270 - 135; // Map index to -135 to +135 degrees
-                knob.style.transform = `rotate(${degrees}deg)`;
-                knob.setAttribute('aria-valuenow', currentIndex);
-            }
-
-            // --- EVENT LISTENERS ---
-            leverSwitch.addEventListener('click', () => {
-                voltageDisplayMode = (voltageDisplayMode + 1) % 3;
-                updateVoltageDisplay();
-            });
-
-            slider.addEventListener('input', () => {
-                updateExperiment(parseInt(slider.value));
-            });
-
-            // --- KNOB INTERACTION ---
-            let isDragging = false;
-            function handleInteraction(e) {
-                if (!isDragging) return;
-                e.preventDefault();
-                const rect = knob.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const clientX = e.clientX || e.touches[0].clientX;
-                const clientY = e.clientY || e.touches[0].clientY;
-                const angleRad = Math.atan2(clientY - centerY, clientX - centerX);
-                let angleDeg = angleRad * (180 / Math.PI) + 90;
-                let currentAngle = (angleDeg + 45) % 360;
-                if (currentAngle > 270) return;
-                const newIdx = Math.round((currentAngle / 270) * maxIndex);
-                if(newIdx !== currentIndex){
-                    updateExperiment(newIdx);
-                }
-            }
-            knob.addEventListener('mousedown', (e) => { isDragging = true; knob.style.cursor = 'grabbing'; });
-            window.addEventListener('mouseup', () => { isDragging = false; knob.style.cursor = 'grab';});
-            window.addEventListener('mousemove', handleInteraction);
-            knob.addEventListener('touchstart', (e) => { isDragging = true; });
-            window.addEventListener('touchend', () => { isDragging = false; });
-            window.addEventListener('touchmove', handleInteraction);
-
-            // --- GRAPHING ---
-            function initializeChart() {
-                chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'Anode Current (Iₐ)', data: [],
-                            borderColor: '#007bff', backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                            borderWidth: 2, pointBackgroundColor: '#dc3545', pointRadius: 3, tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        scales: {
-                            x: { title: { display: true, text: 'Accelerating Voltage Vg2k (V)' } },
-                            y: { title: { display: true, text: 'Anode Current Iₐ (µA)' }, beginAtZero: true }
-                        },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
-
-            plotButton.addEventListener('click', () => {
-                const slicedVoltages = voltages.slice(0, currentIndex + 1);
-                const slicedCurrents = currents.slice(0, currentIndex + 1);
-                chart.data.labels = slicedVoltages;
-                chart.data.datasets[0].data = slicedCurrents;
-                chart.update();
-            });
-
-            // --- INITIALIZE ---
-            initializeChart();
-            updateExperiment(0); // Set to initial state
-        });
-    </script>
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
+
 </html>
