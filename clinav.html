@@ -118,9 +118,28 @@
             background: rgba(0, 192, 255, 0.8);
         }
 
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 767px) {
+            .glass-pane {
+                padding: 1.25rem; /* A bit less padding on mobile */
+            }
+            #result-section {
+                /* When stacked, reduce the vertical gap between image and text */
+                gap: 1.5rem; 
+            }
+            #matched-doctors-list {
+                /* Allow more vertical space for the doctor list on taller screens */
+                max-height: 250px;
+            }
+            header h1 {
+                font-size: 1.75rem; /* Slightly smaller main title on mobile */
+                line-height: 2.25rem;
+            }
+        }
+
     </style>
 </head>
-<body class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+<body class="min-h-screen w-full flex justify-center items-start p-4 sm:p-8 relative overflow-y-auto">
     <div class="background-grid"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a1a] z-[-1]"></div>
 
