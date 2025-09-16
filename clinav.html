@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Clinical Navigator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a1a;
+            color: #e0e0e0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-pane {
+            background: rgba(10, 10, 30, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(0, 192, 255, 0.6), 0 0 12px rgba(0, 192, 255, 0.4);
+        }
+        .form-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 192, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(0, 192, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00c0ff, #aa00ff);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 192, 255, 0.6);
+        }
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #00c0ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Typing effect */
+        .typing-container {
+            display: inline-block;
+        }
+        .typed-text {
+            overflow: hidden;
+            white-space: nowrap;
+            display: inline-block;
+            animation: typing 2.5s steps(30, end) forwards;
+        }
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        /* Fade in animation */
+        .fade-in {
+            animation: fadeInAnimation 1s ease-in forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Background animation */
+        .background-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(0, 192, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 192, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: pan 60s linear infinite;
+        }
+
+        @keyframes pan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+        /* Custom scrollbar for doctor list */
+        #matched-doctors-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        #matched-doctors-list::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        #matched-doctors-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 192, 255, 0.5);
+            border-radius: 3px;
+        }
+        #matched-doctors-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 192, 255, 0.8);
+        }
+
+    </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div class="background-grid"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a1a] z-[-1]"></div>
+
+    <main id="app" class="w-full max-w-4xl mx-auto">
+        <div class="glass-pane p-6 md:p-8">
+            <!-- Header Section -->
+            <header class="text-center mb-6">
+                <h1 class="font-orbitron text-3xl md:text-4xl font-bold glow-text">AI Clinical Navigator</h1>
+                <p class="text-gray-400 mt-2">Translate symptoms into specialist recommendations.</p>
+            </header>
+
+            <!-- Input Section -->
+            <section id="symptom-input-section">
+                <div class="mb-4">
+                    <label for="symptoms" class="block mb-2 text-sm font-medium text-gray-300">Describe your symptoms below:</label>
+                    <textarea id="symptoms" rows="4" class="w-full p-3 rounded-lg form-input" placeholder="e.g., 'Sharp pain in my lower back when I move, and a dull ache when sitting still for too long...'"></textarea>
+                </div>
+                <button id="diagnose-btn" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary">
+                    Initiate Diagnosis
+                </button>
+            </section>
+
+            <!-- Loading Section -->
+            <section id="loading-section" class="hidden flex-col items-center justify-center py-12">
+                <div class="loader"></div>
+                <p class="mt-4 text-gray-300 font-orbitron">Analyzing Symbiote Data...</p>
+            </section>
+            
+            <!-- Result Section -->
+            <section id="result-section" class="hidden grid md:grid-cols-2 gap-8 items-start">
+                <!-- Image Column -->
+                <div id="image-container" class="w-full aspect-square bg-black/30 rounded-lg flex items-center justify-center border border-blue-500/20 overflow-hidden fade-in">
+                     <p class="text-gray-500">Awaiting visual data...</p>
+                </div>
+
+                <!-- Text Column -->
+                <div id="diagnosis-container" class="flex flex-col gap-4 fade-in" style="animation-delay: 0.5s;">
+                    <div>
+                        <h2 class="font-orbitron text-xl glow-text">Analysis Complete</h2>
+                        <p id="suggestion-id" class="text-xs text-gray-500 mt-1">Case ID: </p>
+                    </div>
+                    <div class="glass-pane p-4">
+                        <h3 class="font-bold text-blue-300 mb-2">Recommended Specialists:</h3>
+                        <div id="matched-doctors-list" class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                            <!-- Matched doctors will be injected here -->
+                        </div>
+                    </div>
+                    <div class="glass-pane p-4">
+                        <h3 class="font-bold text-blue-300">Symptom Synopsis:</h3>
+                        <p id="symptom-summary" class="text-sm"></p>
+                    </div>
+                    <div class="mt-4">
+                        <button id="reset-btn" class="w-full py-2 px-4 rounded-lg text-white font-bold bg-indigo-600 hover:bg-indigo-500 transition-colors">
+                            Start New Analysis
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <footer class="text-center mt-4">
+            <p class="text-xs text-gray-600">Disclaimer: This tool is for informational purposes only and is not a substitute for professional medical advice.</p>
+        </footer>
+    </main>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, doc, setDoc, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // DOM Elements
+        const symptomInputSection = document.getElementById('symptom-input-section');
+        const loadingSection = document.getElementById('loading-section');
+        const resultSection = document.getElementById('result-section');
+        const diagnoseBtn = document.getElementById('diagnose-btn');
+        const symptomsTextarea = document.getElementById('symptoms');
+        const imageContainer = document.getElementById('image-container');
+        const matchedDoctorsListEl = document.getElementById('matched-doctors-list');
+        const symptomSummaryEl = document.getElementById('symptom-summary');
+        const suggestionIdEl = document.getElementById('suggestion-id');
+        const resetBtn = document.getElementById('reset-btn');
+
+        // Firebase Setup
+        let db, auth;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = {
+		  apiKey: "AIzaSyBhsgnFvrANPreTbYVi73OtOycxAmtjfss",
+		  authDomain: "social-bfe8f.firebaseapp.com",
+		  databaseURL: "https://social-bfe8f-default-rtdb.firebaseio.com",
+		  projectId: "social-bfe8f",
+		  storageBucket: "social-bfe8f.appspot.com",
+		  messagingSenderId: "699004760928",
+		  appId: "1:699004760928:web:954023b4d44b8d2d466405",
+		  measurementId: "G-N7X4DW3L3R"
+		};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Medical Knowledge Base
+        const possibleQualifications = ["MBBS", "MD (Internal Medicine)", "MD (Pediatrics)", "MD (Dermatology)", "MD (Psychiatry)", "MS (Orthopedics)", "MS (General Surgery)", "MS (ENT)", "MS (Ophthalmology)", "DNB (Diplomate of National Board)", "DM (Cardiology)", "DM (Neurology)", "MCh (Neurosurgery)", "MCh (Urology)", "Fellowship (Oncology)", "Fellowship (Gastroenterology)"];
+        const possibleSpecializations = ["Cardiology (Heart)", "Neurology (Brain & Nerves)", "Orthopedics (Bones & Joints)", "Pediatrics (Children)", "Dermatology (Skin & Hair)", "Psychiatry (Mental Health)", "ENT (Ear, Nose, Throat)", "Ophthalmology (Eye)", "Gastroenterology (Digestive System)", "Endocrinology (Hormones, Diabetes, Thyroid)", "Pulmonology (Lungs)", "Oncology (Cancer)", "Nephrology (Kidney)", "Urology (Urinary System)", "General Medicine", "General Surgery"];
+
+        const seedDoctorsData = async () => {
+            const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
+            const q = query(doctorsCollectionRef, limit(1));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) {
+                console.log("No doctors found. Seeding initial data...");
+                const doctors = {
+                    "Dr. Anya Sharma": { qualifications: ["MBBS", "MD (Internal Medicine)", "DM (Cardiology)"], specializations: ["Cardiology (Heart)", "General Medicine"] },
+                    "Dr. Rohan Gupta": { qualifications: ["MBBS", "MS (Orthopedics)"], specializations: ["Orthopedics (Bones & Joints)"] },
+                    "Dr. Priya Singh": { qualifications: ["MBBS", "MD (Dermatology)"], specializations: ["Dermatology (Skin & Hair)"] },
+                    "Dr. Vikram Choudhury": { qualifications: ["MBBS", "MD (Internal Medicine)", "Fellowship (Gastroenterology)"], specializations: ["Gastroenterology (Digestive System)"] },
+                    "Dr. Sunita Patel": { qualifications: ["MBBS", "MS (ENT)"], specializations: ["ENT (Ear, Nose, Throat)"] },
+                    "Dr. Arjun Das": { qualifications: ["MBBS", "DM (Neurology)"], specializations: ["Neurology (Brain & Nerves)"] },
+                    "Dr. Meera Iyer": { qualifications: ["MBBS"], specializations: ["General Medicine"] }
+                };
+                for (const name in doctors) {
+                    await setDoc(doc(doctorsCollectionRef, name), doctors[name]);
+                }
+                console.log("Seeding complete.");
+            }
+        };
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                auth.onAuthStateChanged(async user => {
+                    if (user) {
+                        await seedDoctorsData();
+                    }
+                });
+
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch(error => console.error("Custom token sign-in error:", error));
+                } else {
+                    signInAnonymously(auth).catch(error => console.error("Anonymous sign-in error:", error));
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.error("Firebase config not found.");
+        }
+
+        // Gemini API Configuration
+        const TEXT_MODEL = 'gemini-2.5-flash-preview-05-20';
+        const API_KEY = "AIzaSyDwEJQ0lYR6CIUQrxYJe4GEB8hRpiljJ5g"; // Kept empty as per instructions for Canvas environment
+
+        const showView = (view) => {
+            symptomInputSection.classList.add('hidden');
+            loadingSection.classList.add('hidden');
+            resultSection.classList.add('hidden');
+            view.classList.remove('hidden');
+            if(view === loadingSection || view === resultSection) {
+                 view.classList.add('flex');
+            }
+        };
+
+        const callGenerativeApi = async (url, payload) => {
+            let retries = 3;
+            let delay = 1000;
+            while (retries > 0) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) {
+                        throw new Error(`API request failed with status ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`API call failed: ${error.message}. Retrying...`);
+                    retries--;
+                    if (retries === 0) throw error;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; // Exponential backoff
+                }
+            }
+        };
+        
+        const getDoctorSuggestion = async (symptoms) => {
+            const systemPrompt = `You are an advanced medical triage AI. Analyze the patient's symptoms. Your task is to determine the necessary medical expertise required. Based on the symptoms, provide:
+1. A list of relevant medical "specializations". Choose ONLY from this list: ${JSON.stringify(possibleSpecializations)}.
+2. A list of the minimum "qualifications" a doctor should have. Choose ONLY from this list: ${JSON.stringify(possibleQualifications)}.
+3. A brief, one-sentence "summary" of the core issue.
+Your response MUST be a single, clean JSON object with the keys "specializations" (array of strings), "qualifications" (array of strings), and "summary" (string).`;
+
+            const userQuery = `Symptoms: "${symptoms}"`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { responseMimeType: "application/json" }
+            };
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${API_KEY}`;
+            const result = await callGenerativeApi(apiUrl, payload);
+            
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("Failed to parse doctor suggestion JSON:", e);
+                    return { specializations: ['General Medicine'], qualifications: ['MBBS'], summary: 'Could not determine specific issue. Please see a general doctor.' };
+                }
+            }
+            throw new Error("No text content returned from text model.");
+        };
+
+        // <-- UPDATED IMAGE GENERATION FUNCTION using Pollinations.ai
+        const generateSymptomImage = async (symptoms) => {
+            const prompt = `Abstract, sci-fi, cyberpunk diagram. A close-up of  bioluminescent, ethereal, and artistic representation of the following symptoms: "${symptoms}". Dark background, neon highlights, intricate, detailed, 8k.`;
+            const encodedPrompt = encodeURIComponent(prompt);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
+            return Promise.resolve(imageUrl); // Return the URL wrapped in a resolved promise to fit the async structure.
+        };
+
+        const findMatchingDoctors = async (requiredSpecs, requiredQuals) => {
+            const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
+            const querySnapshot = await getDocs(doctorsCollectionRef);
+            const scoredDoctors = [];
+
+            querySnapshot.forEach(doc => {
+                const doctorData = doc.data();
+                const doctorName = doc.id;
+
+                // Calculate score based on matching specializations (weighted higher)
+                const specializationScore = doctorData.specializations.reduce((score, spec) => {
+                    return requiredSpecs.includes(spec) ? score + 2 : score;
+                }, 0);
+
+                // Calculate score based on matching qualifications
+                const qualificationScore = doctorData.qualifications.reduce((score, qual) => {
+                    return requiredQuals.includes(qual) ? score + 1 : score;
+                }, 0);
+                
+                const totalScore = specializationScore + qualificationScore;
+
+                if (totalScore > 0) {
+                    scoredDoctors.push({ 
+                        name: doctorName, 
+                        score: totalScore,
+                        ...doctorData 
+                    });
+                }
+            });
+
+            // Sort doctors by score in descending order
+            return scoredDoctors.sort((a, b) => b.score - a.score);
+        };
+
+        const displayDoctors = (doctors) => {
+            matchedDoctorsListEl.innerHTML = '';
+            if (doctors.length === 0) {
+                matchedDoctorsListEl.innerHTML = `<p class="text-gray-400 p-3 text-center">No specialists found matching the required criteria. We recommend seeing a General Medicine doctor.</p>`;
+                return;
+            }
+            doctors.forEach(doctor => {
+                const doctorDiv = document.createElement('div');
+                doctorDiv.className = "p-3 bg-black/20 rounded-md border border-blue-500/10 flex justify-between items-start";
+                doctorDiv.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-white">${doctor.name}</h4>
+                        <p class="text-xs text-gray-300"><strong>Qualifications:</strong> ${doctor.qualifications.join(', ')}</p>
+                        <p class="text-xs text-gray-400"><strong>Specializations:</strong> ${doctor.specializations.join(', ')}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-sm font-orbitron font-bold text-blue-300">${doctor.score}</span>
+                        <p class="text-xs text-gray-500">Match</p>
+                    </div>
+                `;
+                matchedDoctorsListEl.appendChild(doctorDiv);
+            });
+        };
+
+        diagnoseBtn.addEventListener('click', async () => {
+            const symptoms = symptomsTextarea.value.trim();
+            if (!symptoms) {
+                alert('Please describe your symptoms.'); // Using a temporary alert as custom modal is out of scope.
+                return;
+            }
+
+            showView(loadingSection);
+
+            try {
+                const [diagnosis, imageUrl] = await Promise.all([
+                    getDoctorSuggestion(symptoms),
+                    generateSymptomImage(symptoms)
+                ]);
+
+                const matchedDoctors = await findMatchingDoctors(diagnosis.specializations, diagnosis.qualifications);
+
+                let docId = 'N/A';
+                if (db && auth.currentUser) {
+                    const docRef = await addDoc(collection(db, `artifacts/${appId}/public/data/diagnoses`), {
+                        userId: auth.currentUser.uid,
+                        symptoms,
+                        recommendedSpecializations: diagnosis.specializations,
+                        recommendedQualifications: diagnosis.qualifications,
+                        matchedDoctors: matchedDoctors.map(d => d.name),
+                        createdAt: serverTimestamp()
+                    });
+                    docId = docRef.id;
+                }
+
+                symptomSummaryEl.textContent = diagnosis.summary;
+                suggestionIdEl.textContent = `Case ID: ${docId}`;
+                displayDoctors(matchedDoctors);
+
+                imageContainer.innerHTML = ''; 
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = "Symptom Visualization";
+                img.className = "w-full h-full object-cover";
+                imageContainer.appendChild(img);
+                
+                showView(resultSection);
+
+            } catch (error) {
+                console.error('Diagnosis process failed:', error);
+                alert('Failed to get a diagnosis. Please try again later.');
+                showView(symptomInputSection);
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            symptomsTextarea.value = '';
+            imageContainer.innerHTML = '<p class="text-gray-500">Awaiting visual data...</p>';
+            matchedDoctorsListEl.innerHTML = '';
+            symptomSummaryEl.textContent = '';
+            suggestionIdEl.textContent = 'Case ID:';
+            showView(symptomInputSection);
+        });
+
+    </script>
+</body>
+</html>
+
+

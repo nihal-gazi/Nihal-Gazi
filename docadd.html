@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Management Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Reusing the same styles from the main app for consistency */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a1a;
+            color: #e0e0e0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-pane {
+            background: rgba(10, 10, 30, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        .glow-text {
+            text-shadow: 0 0 8px rgba(0, 192, 255, 0.6), 0 0 12px rgba(0, 192, 255, 0.4);
+        }
+        .form-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 192, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(0, 192, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00c0ff, #aa00ff);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 192, 255, 0.6);
+        }
+        .btn-danger {
+            background: #b91c1c;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        .background-grid {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(0, 192, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 192, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1; animation: pan 60s linear infinite;
+        }
+        @keyframes pan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+        /* Custom Checkbox */
+        .custom-checkbox:checked {
+            background-color: #00c0ff;
+            border-color: #00c0ff;
+        }
+        .custom-checkbox:checked::before {
+             content: '✓';
+             color: #0a0a1a;
+             font-size: 0.75rem;
+             text-align: center;
+             line-height: 1rem;
+             display: block;
+        }
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 192, 255, 0.5); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 192, 255, 0.8); }
+    </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div class="background-grid"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a1a] z-[-1]"></div>
+
+    <main id="app" class="w-full max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+        <!-- Add Doctor Panel -->
+        <div class="glass-pane p-6 md:p-8">
+            <h2 class="font-orbitron text-2xl glow-text mb-6">Add New Doctor</h2>
+            <form id="add-doctor-form" class="space-y-4">
+                <div>
+                    <label for="doctor-name" class="block mb-2 text-sm font-medium text-gray-300">Doctor Name</label>
+                    <input type="text" id="doctor-name" class="w-full p-3 rounded-lg form-input" required placeholder="e.g., Dr. Evelyn Reed">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-bold text-blue-300 mb-2">Qualifications</h3>
+                        <div id="qualifications-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-blue-300 mb-2">Specializations</h3>
+                        <div id="specializations-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                            <!-- Checkboxes will be injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary mt-4">
+                    Add Doctor to Roster
+                </button>
+            </form>
+        </div>
+
+        <!-- Doctor Roster Panel -->
+        <div class="glass-pane p-6 md:p-8">
+            <h2 class="font-orbitron text-2xl glow-text mb-6">Current Doctor Roster</h2>
+            <div id="doctor-roster-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                <p class="text-center text-gray-400">Loading roster...</p>
+                <!-- Doctors will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // DOM Elements
+        const addDoctorForm = document.getElementById('add-doctor-form');
+        const doctorNameInput = document.getElementById('doctor-name');
+        const qualificationsListEl = document.getElementById('qualifications-list');
+        const specializationsListEl = document.getElementById('specializations-list');
+        const doctorRosterListEl = document.getElementById('doctor-roster-list');
+
+        // Firebase Setup
+        let db;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = {
+		  apiKey: "AIzaSyBhsgnFvrANPreTbYVi73OtOycxAmtjfss",
+		  authDomain: "social-bfe8f.firebaseapp.com",
+		  databaseURL: "https://social-bfe8f-default-rtdb.firebaseio.com",
+		  projectId: "social-bfe8f",
+		  storageBucket: "social-bfe8f.appspot.com",
+		  messagingSenderId: "699004760928",
+		  appId: "1:699004760928:web:954023b4d44b8d2d466405",
+		  measurementId: "G-N7X4DW3L3R"
+		};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Medical Knowledge Base
+        const possibleQualifications = ["MBBS", "MD (Internal Medicine)", "MD (Pediatrics)", "MD (Dermatology)", "MD (Psychiatry)", "MS (Orthopedics)", "MS (General Surgery)", "MS (ENT)", "MS (Ophthalmology)", "DNB (Diplomate of National Board)", "DM (Cardiology)", "DM (Neurology)", "MCh (Neurosurgery)", "MCh (Urology)", "Fellowship (Oncology)", "Fellowship (Gastroenterology)"];
+        const possibleSpecializations = ["Cardiology (Heart)", "Neurology (Brain & Nerves)", "Orthopedics (Bones & Joints)", "Pediatrics (Children)", "Dermatology (Skin & Hair)", "Psychiatry (Mental Health)", "ENT (Ear, Nose, Throat)", "Ophthalmology (Eye)", "Gastroenterology (Digestive System)", "Endocrinology (Hormones, Diabetes, Thyroid)", "Pulmonology (Lungs)", "Oncology (Cancer)", "Nephrology (Kidney)", "Urology (Urinary System)", "General Medicine", "General Surgery"];
+        
+        // Populate Checkbox Lists
+        const populateCheckboxes = (container, items, groupName) => {
+            container.innerHTML = items.map(item => `
+                <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                    <input type="checkbox" name="${groupName}" value="${item}" class="appearance-none h-4 w-4 border border-gray-500 rounded-sm bg-black/20 custom-checkbox">
+                    <span>${item}</span>
+                </label>
+            `).join('');
+        };
+        populateCheckboxes(qualificationsListEl, possibleQualifications, 'qualification');
+        populateCheckboxes(specializationsListEl, possibleSpecializations, 'specialization');
+
+        // Render Doctor List
+        const renderDoctorList = (doctors) => {
+            doctorRosterListEl.innerHTML = '';
+            if (doctors.length === 0) {
+                doctorRosterListEl.innerHTML = '<p class="text-center text-gray-400">Roster is empty. Add a doctor to begin.</p>';
+                return;
+            }
+            doctors.forEach(doctor => {
+                const docDiv = document.createElement('div');
+                docDiv.className = "p-3 bg-black/20 rounded-md border border-blue-500/10 flex justify-between items-start";
+                docDiv.innerHTML = `
+                    <div>
+                        <h4 class="font-bold text-white">${doctor.id}</h4>
+                        <p class="text-xs text-gray-300"><strong>Qualifications:</strong> ${doctor.data.qualifications.join(', ')}</p>
+                        <p class="text-xs text-gray-400"><strong>Specializations:</strong> ${doctor.data.specializations.join(', ')}</p>
+                    </div>
+                    <button data-id="${doctor.id}" class="delete-btn text-xs text-white font-bold py-1 px-2 rounded btn-danger">Delete</button>
+                `;
+                doctorRosterListEl.appendChild(docDiv);
+            });
+        };
+
+        if (firebaseConfig) {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                const auth = getAuth(app);
+
+                auth.onAuthStateChanged(user => {
+                    if (user && db) {
+                        const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
+                        onSnapshot(doctorsCollectionRef, (snapshot) => {
+                            const doctors = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                            renderDoctorList(doctors);
+                        });
+                    }
+                });
+
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch(error => console.error("Custom token sign-in error:", error));
+                } else {
+                    signInAnonymously(auth).catch(error => console.error("Anonymous sign-in error:", error));
+                }
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
+        } else {
+            console.error("Firebase config not found.");
+        }
+
+        // Add Doctor Form Submission
+        addDoctorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const doctorName = doctorNameInput.value.trim();
+            if (!doctorName) {
+                // Using a simple alert for now.
+                alert("Doctor's name cannot be empty.");
+                return;
+            }
+            const selectedQualifications = Array.from(document.querySelectorAll('input[name="qualification"]:checked')).map(el => el.value);
+            const selectedSpecializations = Array.from(document.querySelectorAll('input[name="specialization"]:checked')).map(el => el.value);
+
+            if (selectedQualifications.length === 0 || selectedSpecializations.length === 0) {
+                alert("Please select at least one qualification and one specialization.");
+                return;
+            }
+
+            try {
+                const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
+                await setDoc(doc(doctorsCollectionRef, doctorName), {
+                    qualifications: selectedQualifications,
+                    specializations: selectedSpecializations
+                });
+                addDoctorForm.reset();
+            } catch (error) {
+                console.error("Error adding doctor:", error);
+                alert("Failed to add doctor. Please try again.");
+            }
+        });
+
+        // Delete Doctor Event Delegation
+        doctorRosterListEl.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const doctorId = e.target.dataset.id;
+                // A simple browser confirm is used here. A custom modal would be better in a full app.
+                if (confirm(`Are you sure you want to remove ${doctorId} from the roster?`)) {
+                    try {
+                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/doctors`, doctorId));
+                    } catch (error) {
+                        console.error("Error deleting doctor: ", error);
+                        alert("Failed to delete doctor. Please try again.");
+                    }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
