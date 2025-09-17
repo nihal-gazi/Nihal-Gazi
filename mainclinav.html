@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Health Navigator Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a1a;
+            color: #e0e0e0;
+        }
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .glass-pane {
+            background: rgba(10, 10, 30, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+        }
+        .glow-text {
+            text-shadow: 0 0 10px rgba(0, 192, 255, 0.7), 0 0 15px rgba(0, 192, 255, 0.5);
+        }
+        .background-grid {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(0, 192, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 192, 255, 0.08) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1; animation: pan 120s linear infinite;
+        }
+        @keyframes pan {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+        .portal-card {
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid transparent;
+        }
+        .portal-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(0, 192, 255, 0.4);
+            box-shadow: 0 0 30px rgba(0, 192, 255, 0.2);
+        }
+        .fade-in {
+            animation: fadeInAnimation 1s ease-in-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInAnimation {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: opacity 0.3s ease-in-out;
+        }
+        .form-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 192, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(0, 192, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .form-input.error {
+             border-color: #ef4444;
+             animation: shake 0.5s ease-in-out;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #00c0ff, #aa00ff);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 192, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden">
+    <div class="background-grid"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a1a] z-[-1]"></div>
+
+    <main id="app" class="w-full max-w-4xl mx-auto text-center">
+        <header class="mb-12">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold glow-text fade-in">AI Health Navigator</h1>
+            <p class="text-gray-400 mt-3 fade-in" style="animation-delay: 0.2s;">Select your destination portal.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <!-- Patient Portal Card -->
+            <div id="patient-portal-btn" class="glass-pane p-8 md:p-10 rounded-2xl cursor-pointer portal-card fade-in" style="animation-delay: 0.4s;">
+                <h2 class="font-orbitron text-2xl font-semibold text-blue-300">Patient Portal</h2>
+                <p class="mt-3 text-gray-400">Access the AI-powered symptom analysis and specialist recommendation tool.</p>
+            </div>
+
+            <!-- Admin Portal Card -->
+            <div id="admin-portal-btn" class="glass-pane p-8 md:p-10 rounded-2xl cursor-pointer portal-card fade-in" style="animation-delay: 0.6s;">
+                <h2 class="font-orbitron text-2xl font-semibold text-purple-300">Admin Panel</h2>
+                <p class="mt-3 text-gray-400">Manage the hospital's roster of available doctors and their specializations.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Passkey Modal -->
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay hidden">
+        <div class="glass-pane p-8 rounded-2xl w-full max-w-sm fade-in">
+            <h3 class="font-orbitron text-xl font-semibold text-center glow-text mb-4">Admin Access Required</h3>
+            <form id="passkey-form">
+                <label for="passkey" class="block text-sm text-gray-400 mb-2 text-left">Enter Passkey:</label>
+                <input type="password" id="passkey" class="w-full p-3 rounded-lg form-input" autofocus>
+                <p id="error-message" class="text-red-500 text-sm mt-2 h-5"></p>
+                <button type="submit" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary mt-4">Authenticate</button>
+            </form>
+             <button id="close-modal-btn" class="w-full py-2 px-4 rounded-lg text-gray-300 font-semibold hover:bg-white/5 transition-colors mt-2">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const patientPortalBtn = document.getElementById('patient-portal-btn');
+        const adminPortalBtn = document.getElementById('admin-portal-btn');
+        const adminModal = document.getElementById('admin-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const passkeyForm = document.getElementById('passkey-form');
+        const passkeyInput = document.getElementById('passkey');
+        const errorMessage = document.getElementById('error-message');
+
+        // Admin Passkey
+        const ADMIN_PASSKEY = "ABC123";
+
+        // Event Listeners
+        patientPortalBtn.addEventListener('click', () => {
+            window.location.href = 'clinav.html'; 
+        });
+
+        adminPortalBtn.addEventListener('click', () => {
+            adminModal.classList.remove('hidden');
+            setTimeout(() => passkeyInput.focus(), 100); // Focus on input after modal opens
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            adminModal.classList.add('hidden');
+            errorMessage.textContent = '';
+            passkeyInput.classList.remove('error');
+        });
+
+        // Close modal if clicking outside the content
+        adminModal.addEventListener('click', (e) => {
+            if (e.target === adminModal) {
+                 closeModalBtn.click();
+            }
+        });
+
+        passkeyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const enteredPasskey = passkeyInput.value;
+            
+            if (enteredPasskey === ADMIN_PASSKEY) {
+                window.location.href = 'docadd.html';
+            } else {
+                errorMessage.textContent = 'Invalid Passkey. Please try again.';
+                passkeyInput.classList.add('error');
+                passkeyInput.value = '';
+                // Remove error state after animation
+                setTimeout(() => {
+                    passkeyInput.classList.remove('error');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>
+
