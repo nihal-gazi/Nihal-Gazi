@@ -9,157 +9,155 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Reusing the same styles from the main app for consistency */
+        /* Base styles from the original app for consistency */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0a0a1a;
             color: #e0e0e0;
         }
-        .font-orbitron {
-            font-family: 'Orbitron', sans-serif;
-        }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
         .glass-pane {
             background: rgba(10, 10, 30, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
         }
-        .glow-text {
-            text-shadow: 0 0 8px rgba(0, 192, 255, 0.6), 0 0 12px rgba(0, 192, 255, 0.4);
-        }
+        .glow-text { text-shadow: 0 0 8px rgba(0, 192, 255, 0.6), 0 0 12px rgba(0, 192, 255, 0.4); }
         .form-input {
-            background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 192, 255, 0.3);
+            background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 192, 255, 0.3);
             transition: all 0.3s ease;
         }
         .form-input:focus {
-            outline: none;
-            border-color: rgba(0, 192, 255, 0.8);
+            outline: none; border-color: rgba(0, 192, 255, 0.8);
             box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
         }
         .btn-primary {
             background: linear-gradient(45deg, #00c0ff, #aa00ff);
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
+            transition: all 0.3s ease; box-shadow: 0 0 15px rgba(0, 192, 255, 0.3);
         }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px rgba(0, 192, 255, 0.6);
-        }
-        .btn-danger {
-            background: #b91c1c;
-            transition: all 0.3s ease;
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-1px);
-        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(0, 192, 255, 0.6); }
+        .btn-danger { background: #b91c1c; transition: all 0.3s ease; }
+        .btn-danger:hover { background: #dc2626; transform: translateY(-1px); }
         .background-grid {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-image: linear-gradient(rgba(0, 192, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 192, 255, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            z-index: -1; animation: pan 60s linear infinite;
+            background-size: 50px 50px; z-index: -1; animation: pan 120s linear infinite;
         }
-        @keyframes pan {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 100%; }
-        }
-        /* Custom Checkbox */
-        .custom-checkbox:checked {
-            background-color: #00c0ff;
-            border-color: #00c0ff;
-        }
-        .custom-checkbox:checked::before {
-             content: '✓';
-             color: #0a0a1a;
-             font-size: 0.75rem;
-             text-align: center;
-             line-height: 1rem;
-             display: block;
-        }
-        /* Custom Scrollbar */
+        @keyframes pan { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+        .custom-checkbox:checked { background-color: #00c0ff; border-color: #00c0ff; }
+        .custom-checkbox:checked::before { content: '✓'; color: #0a0a1a; font-size: 0.75rem; text-align: center; line-height: 1rem; display: block; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 192, 255, 0.5); border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 192, 255, 0.8); }
-
-        /* Mobile Responsive Adjustments */
-        @media (max-width: 767px) {
-            main#app {
-                grid-template-columns: 1fr; /* Stack the columns on mobile */
-                gap: 1.5rem;
-            }
-            .glass-pane {
-                padding: 1.25rem;
-            }
-             h2 {
-                font-size: 1.5rem;
-             }
-        }
-
+        .hospital-list-item { transition: background-color 0.2s ease-in-out; }
+        .hospital-list-item:hover, .hospital-list-item.active { background-color: rgba(0, 192, 255, 0.1); }
     </style>
 </head>
 <body class="min-h-screen w-full flex justify-center items-start p-4 sm:p-8 relative overflow-y-auto">
     <div class="background-grid"></div>
     <div class="absolute inset-0 bg-gradient-to-b from-transparent to-[#0a0a1a] z-[-1]"></div>
 
-    <main id="app" class="w-full max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
-        <!-- Add Doctor Panel -->
-        <div class="glass-pane p-6 md:p-8">
-            <h2 class="font-orbitron text-2xl glow-text mb-6">Add New Doctor</h2>
-            <form id="add-doctor-form" class="space-y-4">
-                <div>
-                    <label for="doctor-name" class="block mb-2 text-sm font-medium text-gray-300">Doctor Name</label>
-                    <input type="text" id="doctor-name" class="w-full p-3 rounded-lg form-input" required placeholder="e.g., Dr. Evelyn Reed">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <main id="app" class="w-full max-w-7xl mx-auto">
+        <!-- Hospital Selection & Creation View -->
+        <section id="hospital-view" class="w-full">
+            <div class="glass-pane p-6 md:p-8">
+                <header class="text-center mb-8">
+                    <h1 class="font-orbitron text-3xl md:text-4xl font-bold glow-text">Hospital Management Console</h1>
+                    <p class="text-gray-400 mt-2">Select a facility to manage or create a new one.</p>
+                </header>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Existing Hospitals -->
                     <div>
-                        <h3 class="font-bold text-blue-300 mb-2">Qualifications</h3>
-                        <div id="qualifications-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                            <!-- Checkboxes will be injected here -->
+                        <h2 class="font-orbitron text-xl text-blue-300 mb-4">Select Existing Hospital</h2>
+                        <div id="hospital-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                            <p class="text-center text-gray-400">Loading hospitals...</p>
                         </div>
                     </div>
+                    <!-- Create New Hospital -->
                     <div>
-                        <h3 class="font-bold text-blue-300 mb-2">Specializations</h3>
-                        <div id="specializations-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                            <!-- Checkboxes will be injected here -->
-                        </div>
+                        <h2 class="font-orbitron text-xl text-purple-300 mb-4">Create New Hospital</h2>
+                        <form id="create-hospital-form" class="space-y-4 glass-pane p-6">
+                            <div>
+                                <label for="hospital-name" class="block mb-2 text-sm font-medium text-gray-300">Hospital Name</label>
+                                <input type="text" id="hospital-name" class="w-full p-3 rounded-lg form-input" required placeholder="e.g., City General Hospital">
+                            </div>
+                            <div>
+                                <label for="hospital-address" class="block mb-2 text-sm font-medium text-gray-300">Address</label>
+                                <input type="text" id="hospital-address" class="w-full p-3 rounded-lg form-input" required placeholder="e.g., 123 Health St, Medicity">
+                            </div>
+                            <button type="submit" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary">Create Hospital</button>
+                        </form>
                     </div>
                 </div>
-
-                <button type="submit" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary mt-4">
-                    Add Doctor to Roster
-                </button>
-            </form>
-        </div>
-
-        <!-- Doctor Roster Panel -->
-        <div class="glass-pane p-6 md:p-8">
-            <h2 class="font-orbitron text-2xl glow-text mb-6">Current Doctor Roster</h2>
-            <div id="doctor-roster-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
-                <p class="text-center text-gray-400">Loading roster...</p>
-                <!-- Doctors will be injected here -->
             </div>
-        </div>
+        </section>
+
+        <!-- Doctor Management View (Initially Hidden) -->
+        <section id="doctor-view" class="w-full hidden">
+             <header class="mb-6 flex justify-between items-center">
+                <div>
+                    <h1 class="font-orbitron text-2xl md:text-3xl font-bold glow-text">Doctor Roster</h1>
+                    <p id="current-hospital-info" class="text-gray-400 mt-1"></p>
+                </div>
+                <button id="back-to-hospitals-btn" class="py-2 px-4 rounded-lg text-white font-semibold bg-white/10 hover:bg-white/20 transition-colors"> &larr; Back to Hospitals</button>
+            </header>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Add Doctor Panel -->
+                <div class="glass-pane p-6 md:p-8">
+                    <h2 class="font-orbitron text-2xl glow-text mb-6">Add New Doctor</h2>
+                    <form id="add-doctor-form" class="space-y-4">
+                         <div>
+                            <label for="doctor-name" class="block mb-2 text-sm font-medium text-gray-300">Doctor Name</label>
+                            <input type="text" id="doctor-name" class="w-full p-3 rounded-lg form-input" required placeholder="e.g., Dr. Evelyn Reed">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h3 class="font-bold text-blue-300 mb-2">Qualifications</h3>
+                                <div id="qualifications-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2"></div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-blue-300 mb-2">Specializations</h3>
+                                <div id="specializations-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary mt-4">Add Doctor to Roster</button>
+                    </form>
+                </div>
+                <!-- Doctor Roster Panel -->
+                <div class="glass-pane p-6 md:p-8">
+                    <h2 class="font-orbitron text-2xl glow-text mb-6">Current Doctor Roster</h2>
+                    <div id="doctor-roster-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar pr-2">
+                        <p class="text-center text-gray-400">Roster will appear here...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </main>
 
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // DOM Elements
+        const hospitalView = document.getElementById('hospital-view');
+        const doctorView = document.getElementById('doctor-view');
+        const hospitalListEl = document.getElementById('hospital-list');
+        const createHospitalForm = document.getElementById('create-hospital-form');
         const addDoctorForm = document.getElementById('add-doctor-form');
         const doctorNameInput = document.getElementById('doctor-name');
         const qualificationsListEl = document.getElementById('qualifications-list');
         const specializationsListEl = document.getElementById('specializations-list');
         const doctorRosterListEl = document.getElementById('doctor-roster-list');
+        const backToHospitalsBtn = document.getElementById('back-to-hospitals-btn');
+        const currentHospitalInfoEl = document.getElementById('current-hospital-info');
 
-        // Firebase Setup
+        // App State
         let db;
+        let selectedHospital = null;
+        let unsubscribeFromDoctors = null; // To store the onSnapshot listener cleanup function
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = {
 		  apiKey: "AIzaSyBhsgnFvrANPreTbYVi73OtOycxAmtjfss",
@@ -176,8 +174,76 @@
         // Medical Knowledge Base
         const possibleQualifications = ["MBBS", "MD (Internal Medicine)", "MD (Pediatrics)", "MD (Dermatology)", "MD (Psychiatry)", "MS (Orthopedics)", "MS (General Surgery)", "MS (ENT)", "MS (Ophthalmology)", "DNB (Diplomate of National Board)", "DM (Cardiology)", "DM (Neurology)", "MCh (Neurosurgery)", "MCh (Urology)", "Fellowship (Oncology)", "Fellowship (Gastroenterology)"];
         const possibleSpecializations = ["Cardiology (Heart)", "Neurology (Brain & Nerves)", "Orthopedics (Bones & Joints)", "Pediatrics (Children)", "Dermatology (Skin & Hair)", "Psychiatry (Mental Health)", "ENT (Ear, Nose, Throat)", "Ophthalmology (Eye)", "Gastroenterology (Digestive System)", "Endocrinology (Hormones, Diabetes, Thyroid)", "Pulmonology (Lungs)", "Oncology (Cancer)", "Nephrology (Kidney)", "Urology (Urinary System)", "General Medicine", "General Surgery"];
+
+        // UI View Manager
+        const showView = (view) => {
+            hospitalView.classList.add('hidden');
+            doctorView.classList.add('hidden');
+            view.classList.remove('hidden');
+        };
+
+        // --- HOSPITAL MANAGEMENT ---
+        const renderHospitalList = (hospitals) => {
+            hospitalListEl.innerHTML = '';
+            if (hospitals.length === 0) {
+                hospitalListEl.innerHTML = '<p class="text-center text-gray-400">No hospitals found. Create one to begin.</p>';
+                return;
+            }
+            hospitals.forEach(hospital => {
+                const hospitalDiv = document.createElement('div');
+                hospitalDiv.className = "p-4 bg-black/20 rounded-md border border-blue-500/10 cursor-pointer hospital-list-item";
+                hospitalDiv.dataset.id = hospital.id;
+                hospitalDiv.innerHTML = `
+                    <h3 class="font-bold text-white">${hospital.data.name}</h3>
+                    <p class="text-xs text-gray-400">${hospital.data.address}</p>
+                `;
+                hospitalListEl.appendChild(hospitalDiv);
+            });
+        };
+
+        createHospitalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const hospitalName = document.getElementById('hospital-name').value.trim();
+            const hospitalAddress = document.getElementById('hospital-address').value.trim();
+            if (!hospitalName || !hospitalAddress) return;
+
+            try {
+                const hospitalsCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals`);
+                await addDoc(hospitalsCollectionRef, {
+                    name: hospitalName,
+                    address: hospitalAddress
+                });
+                createHospitalForm.reset();
+            } catch (error) {
+                console.error("Error creating hospital:", error);
+                alert("Failed to create hospital.");
+            }
+        });
+
+        hospitalListEl.addEventListener('click', (e) => {
+            const hospitalItem = e.target.closest('.hospital-list-item');
+            if (hospitalItem) {
+                const hospitalId = hospitalItem.dataset.id;
+                const hospitalName = hospitalItem.querySelector('h3').textContent;
+                const hospitalAddress = hospitalItem.querySelector('p').textContent;
+                selectedHospital = { id: hospitalId, name: hospitalName, address: hospitalAddress };
+                currentHospitalInfoEl.textContent = `Managing: ${selectedHospital.name} (${selectedHospital.address})`;
+                listenForDoctors(hospitalId);
+                showView(doctorView);
+            }
+        });
         
-        // Populate Checkbox Lists
+        backToHospitalsBtn.addEventListener('click', () => {
+            if (unsubscribeFromDoctors) {
+                unsubscribeFromDoctors(); // Detach the listener for the previous hospital's doctors
+                unsubscribeFromDoctors = null;
+            }
+            selectedHospital = null;
+            doctorRosterListEl.innerHTML = '';
+            showView(hospitalView);
+        });
+
+        // --- DOCTOR MANAGEMENT ---
         const populateCheckboxes = (container, items, groupName) => {
             container.innerHTML = items.map(item => `
                 <label class="flex items-center space-x-2 cursor-pointer text-sm">
@@ -189,11 +255,10 @@
         populateCheckboxes(qualificationsListEl, possibleQualifications, 'qualification');
         populateCheckboxes(specializationsListEl, possibleSpecializations, 'specialization');
 
-        // Render Doctor List
         const renderDoctorList = (doctors) => {
             doctorRosterListEl.innerHTML = '';
             if (doctors.length === 0) {
-                doctorRosterListEl.innerHTML = '<p class="text-center text-gray-400">Roster is empty. Add a doctor to begin.</p>';
+                doctorRosterListEl.innerHTML = '<p class="text-center text-gray-400">No doctors in this roster. Add one to begin.</p>';
                 return;
             }
             doctors.forEach(doctor => {
@@ -211,80 +276,84 @@
             });
         };
 
-        if (firebaseConfig) {
-            try {
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                const auth = getAuth(app);
-
-                auth.onAuthStateChanged(user => {
-                    if (user && db) {
-                        const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
-                        onSnapshot(doctorsCollectionRef, (snapshot) => {
-                            const doctors = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
-                            renderDoctorList(doctors);
-                        });
-                    }
-                });
-
-                if (initialAuthToken) {
-                    signInWithCustomToken(auth, initialAuthToken).catch(error => console.error("Custom token sign-in error:", error));
-                } else {
-                    signInAnonymously(auth).catch(error => console.error("Anonymous sign-in error:", error));
-                }
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-            }
-        } else {
-            console.error("Firebase config not found.");
-        }
-
-        // Add Doctor Form Submission
         addDoctorForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!selectedHospital) return alert("No hospital selected.");
+            
             const doctorName = doctorNameInput.value.trim();
-            if (!doctorName) {
-                // Using a simple alert for now.
-                alert("Doctor's name cannot be empty.");
-                return;
-            }
+            if (!doctorName) return alert("Doctor's name cannot be empty.");
+
             const selectedQualifications = Array.from(document.querySelectorAll('input[name="qualification"]:checked')).map(el => el.value);
             const selectedSpecializations = Array.from(document.querySelectorAll('input[name="specialization"]:checked')).map(el => el.value);
 
             if (selectedQualifications.length === 0 || selectedSpecializations.length === 0) {
-                alert("Please select at least one qualification and one specialization.");
-                return;
+                return alert("Please select at least one qualification and one specialization.");
             }
 
             try {
-                const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
-                await setDoc(doc(doctorsCollectionRef, doctorName), {
+                const doctorsSubCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals/${selectedHospital.id}/doctors`);
+                await setDoc(doc(doctorsSubCollectionRef, doctorName), {
                     qualifications: selectedQualifications,
                     specializations: selectedSpecializations
                 });
                 addDoctorForm.reset();
             } catch (error) {
                 console.error("Error adding doctor:", error);
-                alert("Failed to add doctor. Please try again.");
+                alert("Failed to add doctor.");
             }
         });
 
-        // Delete Doctor Event Delegation
         doctorRosterListEl.addEventListener('click', async (e) => {
             if (e.target.classList.contains('delete-btn')) {
                 const doctorId = e.target.dataset.id;
-                // A simple browser confirm is used here. A custom modal would be better in a full app.
-                if (confirm(`Are you sure you want to remove ${doctorId} from the roster?`)) {
+                if (confirm(`Are you sure you want to remove ${doctorId} from this roster?`)) {
                     try {
-                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/doctors`, doctorId));
+                        await deleteDoc(doc(db, `artifacts/${appId}/public/data/hospitals/${selectedHospital.id}/doctors`, doctorId));
                     } catch (error) {
                         console.error("Error deleting doctor: ", error);
-                        alert("Failed to delete doctor. Please try again.");
+                        alert("Failed to delete doctor.");
                     }
                 }
             }
         });
 
+        // --- INITIALIZATION ---
+        const listenForDoctors = (hospitalId) => {
+             if (unsubscribeFromDoctors) unsubscribeFromDoctors(); // Clean up old listener
+             const doctorsSubCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals/${hospitalId}/doctors`);
+             unsubscribeFromDoctors = onSnapshot(doctorsSubCollectionRef, (snapshot) => {
+                const doctors = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                renderDoctorList(doctors);
+             });
+        }
+
+        const initialize = () => {
+             if (firebaseConfig) {
+                try {
+                    const app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    const auth = getAuth(app);
+
+                    auth.onAuthStateChanged(user => {
+                        if (user && db) {
+                            const hospitalsCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals`);
+                            onSnapshot(hospitalsCollectionRef, (snapshot) => {
+                                const hospitals = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+                                renderHospitalList(hospitals);
+                            });
+                        }
+                    });
+
+                    if (initialAuthToken) {
+                        signInWithCustomToken(auth, initialAuthToken).catch(err => console.error("Auth Error:", err));
+                    } else {
+                        signInAnonymously(auth).catch(err => console.error("Auth Error:", err));
+                    }
+                } catch (e) { console.error("Firebase initialization failed:", e); }
+            } else { console.error("Firebase config not found."); }
+        };
+
+        initialize();
     </script>
 </body>
 </html>
