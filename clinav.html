@@ -58,22 +58,6 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        /* Typing effect */
-        .typing-container {
-            display: inline-block;
-        }
-        .typed-text {
-            overflow: hidden;
-            white-space: nowrap;
-            display: inline-block;
-            animation: typing 2.5s steps(30, end) forwards;
-        }
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-
-        /* Fade in animation */
         .fade-in {
             animation: fadeInAnimation 1s ease-in forwards;
             opacity: 0;
@@ -82,61 +66,31 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        /* Background animation */
         .background-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-image:
                 linear-gradient(rgba(0, 192, 255, 0.1) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(0, 192, 255, 0.1) 1px, transparent 1px);
             background-size: 50px 50px;
             z-index: -1;
-            animation: pan 60s linear infinite;
+            animation: pan 120s linear infinite;
         }
-
         @keyframes pan {
             0% { background-position: 0% 0%; }
             100% { background-position: 100% 100%; }
         }
-        /* Custom scrollbar for doctor list */
-        #matched-doctors-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        #matched-doctors-list::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
-        }
-        #matched-doctors-list::-webkit-scrollbar-thumb {
-            background: rgba(0, 192, 255, 0.5);
-            border-radius: 3px;
-        }
-        #matched-doctors-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 192, 255, 0.8);
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 192, 255, 0.5); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 192, 255, 0.8); }
 
-        /* Mobile Responsive Adjustments */
         @media (max-width: 767px) {
-            .glass-pane {
-                padding: 1.25rem; /* A bit less padding on mobile */
-            }
-            #result-section {
-                /* When stacked, reduce the vertical gap between image and text */
-                gap: 1.5rem; 
-            }
-            #matched-doctors-list {
-                /* Allow more vertical space for the doctor list on taller screens */
-                max-height: 250px;
-            }
-            header h1 {
-                font-size: 1.75rem; /* Slightly smaller main title on mobile */
-                line-height: 2.25rem;
-            }
+            .glass-pane { padding: 1.25rem; }
+            #result-section { gap: 1.5rem; }
+            #matched-doctors-list { max-height: 250px; }
+            header h1 { font-size: 1.75rem; line-height: 2.25rem; }
         }
-
     </style>
 </head>
 <body class="min-h-screen w-full flex justify-center items-start p-4 sm:p-8 relative overflow-y-auto">
@@ -145,37 +99,31 @@
 
     <main id="app" class="w-full max-w-4xl mx-auto">
         <div class="glass-pane p-6 md:p-8">
-            <!-- Header Section -->
             <header class="text-center mb-6">
                 <h1 class="font-orbitron text-3xl md:text-4xl font-bold glow-text">Clinav</h1>
                 <p class="text-gray-400 mt-2">Translate symptoms into specialist recommendations.</p>
             </header>
 
-            <!-- Input Section -->
             <section id="symptom-input-section">
                 <div class="mb-4">
                     <label for="symptoms" class="block mb-2 text-sm font-medium text-gray-300">Describe your symptoms below:</label>
-                    <textarea id="symptoms" rows="4" class="w-full p-3 rounded-lg form-input" placeholder="e.g., 'Sharp pain in my lower back when I move, and a dull ache when sitting still for too long...'"></textarea>
+                    <textarea id="symptoms" rows="4" class="w-full p-3 rounded-lg form-input custom-scrollbar" placeholder="e.g., 'Sharp pain in my lower back when I move, and a dull ache when sitting still for too long...'"></textarea>
                 </div>
                 <button id="diagnose-btn" class="w-full py-3 px-4 rounded-lg text-white font-bold btn-primary">
                     Initiate Diagnosis
                 </button>
             </section>
 
-            <!-- Loading Section -->
             <section id="loading-section" class="hidden flex-col items-center justify-center py-12">
                 <div class="loader"></div>
                 <p class="mt-4 text-gray-300 font-orbitron">Analyzing Symbiote Data...</p>
             </section>
             
-            <!-- Result Section -->
             <section id="result-section" class="hidden grid md:grid-cols-2 gap-8 items-start">
-                <!-- Image Column -->
                 <div id="image-container" class="w-full aspect-square bg-black/30 rounded-lg flex items-center justify-center border border-blue-500/20 overflow-hidden fade-in">
-                     <p class="text-gray-500">Awaiting visual data...</p>
+                       <p class="text-gray-500">Awaiting visual data...</p>
                 </div>
 
-                <!-- Text Column -->
                 <div id="diagnosis-container" class="flex flex-col gap-4 fade-in" style="animation-delay: 0.5s;">
                     <div>
                         <h2 class="font-orbitron text-xl glow-text">Analysis Complete</h2>
@@ -183,7 +131,7 @@
                     </div>
                     <div class="glass-pane p-4">
                         <h3 class="font-bold text-blue-300 mb-2">Recommended Specialists:</h3>
-                        <div id="matched-doctors-list" class="space-y-3 max-h-48 overflow-y-auto pr-2">
+                        <div id="matched-doctors-list" class="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                             <!-- Matched doctors will be injected here -->
                         </div>
                     </div>
@@ -208,7 +156,7 @@
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, getDocs, doc, setDoc, query, limit } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // DOM Elements
         const symptomInputSection = document.getElementById('symptom-input-section');
@@ -235,46 +183,18 @@
 		  appId: "1:699004760928:web:954023b4d44b8d2d466405",
 		  measurementId: "G-N7X4DW3L3R"
 		};
+		
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Medical Knowledge Base
         const possibleQualifications = ["MBBS", "MD (Internal Medicine)", "MD (Pediatrics)", "MD (Dermatology)", "MD (Psychiatry)", "MS (Orthopedics)", "MS (General Surgery)", "MS (ENT)", "MS (Ophthalmology)", "DNB (Diplomate of National Board)", "DM (Cardiology)", "DM (Neurology)", "MCh (Neurosurgery)", "MCh (Urology)", "Fellowship (Oncology)", "Fellowship (Gastroenterology)"];
         const possibleSpecializations = ["Cardiology (Heart)", "Neurology (Brain & Nerves)", "Orthopedics (Bones & Joints)", "Pediatrics (Children)", "Dermatology (Skin & Hair)", "Psychiatry (Mental Health)", "ENT (Ear, Nose, Throat)", "Ophthalmology (Eye)", "Gastroenterology (Digestive System)", "Endocrinology (Hormones, Diabetes, Thyroid)", "Pulmonology (Lungs)", "Oncology (Cancer)", "Nephrology (Kidney)", "Urology (Urinary System)", "General Medicine", "General Surgery"];
 
-        const seedDoctorsData = async () => {
-            const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
-            const q = query(doctorsCollectionRef, limit(1));
-            const snapshot = await getDocs(q);
-            if (snapshot.empty) {
-                console.log("No doctors found. Seeding initial data...");
-                const doctors = {
-                    "Dr. Anya Sharma": { qualifications: ["MBBS", "MD (Internal Medicine)", "DM (Cardiology)"], specializations: ["Cardiology (Heart)", "General Medicine"] },
-                    "Dr. Rohan Gupta": { qualifications: ["MBBS", "MS (Orthopedics)"], specializations: ["Orthopedics (Bones & Joints)"] },
-                    "Dr. Priya Singh": { qualifications: ["MBBS", "MD (Dermatology)"], specializations: ["Dermatology (Skin & Hair)"] },
-                    "Dr. Vikram Choudhury": { qualifications: ["MBBS", "MD (Internal Medicine)", "Fellowship (Gastroenterology)"], specializations: ["Gastroenterology (Digestive System)"] },
-                    "Dr. Sunita Patel": { qualifications: ["MBBS", "MS (ENT)"], specializations: ["ENT (Ear, Nose, Throat)"] },
-                    "Dr. Arjun Das": { qualifications: ["MBBS", "DM (Neurology)"], specializations: ["Neurology (Brain & Nerves)"] },
-                    "Dr. Meera Iyer": { qualifications: ["MBBS"], specializations: ["General Medicine"] }
-                };
-                for (const name in doctors) {
-                    await setDoc(doc(doctorsCollectionRef, name), doctors[name]);
-                }
-                console.log("Seeding complete.");
-            }
-        };
-
         if (firebaseConfig) {
             try {
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-
-                auth.onAuthStateChanged(async user => {
-                    if (user) {
-                        await seedDoctorsData();
-                    }
-                });
-
                 if (initialAuthToken) {
                     signInWithCustomToken(auth, initialAuthToken).catch(error => console.error("Custom token sign-in error:", error));
                 } else {
@@ -282,22 +202,26 @@
                 }
             } catch (e) {
                 console.error("Firebase initialization failed:", e);
+                alert("Could not connect to services. Please try again later.");
             }
         } else {
             console.error("Firebase config not found.");
+            alert("Application configuration is missing.");
         }
 
         // Gemini API Configuration
         const TEXT_MODEL = 'gemini-2.5-flash-preview-05-20';
-        const API_KEY = "AIzaSyDwEJQ0lYR6CIUQrxYJe4GEB8hRpiljJ5g"; // Kept empty as per instructions for Canvas environment
+        const API_KEY = "AIzaSyDwEJQ0lYR6CIUQrxYJe4GEB8hRpiljJ5g";
 
         const showView = (view) => {
             symptomInputSection.classList.add('hidden');
             loadingSection.classList.add('hidden');
             resultSection.classList.add('hidden');
             view.classList.remove('hidden');
-            if(view === loadingSection || view === resultSection) {
-                 view.classList.add('flex');
+            if (view === loadingSection) {
+                 view.classList.add('flex', 'flex-col');
+            } else if (view === resultSection) {
+                view.classList.remove('flex'); // Keep grid layout
             }
         };
 
@@ -311,9 +235,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload),
                     });
-                    if (!response.ok) {
-                        throw new Error(`API request failed with status ${response.status}`);
-                    }
+                    if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
                     return await response.json();
                 } catch (error) {
                     console.error(`API call failed: ${error.message}. Retrying...`);
@@ -331,9 +253,7 @@
 2. A list of the minimum "qualifications" a doctor should have. Choose ONLY from this list: ${JSON.stringify(possibleQualifications)}.
 3. A brief, one-sentence "summary" of the core issue.
 Your response MUST be a single, clean JSON object with the keys "specializations" (array of strings), "qualifications" (array of strings), and "summary" (string).`;
-
             const userQuery = `Symptoms: "${symptoms}"`;
-
             const payload = {
                 contents: [{ parts: [{ text: userQuery }] }],
                 systemInstruction: { parts: [{ text: systemPrompt }] },
@@ -354,45 +274,43 @@ Your response MUST be a single, clean JSON object with the keys "specializations
             throw new Error("No text content returned from text model.");
         };
 
-        // <-- UPDATED IMAGE GENERATION FUNCTION using Pollinations.ai
         const generateSymptomImage = async (symptoms) => {
             const prompt = `Abstract, sci-fi, cyberpunk diagram. A close-up of  bioluminescent, ethereal, and artistic representation of the following symptoms: "${symptoms}". Dark background, neon highlights, intricate, detailed, 8k.`;
             const encodedPrompt = encodeURIComponent(prompt);
             const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true`;
-            return Promise.resolve(imageUrl); // Return the URL wrapped in a resolved promise to fit the async structure.
+            return Promise.resolve(imageUrl);
         };
 
+        // --- UPDATED DOCTOR SEARCH LOGIC ---
         const findMatchingDoctors = async (requiredSpecs, requiredQuals) => {
-            const doctorsCollectionRef = collection(db, `artifacts/${appId}/public/data/doctors`);
-            const querySnapshot = await getDocs(doctorsCollectionRef);
+            const hospitalsCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals`);
+            const hospitalsSnapshot = await getDocs(hospitalsCollectionRef);
+            
+            const doctorPromises = hospitalsSnapshot.docs.map(async (hospitalDoc) => {
+                const hospitalData = hospitalDoc.data();
+                const doctorsSubCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals/${hospitalDoc.id}/doctors`);
+                const doctorsSnapshot = await getDocs(doctorsSubCollectionRef);
+                return doctorsSnapshot.docs.map(doctorDoc => ({
+                    id: doctorDoc.id,
+                    ...doctorDoc.data(),
+                    hospital: { name: hospitalData.name, address: hospitalData.address }
+                }));
+            });
+
+            const allDoctorsNested = await Promise.all(doctorPromises);
+            const allDoctors = allDoctorsNested.flat(); // Flatten the array of arrays
+            
             const scoredDoctors = [];
-
-            querySnapshot.forEach(doc => {
-                const doctorData = doc.data();
-                const doctorName = doc.id;
-
-                // Calculate score based on matching specializations (weighted higher)
-                const specializationScore = doctorData.specializations.reduce((score, spec) => {
-                    return requiredSpecs.includes(spec) ? score + 2 : score;
-                }, 0);
-
-                // Calculate score based on matching qualifications
-                const qualificationScore = doctorData.qualifications.reduce((score, qual) => {
-                    return requiredQuals.includes(qual) ? score + 1 : score;
-                }, 0);
-                
+            allDoctors.forEach(doctor => {
+                const specializationScore = doctor.specializations.reduce((score, spec) => requiredSpecs.includes(spec) ? score + 2 : score, 0);
+                const qualificationScore = doctor.qualifications.reduce((score, qual) => requiredQuals.includes(qual) ? score + 1 : score, 0);
                 const totalScore = specializationScore + qualificationScore;
 
                 if (totalScore > 0) {
-                    scoredDoctors.push({ 
-                        name: doctorName, 
-                        score: totalScore,
-                        ...doctorData 
-                    });
+                    scoredDoctors.push({ ...doctor, score: totalScore });
                 }
             });
 
-            // Sort doctors by score in descending order
             return scoredDoctors.sort((a, b) => b.score - a.score);
         };
 
@@ -407,11 +325,12 @@ Your response MUST be a single, clean JSON object with the keys "specializations
                 doctorDiv.className = "p-3 bg-black/20 rounded-md border border-blue-500/10 flex justify-between items-start";
                 doctorDiv.innerHTML = `
                     <div>
-                        <h4 class="font-bold text-white">${doctor.name}</h4>
+                        <h4 class="font-bold text-white">${doctor.id}</h4>
                         <p class="text-xs text-gray-300"><strong>Qualifications:</strong> ${doctor.qualifications.join(', ')}</p>
                         <p class="text-xs text-gray-400"><strong>Specializations:</strong> ${doctor.specializations.join(', ')}</p>
+                        <p class="text-xs text-cyan-400 mt-1"><strong>Location:</strong> ${doctor.hospital.name}</p>
                     </div>
-                    <div class="text-right">
+                    <div class="text-right flex-shrink-0 ml-4">
                         <span class="text-sm font-orbitron font-bold text-blue-300">${doctor.score}</span>
                         <p class="text-xs text-gray-500">Match</p>
                     </div>
@@ -423,7 +342,11 @@ Your response MUST be a single, clean JSON object with the keys "specializations
         diagnoseBtn.addEventListener('click', async () => {
             const symptoms = symptomsTextarea.value.trim();
             if (!symptoms) {
-                alert('Please describe your symptoms.'); // Using a temporary alert as custom modal is out of scope.
+                alert('Please describe your symptoms.');
+                return;
+            }
+            if (!db) {
+                alert("Service connection is not ready. Please wait a moment and try again.");
                 return;
             }
 
@@ -438,13 +361,13 @@ Your response MUST be a single, clean JSON object with the keys "specializations
                 const matchedDoctors = await findMatchingDoctors(diagnosis.specializations, diagnosis.qualifications);
 
                 let docId = 'N/A';
-                if (db && auth.currentUser) {
+                if (auth.currentUser) {
                     const docRef = await addDoc(collection(db, `artifacts/${appId}/public/data/diagnoses`), {
                         userId: auth.currentUser.uid,
                         symptoms,
                         recommendedSpecializations: diagnosis.specializations,
                         recommendedQualifications: diagnosis.qualifications,
-                        matchedDoctors: matchedDoctors.map(d => d.name),
+                        matchedDoctors: matchedDoctors.map(d => ({name: d.id, hospital: d.hospital.name})),
                         createdAt: serverTimestamp()
                     });
                     docId = docRef.id;
@@ -478,9 +401,6 @@ Your response MUST be a single, clean JSON object with the keys "specializations
             suggestionIdEl.textContent = 'Case ID:';
             showView(symptomInputSection);
         });
-
     </script>
 </body>
 </html>
-
-
