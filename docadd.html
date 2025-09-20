@@ -51,7 +51,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 192, 255, 0.5); border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0, 192, 255, 0.8); }
         .hospital-list-item { transition: background-color 0.2s ease-in-out; }
-        .hospital-list-item:hover, .hospital-list-item.active { background-color: rgba(0, 192, 255, 0.1); }
+        .hospital-list-item:hover .select-area, .hospital-list-item.active { background-color: rgba(0, 192, 255, 0.1); }
     </style>
 </head>
 <body class="min-h-screen w-full flex justify-center items-start p-4 sm:p-8 relative overflow-y-auto">
@@ -139,7 +139,7 @@
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // DOM Elements
         const hospitalView = document.getElementById('hospital-view');
@@ -157,7 +157,7 @@
         // App State
         let db;
         let selectedHospital = null;
-        let unsubscribeFromDoctors = null; // To store the onSnapshot listener cleanup function
+        let unsubscribeFromDoctors = null;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = {
 		  apiKey: "AIzaSyBhsgnFvrANPreTbYVi73OtOycxAmtjfss",
@@ -169,6 +169,7 @@
 		  appId: "1:699004760928:web:954023b4d44b8d2d466405",
 		  measurementId: "G-N7X4DW3L3R"
 		};
+		
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         // Medical Knowledge Base
@@ -191,14 +192,35 @@
             }
             hospitals.forEach(hospital => {
                 const hospitalDiv = document.createElement('div');
-                hospitalDiv.className = "p-4 bg-black/20 rounded-md border border-blue-500/10 cursor-pointer hospital-list-item";
+                hospitalDiv.className = "p-4 bg-black/20 rounded-md border border-blue-500/10 hospital-list-item flex justify-between items-center gap-4";
                 hospitalDiv.dataset.id = hospital.id;
                 hospitalDiv.innerHTML = `
-                    <h3 class="font-bold text-white">${hospital.data.name}</h3>
-                    <p class="text-xs text-gray-400">${hospital.data.address}</p>
+                    <div class="flex-grow select-area cursor-pointer">
+                        <h3 class="font-bold text-white pointer-events-none">${hospital.data.name}</h3>
+                        <p class="text-xs text-gray-400 pointer-events-none">${hospital.data.address}</p>
+                    </div>
+                    <button data-id="${hospital.id}" data-name="${hospital.data.name}" class="delete-hospital-btn text-xs text-white font-bold py-1 px-2 rounded btn-danger flex-shrink-0">Delete</button>
                 `;
                 hospitalListEl.appendChild(hospitalDiv);
             });
+        };
+        
+        const deleteHospital = async (hospitalId) => {
+             if (!db) return;
+             try {
+                 // 1. Delete all doctors in the sub-collection first
+                 const doctorsSubCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals/${hospitalId}/doctors`);
+                 const doctorsSnapshot = await getDocs(doctorsSubCollectionRef);
+                 const deletePromises = doctorsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+                 await Promise.all(deletePromises);
+
+                 // 2. Delete the hospital document itself
+                 await deleteDoc(doc(db, `artifacts/${appId}/public/data/hospitals`, hospitalId));
+                 console.log(`Hospital ${hospitalId} and its roster deleted successfully.`);
+             } catch (error) {
+                 console.error("Error deleting hospital:", error);
+                 alert("Failed to delete the hospital. See console for details.");
+             }
         };
 
         createHospitalForm.addEventListener('submit', async (e) => {
@@ -221,11 +243,21 @@
         });
 
         hospitalListEl.addEventListener('click', (e) => {
-            const hospitalItem = e.target.closest('.hospital-list-item');
+            if (e.target.classList.contains('delete-hospital-btn')) {
+                const hospitalId = e.target.dataset.id;
+                const hospitalName = e.target.dataset.name;
+                if (confirm(`Are you sure you want to delete "${hospitalName}" and all its associated doctors? This action cannot be undone.`)) {
+                    deleteHospital(hospitalId);
+                }
+                return; // Stop further execution
+            }
+
+            const hospitalItem = e.target.closest('.select-area');
             if (hospitalItem) {
-                const hospitalId = hospitalItem.dataset.id;
-                const hospitalName = hospitalItem.querySelector('h3').textContent;
-                const hospitalAddress = hospitalItem.querySelector('p').textContent;
+                const parentDiv = hospitalItem.closest('.hospital-list-item');
+                const hospitalId = parentDiv.dataset.id;
+                const hospitalName = parentDiv.querySelector('h3').textContent;
+                const hospitalAddress = parentDiv.querySelector('p').textContent;
                 selectedHospital = { id: hospitalId, name: hospitalName, address: hospitalAddress };
                 currentHospitalInfoEl.textContent = `Managing: ${selectedHospital.name} (${selectedHospital.address})`;
                 listenForDoctors(hospitalId);
@@ -235,7 +267,7 @@
         
         backToHospitalsBtn.addEventListener('click', () => {
             if (unsubscribeFromDoctors) {
-                unsubscribeFromDoctors(); // Detach the listener for the previous hospital's doctors
+                unsubscribeFromDoctors();
                 unsubscribeFromDoctors = null;
             }
             selectedHospital = null;
@@ -319,7 +351,7 @@
 
         // --- INITIALIZATION ---
         const listenForDoctors = (hospitalId) => {
-             if (unsubscribeFromDoctors) unsubscribeFromDoctors(); // Clean up old listener
+             if (unsubscribeFromDoctors) unsubscribeFromDoctors();
              const doctorsSubCollectionRef = collection(db, `artifacts/${appId}/public/data/hospitals/${hospitalId}/doctors`);
              unsubscribeFromDoctors = onSnapshot(doctorsSubCollectionRef, (snapshot) => {
                 const doctors = snapshot.docs.map(doc => ({ id: doc.id, data: doc.data() }));
