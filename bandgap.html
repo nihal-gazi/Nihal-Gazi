@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Four-Probe Band Gap Experiment (Real Data)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS styles can go here */
+    </style>
+    <script>
+        /* Simple regression lib (MOVED HERE from style tag) */
+        const regression = {};
+        regression.linear = function(data) {
+            const sum_x = data.reduce((acc, pair) => acc + pair[0], 0);
+            const sum_y = data.reduce((acc, pair) => acc + pair[1], 0);
+            const sum_xy = data.reduce((acc, pair) => acc + pair[0] * pair[1], 0);
+            const sum_xx = data.reduce((acc, pair) => acc + pair[0] * pair[0], 0);
+            const n = data.length;
+            const m = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
+            const b = (sum_y - m * sum_x) / n;
+            return { slope: m, intercept: b };
+        };
+    </script>
+</head>
+<body class="bg-gray-100 font-sans flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 space-y-6">
+        
+        <h1 class="text-2xl font-bold text-center text-blue-700">Four-Probe Band Gap Experiment</h1>
+        <p class="text-center text-sm text-gray-600">Based on your experimental data table.</p>
+        
+        <!-- Controls Section -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 space-y-6">
+            
+            <div>
+                <label for="tempSlider" class="block mb-2 text-sm font-medium text-gray-700">Set Temperature</label>
+                <input id="tempSlider" type="range" min="0" max="44" value="0" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                <div class="text-center text-lg font-mono mt-2" id="tempDisplay">32 °C (305 K)</div>
+            </div>
+
+            <!-- Displays -->
+            <div class="flex gap-4">
+                <div class="flex-1 bg-gray-900 text-green-400 p-4 rounded-lg text-center font-mono shadow-inner">
+                    <span class="block text-xs text-green-200 uppercase">Voltage (V)</span>
+                    <span class="text-3xl font-bold" id="currentReadingDisplay">196 mV</span>
+                </div>
+                <div class="flex-1 bg-gray-200 text-gray-800 p-4 rounded-lg text-center font-mono">
+                    <span class="block text-xs text-gray-600 uppercase">Current (I)</span>
+                    <span class="text-3xl font-bold">4.01 mA</span>
+                </div>
+            </div>
+            
+            <button id="takeReadingBtn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                Add Data Point
+            </button>
+        </div>
+
+        <!-- Data Table -->
+        <div id="dataTableContainer" class="hidden">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">My Data</h2>
+            <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">T (K)</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">V (mV)</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">log₁₀(ρ)</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">1000/T</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <button id="clearDataBtn" class="w-full bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition duration-300 mt-4">
+                Clear Data
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-5 space-y-4">
+            <button id="calculateBtn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 shadow-md disabled:bg-gray-400">
+                Calculate Band Gap
+            </button>
+            <button id="showGraphBtn" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md disabled:bg-gray-400 mt-4">
+                Show Graph
+            </button>
+            <div id="resultsDisplay" class="hidden text-center mt-4">
+                <h3 class="text-md font-semibold text-gray-700">Calculated Band Gap (E<sub>g</sub>):</h3>
+                <p class="text-4xl font-bold text-blue-700" id="bandGapValue">0.00 eV</p>
+                <p class="text-sm text-gray-600" id="slopeValue">Slope: 0.00</p>
+            </div>
+        </div>
+
+        <!-- Graph Section -->
+        <div id="graphContainer" class="hidden bg-white p-4 rounded-lg border border-gray-200">
+            <canvas id="bandGapChart"></canvas>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- CONSTANTS (from user's experimental setup) ---
+            const PROBE_SPACING_S = 0.2;     // cm
+            const WAFER_THICKNESS_W = 0.05;  // cm
+            const BOLTZMANN_K = 8.617e-5;    // eV/K
+            const CURRENT_MA = 4.01;         // mA (from user's table header)
+            const CURRENT_A = CURRENT_MA / 1000.0;
+            
+            // Geometric correction factor G7(w/s)
+            // G7 = 2*ln(2) / (w/s) = 1.386 / (0.05/0.2) = 1.386 / 0.25 = 5.545
+            // User's table confirms this: 61.42 (rho_0) / 11.07 (rho) = 5.548
+            const CORRECTION_G7 = 5.548;
+
+            // --- USER'S ACTUAL EXPERIMENTAL DATA ---
+            // [Temperature (°C), Voltage (mV)]
+            const experimentalData = [
+                [32, 196], [34, 196], [36, 196], [38, 195], [40, 195], [42, 194],
+                [44, 194], [46, 193], [48, 191], [50, 188], [52, 186], [54, 182],
+                [56, 178], [58, 173], [60, 169], [62, 162], [64, 156], [66, 150],
+                [68, 145], [70, 138], [72, 132], [74, 125], [76, 119], [78, 112],
+                [80, 106], [82, 100], [84, 95], [86, 89], [88, 84], [90, 80],
+                [92, 75], [94, 71], [96, 67], [98, 63], [100, 59], [102, 56],
+                [104, 53], [106, 50], [108, 47], [110, 44], [112, 41], [114, 39],
+                [116, 37], [118, 34], [120, 32] // Note: Your 2nd table image has 34,32,30. I used 34,32.
+            ];
+
+            // --- STATE ---
+            let readings = []; // { tempK, voltageMV, log_rho, inv_T_1000 }
+            let chart;
+            let lastRegressionResult = null;
+            let lastIntrinsicData = null;
+
+            // --- SELECTORS ---
+            const tempSlider = document.getElementById('tempSlider');
+            const tempDisplay = document.getElementById('tempDisplay');
+            const currentReadingDisplay = document.getElementById('currentReadingDisplay');
+            const takeReadingBtn = document.getElementById('takeReadingBtn');
+            const clearDataBtn = document.getElementById('clearDataBtn');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const showGraphBtn = document.getElementById('showGraphBtn');
+            const dataTableContainer = document.getElementById('dataTableContainer');
+            const dataTableBody = document.getElementById('dataTableBody');
+            const resultsDisplay = document.getElementById('resultsDisplay');
+            const bandGapValue = document.getElementById('bandGapValue');
+            const slopeValue = document.getElementById('slopeValue');
+            const graphContainer = document.getElementById('graphContainer');
+            
+            // --- FUNCTIONS ---
+            
+            function updateSliderDisplay() {
+                const index = parseInt(tempSlider.value);
+                const [tempC, voltageMV] = experimentalData[index];
+                const tempK = tempC + 273; // Close enough to table's 305, 307...
+                
+                tempDisplay.textContent = `${tempC} °C (${tempK} K)`;
+                currentReadingDisplay.textContent = `${voltageMV.toFixed(0)} mV`;
+            }
+
+            function takeReading() {
+                const index = parseInt(tempSlider.value);
+                const [tempC, voltageMV] = experimentalData[index];
+                const tempK = tempC + 273;
+                const voltageV = voltageMV / 1000.0;
+
+                // 1. Calculate rho_0 (uncorrected)
+                // rho_0 = (V/I) * 2*pi*s
+                const rho_0 = (voltageV / CURRENT_A) * 2 * Math.PI * PROBE_SPACING_S;
+                
+                // 2. Calculate rho (corrected)
+                // rho = rho_0 / G7(w/s)
+                const rho = rho_0 / CORRECTION_G7;
+
+                // 3. Calculate plotting values
+                const log10_rho = Math.log10(rho);
+                const inv_T_1000 = 1000 / tempK;
+
+                const reading = { tempK, voltageMV, log10_rho, inv_T_1000 };
+                readings.push(reading);
+                
+                // Add to table
+                const row = `
+                    <tr>
+                        <td class="px-4 py-2">${tempK}</td>
+                        <td class="px-4 py-2">${voltageMV.toFixed(0)}</td>
+                        <td class="px-4 py-2">${log10_rho.toFixed(3)}</td>
+                        <td class="px-4 py-2">${inv_T_1000.toFixed(3)}</td>
+                    </tr>
+                `;
+                dataTableBody.innerHTML += row;
+                dataTableContainer.classList.remove('hidden');
+                calculateBtn.disabled = false;
+                showGraphBtn.disabled = true; // Disable graph btn since data changed
+                resultsDisplay.classList.add('hidden'); // Hide old results
+                graphContainer.classList.add('hidden'); // Hide old graph
+            }
+
+            function clearData() {
+                readings = [];
+                dataTableBody.innerHTML = '';
+                dataTableContainer.classList.add('hidden');
+                graphContainer.classList.add('hidden');
+                resultsDisplay.classList.add('hidden');
+                calculateBtn.disabled = true;
+                showGraphBtn.disabled = true;
+            }
+
+            function calculateBandGap() {
+                if (readings.length < 2) {
+                    alert("Please take at least two readings.");
+                    return;
+                }
+
+                // Filter for the "intrinsic" region (high temp = low 1000/T)
+                // Your graph and table show this starts around 1000/T < 2.9 (T > 345K or 72°C)
+                // Let's use the data from your second table image: T > 88°C
+                // From the first table, let's say T > 70°C (1000/T < 2.91)
+                const intrinsicData = readings
+                    .filter(r => r.tempK > 361) // T > 88°C, based on your table
+                    .map(r => [r.inv_T_1000, r.log10_rho]);
+
+                if (intrinsicData.length < 2) {
+                    alert("Not enough data in the intrinsic region (high temp). Please add more readings > 88°C.");
+                    return;
+                }
+
+                // Perform linear regression
+                lastRegressionResult = regression.linear(intrinsicData);
+                const slope = lastRegressionResult.slope;
+                lastIntrinsicData = intrinsicData; // Save data for graph
+
+                // Calculate Band Gap
+                // Eg = slope * 2 * k * 2.303 * 1000
+                // 2.303 is for log10
+                const Eg = slope * 2 * BOLTZMANN_K * 2.303 * 1000;
+                
+                // --- Display Results ---
+                bandGapValue.textContent = `${Eg.toFixed(3)} eV`;
+                slopeValue.textContent = `Slope: ${slope.toFixed(3)}`;
+                resultsDisplay.classList.remove('hidden');
+                showGraphBtn.disabled = false; // Enable graph button
+            }
+
+            function showGraph() {
+                if (!lastIntrinsicData || !lastRegressionResult) {
+                    console.error("Cannot show graph: Calculation not performed yet.");
+                    return;
+                }
+                plotGraph(lastIntrinsicData, lastRegressionResult);
+            }
+
+            function plotGraph(intrinsicData, regressionResult) {
+                graphContainer.classList.remove('hidden');
+                
+                const allData = readings.map(r => ({ x: r.inv_T_1000, y: r.log10_rho }));
+                
+                const regressionLine = intrinsicData.map(pair => ({
+                    x: pair[0],
+                    y: regressionResult.slope * pair[0] + regressionResult.intercept
+                }));
+
+                if (chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(document.getElementById('bandGapChart').getContext('2d'), {
+                    type: 'scatter',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'All Data Points',
+                                data: allData,
+                                backgroundColor: 'rgba(0, 123, 255, 0.6)'
+                            },
+                            {
+                                label: 'Intrinsic Region Fit',
+                                data: regressionLine,
+                                type: 'line',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                borderWidth: 2,
+                                fill: false,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                position: 'bottom',
+                                title: {
+                                    display: true,
+                                    text: '1000 / T (K⁻¹)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'log₁₀(ρ)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- EVENT LISTENERS ---
+            tempSlider.addEventListener('input', updateSliderDisplay);
+            takeReadingBtn.addEventListener('click', takeReading);
+            clearDataBtn.addEventListener('click', clearData);
+            calculateBtn.addEventListener('click', calculateBandGap);
+            showGraphBtn.addEventListener('click', showGraph);
+
+            // --- INITIALIZE ---
+            tempSlider.max = experimentalData.length - 1;
+            updateSliderDisplay();
+            clearData(); // Set initial state
+        });
+    </script>
+</body>
+</html>
