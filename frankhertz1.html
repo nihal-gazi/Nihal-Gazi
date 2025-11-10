@@ -28,7 +28,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             padding: 25px;
             width: 100%;
-            max-width: 650px; /* Reduced width as schematic is removed */
+            max-width: 650px;
             display: grid;
             grid-template-columns: 1fr;
             gap: 25px;
@@ -136,11 +136,27 @@
         #lever-switch.mode-1 .handle { transform: translateX(15px); }
         #lever-switch.mode-2 .handle { transform: translateX(30px); }
 
-
-        #voltageSlider {
-            width: 80%;
-            margin-top: 25px;
+        .slider-group {
+            width: 90%;
+            margin-top: 20px;
+            text-align: center;
         }
+        .slider-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+        }
+        #vg2kSlider {
+             width: 80%;
+             margin-top: 25px;
+        }
+
 
         /* --- Graph Section --- */
         .graph-container {
@@ -177,7 +193,7 @@
         
         <div class="controls">
             <div class="knob-container">
-                <div id="knob" role="slider" aria-valuemin="0" aria-valuemax="44" aria-valuenow="0" title="Adjust Accelerating Voltage"></div>
+                <div id="knob" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" title="Adjust Accelerating Voltage"></div>
             </div>
 
             <div class="interactive-panel">
@@ -187,7 +203,7 @@
                 <div class="display-panel">
                     <div class="display">
                         <span class="label" id="voltage-label">V<sub>g2k</sub></span>
-                        <span class="value" id="voltage-display">1.00</span>
+                        <span class="value" id="voltage-display">0.00</span>
                     </div>
                     <div class="display">
                         <span class="label">I<sub>a</sub> (µA)</span>
@@ -196,7 +212,23 @@
                 </div>
             </div>
 
-            <input type="range" id="voltageSlider" min="0" max="44" value="0" step="1">
+            <div class="slider-group">
+                <label for="vg2kSlider">Accelerating V<sub>g2k</sub>: <span id="vg2kValue">0.0</span> V</label>
+                <input type="range" id="vg2kSlider" min="0" max="100" value="0" step="1">
+            </div>
+
+            <hr style="width: 90%; border: 1px solid #d0d8e0; margin-top: 25px;">
+
+            <div class="slider-group">
+                <label for="vg1kSlider">Filament V<sub>g1k</sub>: <span id="vg1kValue">1.5</span> V</label>
+                <input type="range" id="vg1kSlider" min="0.5" max="3.0" value="1.5" step="0.1">
+            </div>
+
+            <div class="slider-group">
+                <label for="vg2aSlider">Retarding V<sub>g2a</sub>: <span id="vg2aValue">1.5</span> V</label>
+                <input type="range" id="vg2aSlider" min="0.1" max="4.8" value="1.5" step="0.1">
+            </div>
+
         </div>
 
         <div class="graph-container">
@@ -211,20 +243,33 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // --- DATA & CONSTANTS ---
-            const voltages = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89];
-            const currents = [0, 0.01, 0.07, 0.24, 0.35, 0.38, 0.40, 0.42, 0.39, 0.59, 0.70, 0.70, 0.64, 0.57, 0.52, 0.78, 0.92, 0.95, 0.98, 0.78, 0.71, 0.89, 1.07, 1.12, 1.19, 1.08, 1.00, 1.11, 1.28, 1.38, 1.39, 1.37, 1.36, 1.42, 1.53, 1.69, 1.79, 1.85, 1.87, 1.92, 2.00, 2.12, 2.24, 2.33, 2.41];
-            const maxIndex = voltages.length - 1;
-            const V_G1K = 1.5;
-            const V_G2A = 7.5;
+            const EXCITATION_ENERGY = 4.9; // (eV) for Mercury
+            const MAX_VOLTAGE = 50.0;
+            const VOLTAGE_STEPS = 100;
+            const BASE_VG1K = 1.5;
+            const BASE_VG2A = 1.5;
+
+            // --- PHYSICS MODEL DATA (Generated once) ---
+            let baseVoltages = [];
+            let baseCurrents = []; // Current with dips
+            let basePeaks = [];    // Envelope current (no dips)
 
             // --- STATE ---
             let currentIndex = 0;
+            let currentVg1k = BASE_VG1K;
+            let currentVg2a = BASE_VG2A;
             let voltageDisplayMode = 2; // 0: Vg1k, 1: Vg2a, 2: Vg2k
             let chart;
 
             // --- ELEMENT SELECTORS ---
             const knob = document.getElementById('knob');
-            const slider = document.getElementById('voltageSlider');
+            const vg2kSlider = document.getElementById('vg2kSlider');
+            const vg2kValue = document.getElementById('vg2kValue');
+            const vg1kSlider = document.getElementById('vg1kSlider');
+            const vg1kValue = document.getElementById('vg1kValue');
+            const vg2aSlider = document.getElementById('vg2aSlider');
+            const vg2aValue = document.getElementById('vg2aValue');
+
             const voltageLabel = document.getElementById('voltage-label');
             const voltageDisplay = document.getElementById('voltage-display');
             const iaDisplay = document.getElementById('ia-display');
@@ -232,40 +277,95 @@
             const plotButton = document.getElementById('plotButton');
             const ctx = document.getElementById('franckHertzChart').getContext('2d');
             
+            // --- PHYSICS MODEL GENERATION ---
+            function generateBaseData() {
+                baseVoltages = [];
+                baseCurrents = [];
+                basePeaks = [];
+                
+                for (let i = 0; i <= VOLTAGE_STEPS; i++) {
+                    let v = (i / VOLTAGE_STEPS) * MAX_VOLTAGE;
+                    baseVoltages.push(v);
+                    
+                    // 1. Calculate the envelope (Child's Law approximation)
+                    let envelope = 0.01 * Math.pow(v, 1.5);
+                    basePeaks.push(envelope);
+
+                    // 2. Calculate the dips (sum of Gaussians)
+                    let dip = 0;
+                    const dipAmplitude = 0.8; // Base dip depth (80%)
+                    const dipWidth = 1.0;     // Base dip width
+                    
+                    for (let n = 1; (n * EXCITATION_ENERGY) <= v + dipWidth; n++) {
+                        let peakCenter = n * EXCITATION_ENERGY + 0.5; // Center dip slightly after peak
+                        // Dip magnitude scales with the envelope height at that peak
+                        let peakEnvelope = 0.01 * Math.pow(peakCenter, 1.5);
+                        dip += dipAmplitude * peakEnvelope * Math.exp(-Math.pow(v - peakCenter, 2) / dipWidth);
+                    }
+                    
+                    baseCurrents.push(Math.max(0, envelope - dip));
+                }
+            }
+            
+            // --- PHYSICS CALCULATION ---
+            function calculateModifiedCurrent(index) {
+                let Vg2k = baseVoltages[index];
+                let baseEnvelope = basePeaks[index];
+                let baseDip = baseEnvelope - baseCurrents[index]; // Get the magnitude of the dip
+                
+                // 1. Vg1k (Filament) scales everything (emission)
+                // Using a square law as a simple model for thermionic emission
+                let filamentScale = Math.pow(currentVg1k / BASE_VG1K, 2);
+                
+                // 2. Vg2a (Retarding) scales the dip depth
+                // Linear scaling relative to the base retarding voltage
+                let retardingScale = currentVg2a / BASE_VG2A;
+                
+                let modifiedEnvelope = baseEnvelope * filamentScale;
+                let modifiedDip = baseDip * filamentScale * retardingScale;
+                
+                let modifiedIa = Math.max(0, modifiedEnvelope - modifiedDip);
+                
+                return { Vg2k: Vg2k, Ia: modifiedIa };
+            }
+
             // --- DISPLAY UPDATE FUNCTIONS ---
-            function updateVoltageDisplay() {
+            function updateVoltageDisplay(currentVg2k) {
                 leverSwitch.className = `mode-${voltageDisplayMode}`;
                 switch (voltageDisplayMode) {
                     case 0: // Vg1k
                         voltageLabel.innerHTML = 'V<sub>g1k</sub> (Filament)';
-                        voltageDisplay.textContent = V_G1K.toFixed(2);
+                        voltageDisplay.textContent = currentVg1k.toFixed(2);
                         break;
                     case 1: // Vg2a
                         voltageLabel.innerHTML = 'V<sub>g2a</sub> (Retarding)';
-                        voltageDisplay.textContent = V_G2A.toFixed(2);
+                        voltageDisplay.textContent = currentVg2a.toFixed(2);
                         break;
                     case 2: // Vg2k
                         voltageLabel.innerHTML = 'V<sub>g2k</sub> (Accelerating)';
-                        voltageDisplay.textContent = voltages[currentIndex].toFixed(2);
+                        voltageDisplay.textContent = currentVg2k.toFixed(2);
                         break;
                 }
             }
 
             // --- CORE UPDATE FUNCTION ---
             function updateExperiment(index) {
-                currentIndex = Math.max(0, Math.min(index, maxIndex));
+                currentIndex = Math.max(0, Math.min(index, VOLTAGE_STEPS));
+                
+                const { Vg2k, Ia } = calculateModifiedCurrent(currentIndex);
                 
                 // Update current display
-                iaDisplay.textContent = currents[currentIndex].toFixed(2);
+                iaDisplay.textContent = Ia.toFixed(2);
 
-                // Update voltage display (in case it's showing Vg2k)
-                updateVoltageDisplay();
+                // Update voltage display
+                updateVoltageDisplay(Vg2k);
 
                 // Sync slider
-                slider.value = currentIndex;
+                vg2kSlider.value = currentIndex;
+                vg2kValue.textContent = Vg2k.toFixed(1);
                 
                 // Sync knob rotation
-                const degrees = (currentIndex / maxIndex) * 270 - 135; // Map index to -135 to +135 degrees
+                const degrees = (currentIndex / VOLTAGE_STEPS) * 270 - 135; // Map index to -135 to +135 degrees
                 knob.style.transform = `rotate(${degrees}deg)`;
                 knob.setAttribute('aria-valuenow', currentIndex);
             }
@@ -273,11 +373,24 @@
             // --- EVENT LISTENERS ---
             leverSwitch.addEventListener('click', () => {
                 voltageDisplayMode = (voltageDisplayMode + 1) % 3;
-                updateVoltageDisplay();
+                const { Vg2k } = calculateModifiedCurrent(currentIndex);
+                updateVoltageDisplay(Vg2k);
             });
 
-            slider.addEventListener('input', () => {
-                updateExperiment(parseInt(slider.value));
+            vg2kSlider.addEventListener('input', () => {
+                updateExperiment(parseInt(vg2kSlider.value));
+            });
+            
+            vg1kSlider.addEventListener('input', () => {
+                currentVg1k = parseFloat(vg1kSlider.value);
+                vg1kValue.textContent = currentVg1k.toFixed(1);
+                updateExperiment(currentIndex); // Update displays
+            });
+            
+            vg2aSlider.addEventListener('input', () => {
+                currentVg2a = parseFloat(vg2aSlider.value);
+                vg2aValue.textContent = currentVg2a.toFixed(1);
+                updateExperiment(currentIndex); // Update displays
             });
 
             // --- KNOB INTERACTION ---
@@ -294,7 +407,7 @@
                 let angleDeg = angleRad * (180 / Math.PI) + 90;
                 let currentAngle = (angleDeg + 45) % 360;
                 if (currentAngle > 270) return;
-                const newIdx = Math.round((currentAngle / 270) * maxIndex);
+                const newIdx = Math.round((currentAngle / 270) * VOLTAGE_STEPS);
                 if(newIdx !== currentIndex){
                     updateExperiment(newIdx);
                 }
@@ -330,15 +443,25 @@
             }
 
             plotButton.addEventListener('click', () => {
-                const slicedVoltages = voltages.slice(0, currentIndex + 1);
-                const slicedCurrents = currents.slice(0, currentIndex + 1);
-                chart.data.labels = slicedVoltages;
-                chart.data.datasets[0].data = slicedCurrents;
+                let labels = [];
+                let data = [];
+                
+                for (let i = 0; i <= currentIndex; i++) {
+                    const { Vg2k, Ia } = calculateModifiedCurrent(i);
+                    labels.push(Vg2k.toFixed(1));
+                    data.push(Ia);
+                }
+                
+                chart.data.labels = labels;
+                chart.data.datasets[0].data = data;
                 chart.update();
             });
 
             // --- INITIALIZE ---
+            generateBaseData();
             initializeChart();
+            vg1kValue.textContent = currentVg1k.toFixed(1); // Set initial readout
+            vg2aValue.textContent = currentVg2a.toFixed(1); // Set initial readout
             updateExperiment(0); // Set to initial state
         });
     </script>
