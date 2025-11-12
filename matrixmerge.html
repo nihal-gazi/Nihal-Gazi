@@ -114,12 +114,53 @@
             <!-- Common Inputs -->
             <div class="space-y-3 mb-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Top Header Text</label>
-                    <input type="text" id="headerText1" placeholder="e.g. Project Alpha" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Top Header Text (Row 3)</label>
+                    <div class="p-3 border rounded-lg bg-slate-50 space-y-2">
+                        <!-- Row 1: Sem 1 Stream 1 -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="h1_sem1" class="p-2 border rounded-lg bg-white w-20">
+                                <option>1st</option>
+                                <option>2nd</option>
+                                <option>3rd</option>
+                                <option>4th</option>
+                                <option>5th</option>
+                                <option>6th</option>
+                                <option>7th</option>
+                                <option>8th</option>
+                            </select>
+                            <span class="text-sm text-slate-700">Sem</span>
+                            <input type="text" id="h1_stream1" placeholder="Stream" class="flex-1 p-2 border rounded-lg bg-white min-w-[100px]">
+                            <span class="text-sm text-slate-700">(GR-B) and</span>
+                        </div>
+                        <!-- Row 2: Sem 2 Stream 2 -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="h1_sem2" class="p-2 border rounded-lg bg-white w-20">
+                                <option>1st</option>
+                                <option>2nd</option>
+                                <option>3rd</option>
+                                <option>4th</option>
+                            </select>
+                            <span class="text-sm text-slate-700">Sem</span>
+                            <input type="text" id="h1_stream2" placeholder="Stream" class="flex-1 p-2 border rounded-lg bg-white min-w-[100px]">
+                            <span class="text-sm text-slate-700">(GM)</span>
+                        </div>
+                        <!-- Row 3: Exam Year -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="h1_odd_even" class="p-2 border rounded-lg bg-white flex-1">
+                                <option>Odd</option>
+                                <option>Even</option>
+                            </select>
+                            <span class="text-sm text-slate-700">Semester Exam -</span>
+                            <input type="text" id="h1_year" placeholder="Year" class="p-2 border rounded-lg bg-white w-24">
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">Sub Header Text</label>
-                    <input type="text" id="headerText2" placeholder="e.g. Q3 Report" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-xs font-medium text-slate-500 mb-1">Sub Header Text (Row 4)</label>
+                    <div class="flex items-center gap-2 p-3 border rounded-lg bg-slate-50">
+                        <span class="text-sm font-medium text-slate-700">Arrangement of Seat - Room No -</span>
+                        <input type="text" id="h2_room_num" placeholder="Room No" class="p-2 border rounded-lg bg-white w-24 flex-1">
+                    </div>
                 </div>
             </div>
 
@@ -130,7 +171,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 mb-1">Columns (N)</label>
-                    <input type="number" id="colsN" value="3" min="1" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="number" id="colsN" value="6" min="1" class="w-full p-2 border rounded-lg bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
             </div>
         </section>
@@ -144,42 +185,42 @@
 
             <div class="space-y-4">
                 <!-- Header 1 Style -->
-                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <p class="text-xs font-bold text-slate-600 mb-2">Header 1 Styling</p>
+                <div class="p-3 bg-black/10 rounded-lg border border-slate-100">
+                    <p class="text-xs font-bold text-slate-600 mb-2">Header 1 Styling (Row 3)</p>
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="text-[10px] text-slate-400">Font Color</label>
                             <div class="flex items-center gap-2 h-8">
-                                <input type="color" id="h1Color" value="#ffffff" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
+                                <input type="color" id="h1Color" value="#000000" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
                             </div>
                         </div>
                         <div class="flex-1">
                             <label class="text-[10px] text-slate-400">Size</label>
-                            <input type="number" id="h1Size" value="16" class="w-full h-8 px-2 text-sm border rounded">
+                            <input type="number" id="h1Size" value="18" class="w-full h-8 px-2 text-sm border rounded">
                         </div>
                     </div>
                 </div>
 
                 <!-- Header 2 Style -->
-                <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
-                    <p class="text-xs font-bold text-slate-600 mb-2">Header 2 Styling</p>
+                <div class="p-3 bg-red-50 rounded-lg border border-red-100">
+                    <p class="text-xs font-bold text-slate-600 mb-2">Header 2 Styling (Row 4)</p>
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="text-[10px] text-slate-400">Font Color</label>
                             <div class="flex items-center gap-2 h-8">
-                                <input type="color" id="h2Color" value="#ffffff" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
+                                <input type="color" id="h2Color" value="#FF0000" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
                             </div>
                         </div>
                         <div class="flex-1">
                             <label class="text-[10px] text-slate-400">Size</label>
-                            <input type="number" id="h2Size" value="14" class="w-full h-8 px-2 text-sm border rounded">
+                            <input type="number" id="h2Size" value="18" class="w-full h-8 px-2 text-sm border rounded">
                         </div>
                     </div>
                 </div>
 
                 <!-- X Data Style -->
                 <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <p class="text-xs font-bold text-blue-600 mb-2">File 1 (X) Data Styling</p>
+                    <p class="text-xs font-bold text-blue-600 mb-2">Data X Styling</p>
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="text-[10px] text-blue-400">Font Color</label>
@@ -189,14 +230,14 @@
                         </div>
                         <div class="flex-1">
                             <label class="text-[10px] text-blue-400">Size</label>
-                            <input type="number" id="xSize" value="11" class="w-full h-8 px-2 text-sm border rounded">
+                            <input type="number" id="xSize" value="14" class="w-full h-8 px-2 text-sm border rounded">
                         </div>
                     </div>
                 </div>
 
                 <!-- Y Data Style -->
                 <div class="p-3 bg-green-50 rounded-lg border border-green-100">
-                    <p class="text-xs font-bold text-green-600 mb-2">File 2 (Y) Data Styling</p>
+                    <p class="text-xs font-bold text-green-600 mb-2">Data Y Styling</p>
                     <div class="flex gap-3">
                         <div class="flex-1">
                             <label class="text-[10px] text-green-400">Font Color</label>
@@ -206,7 +247,7 @@
                         </div>
                         <div class="flex-1">
                             <label class="text-[10px] text-green-400">Size</label>
-                            <input type="number" id="ySize" value="11" class="w-full h-8 px-2 text-sm border rounded">
+                            <input type="number" id="ySize" value="14" class="w-full h-8 px-2 text-sm border rounded">
                         </div>
                     </div>
                 </div>
@@ -320,7 +361,6 @@
                     const file2Input = document.getElementById('file2');
 
                     if (!file1Input.files[0] || !file2Input.files[0]) {
-                        // MODIFIED: Use custom alert modal
                         showModal("Please select both Excel files for Matrix Mode.");
                         statusEl.classList.add('hidden');
                         generateBtn.disabled = false;
@@ -341,7 +381,6 @@
                     const fileSingleInput = document.getElementById('fileSingle');
                     
                     if (!fileSingleInput.files[0]) {
-                        // MODIFIED: Use custom alert modal
                         showModal("Please select an Excel file for Single Column Mode.");
                         statusEl.classList.add('hidden');
                         generateBtn.disabled = false;
@@ -353,34 +392,39 @@
 
                     const colX = parseInt(document.getElementById('colIndexSingle').value) - 1;
                     // User's 1-based "split row" index.
-                    // e.g., 10. This means file row 10 is the last X.
-                    // allData[0] is file row 1 (header)
-                    // allData[9] is file row 10 (last X)
-                    // allData[10] is file row 11 (first Y)
                     const splitIndex = parseInt(document.getElementById('splitRowIndex').value); 
                     
                     const allData = await readColumnFromExcel(fileSingleInput.files[0], colX);
                     
-                    // X data is from row 2 (index 1) up to row `splitIndex` (index `splitIndex - 1`)
-                    // slice(start, end) is exclusive of end.
-                    // slice(1, splitIndex) gives indices 1... (splitIndex - 1)
+                    // In single mode, row 0 is the header, data starts at 1.
+                    // Slice(1, splitIndex) goes from index 1 up to (but not including) splitIndex.
+                    // This is correct as user's 1-based index matches array length.
                     dataX = allData.slice(1, splitIndex); 
-                    
-                    // Y data starts from *after* the split index, so row `splitIndex + 1` (index `splitIndex`)
                     dataY = allData.slice(splitIndex);
+
+                    // REQ 2 Fix: Pointers for single mode must start at 0
+                    // This is handled by the ptrX/ptrY init logic later
                 }
                 // --- End data loading ---
 
 
-                // 2. Setup Workbook for Output
-                const wb = new ExcelJS.Workbook();
-                const ws = wb.addWorksheet('Matrix Result');
-
-                // 3. Inputs
+                // 2. Setup Common Variables
                 const rowsM = parseInt(document.getElementById('rowsM').value);
                 const colsN = parseInt(document.getElementById('colsN').value);
-                const head1Txt = document.getElementById('headerText1').value;
-                const head2Txt = document.getElementById('headerText2').value;
+                
+                // NEW: Assemble Header 1 from multiple inputs
+                const sem1 = document.getElementById('h1_sem1').value;
+                const stream1 = document.getElementById('h1_stream1').value;
+                const sem2 = document.getElementById('h1_sem2').value;
+                const stream2 = document.getElementById('h1_stream2').value;
+                const oddEven = document.getElementById('h1_odd_even').value;
+                const year = document.getElementById('h1_year').value;
+                const head1Txt = `${sem1} Sem ${stream1} (GR-B) and ${sem2} Sem ${stream2} (GM) ${oddEven} Semester Examination - ${year}`;
+
+                // NEW: Assemble Header 2 from multiple inputs
+                const roomNum = document.getElementById('h2_room_num').value;
+                const head2Txt = `Arrangement of Seat - Room No - ${roomNum}`;
+
 
                 // Styles
                 const h1ColorHex = document.getElementById('h1Color').value;
@@ -392,16 +436,12 @@
                     h1: { 
                         color: { argb: h1ColorHex.replace('#', 'FF') },
                         size: parseInt(document.getElementById('h1Size').value),
-                        bg: { argb: 'FF4F46E5' }, // Indigo background for header
-                        colorHex: h1ColorHex,
-                        bgHex: '#4F46E5'
+                        colorHex: h1ColorHex
                     },
                     h2: { 
                         color: { argb: h2ColorHex.replace('#', 'FF') },
                         size: parseInt(document.getElementById('h2Size').value),
-                        bg: { argb: 'FF6366F1' }, // Lighter indigo
-                        colorHex: h2ColorHex,
-                        bgHex: '#6366F1'
+                        colorHex: h2ColorHex
                     },
                     x: { 
                         color: { argb: xColorHex.replace('#', 'FF') },
@@ -414,92 +454,113 @@
                         colorHex: yColorHex
                     }
                 };
-
-                // 4. Write Headers (Row 1 and Row 2) - ExcelJS
-                ws.mergeCells(1, 1, 1, colsN);
-                const cellH1 = ws.getCell(1, 1);
-                cellH1.value = head1Txt;
-                cellH1.font = { color: styles.h1.color, size: styles.h1.size, bold: true };
-                cellH1.fill = { type: 'pattern', pattern: 'solid', fgColor: styles.h1.bg };
-                cellH1.alignment = { horizontal: 'center' };
-
-                ws.mergeCells(2, 1, 2, colsN);
-                const cellH2 = ws.getCell(2, 1);
-                cellH2.value = head2Txt;
-                cellH2.font = { color: styles.h2.color, size: styles.h2.size, bold: true };
-                cellH2.fill = { type: 'pattern', pattern: 'solid', fgColor: styles.h2.bg };
-                cellH2.alignment = { horizontal: 'center' };
-
-                // 5. Construct Matrix (Checkerboard Logic)
                 
+                // Border definition
+                const allBorders = {
+                    top: {style:'thin'},
+                    left: {style:'thin'},
+                    bottom: {style:'thin'},
+                    right: {style:'thin'}
+                };
+
+                // NEW: Initialize pointers ONCE here, before the output type check.
+                // This ensures they are shared and incremented across the entire generation process
+                // for both preview and excel.
                 let ptrX = (activeMode === 'matrix') ? 1 : 0;
                 let ptrY = (activeMode === 'matrix') ? 1 : 0;
-                const startRow = 3; 
-
-                // Create a 2D array to hold data for preview (which is row-major)
-                let previewGrid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
-
-                for (let c = 0; c < colsN; c++) {
-                    for (let r = 0; r < rowsM; r++) {
-                        const cell = ws.getCell(startRow + r, c + 1);
-                        const isTypeX = (r + c) % 2 === 0;
-                        let val, styleKey;
-
-                        if (isTypeX) {
-                            // Data X
-                            val = ptrX < dataX.length ? dataX[ptrX] : "";
-                            styleKey = 'x';
-                            ptrX++;
-                        } else {
-                            // Data Y
-                            val = ptrY < dataY.length ? dataY[ptrY] : "";
-                            styleKey = 'y';
-                            ptrY++;
-                        }
-                        
-                        // Populate Excel Cell
-                        cell.value = val;
-                        cell.font = { color: styles[styleKey].color, size: styles[styleKey].size };
-                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: (styleKey === 'x' ? { argb: 'FFF8FAFC' } : { argb: 'FFF0FDF4' }) };
-                        cell.border = {
-                            top: {style:'thin'},
-                            left: {style:'thin'},
-                            bottom: {style:'thin'},
-                            right: {style:'thin'}
-                        };
-
-                        // Populate Preview Grid
-                        previewGrid[r][c] = { value: val, styleKey: styleKey };
-                    }
+                if (activeMode === 'single') {
+                    ptrX = 0;
+                    ptrY = 0;
                 }
 
-                // 6. Output based on type
+                // 3. Output based on type
                 if (outputType === 'preview') {
                     statusEl.textContent = "Generating preview...";
-                    let previewHtml = '<table class="w-full border-collapse border border-slate-300 text-sm text-center">';
-                    // Headers
-                    previewHtml += `<thead><tr><th colspan="${colsN}" style="background-color: ${styles.h1.bgHex}; color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; padding: 4px; border: 1px solid #999;">${head1Txt}</th></tr>`;
-                    previewHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h2.bgHex}; color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; padding: 4px; border: 1px solid #999;">${head2Txt}</th></tr></thead>`;
-                    previewHtml += '<tbody>';
 
-                    // Body (from row-major grid)
-                    for (let r = 0; r < rowsM; r++) {
-                        previewHtml += '<tr>';
+                    // --- Generate HTML Preview Table (with looping) ---
+                    // Initialize HTML string *outside* loop
+                    let previewHtml = '';
+                    let sheetCount = 1; // To show "Room 1", "Room 2" in preview
+
+                    // NEW: Run loop as long as there is data left
+                    while (ptrX < dataX.length || ptrY < dataY.length) {
+
+                        // Add spacer between tables
+                        if (sheetCount > 1) {
+                            previewHtml += '<div style="height: 30px; border-bottom: 2px dashed #94a3b8; margin: 20px 0;"></div>';
+                        }
+                        
+                        previewHtml += `<h4 class="text-lg font-bold text-slate-700 mb-2">Seating Room ${sheetCount}</h4>`;
+                        
+                        // --- NEW: Build a temporary 2D grid for preview ---
+                        // This allows us to fill column-major, but display row-major
+                        let previewGrid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
+
+                        // NEW: Fill the grid using COLUMN-MAJOR iteration (c, then r)
                         for (let c = 0; c < colsN; c++) {
-                            const item = previewGrid[r][c];
-                            if (item) {
-                                const style = styles[item.styleKey];
-                                const bgColor = item.styleKey === 'x' ? '#F8FAFC' : '#F0FDF4';
-                                previewHtml += `<td style="color: ${style.colorHex}; font-size: ${style.size}px; background-color: ${bgColor}; border: 1px solid #cbd5e1; padding: 2px 4px; white-space: nowrap;">${item.value}</td>`;
-                            } else {
-                                previewHtml += '<td style="border: 1px solid #cbd5e1; padding: 2px 4px;"></td>';
+                            for (let r = 0; r < rowsM; r++) {
+                                const isTypeX = (r + c) % 2 === 0;
+                                let val, styleKey;
+
+                                if (isTypeX) {
+                                    val = ptrX < dataX.length ? dataX[ptrX] : "";
+                                    styleKey = 'x';
+                                    ptrX++; // Increment pointer
+                                } else {
+                                    val = ptrY < dataY.length ? dataY[ptrY] : "";
+                                    styleKey = 'y';
+                                    ptrY++; // Increment pointer
+                                }
+                                // Assign to the grid at [r][c]
+                                previewGrid[r][c] = { value: val, styleKey: styleKey };
                             }
                         }
-                        previewHtml += '</tr>';
-                    }
-                    previewHtml += '</tbody></table>';
+                        // --- End grid filling ---
+
+
+                        previewHtml += '<table class="w-full border-collapse border border-slate-300 text-sm text-center">';
+                        previewHtml += `<thead>`;
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`; // Row 1
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`; // Row 2
+                        // REQ 3: Add border style
+                        previewHtml += `<tr style="height: 30px;"><th colspan="${colsN}" style="color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 4px; border: 1px solid #cbd5e1;">${head1Txt}</th></tr>`; // Row 3, NEW: height
+                        // REQ 3: Add border style
+                        previewHtml += `<tr style="height: 35.1px;"><th colspan="${colsN}" style="color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; text-decoration: underline; padding: 4px; border: 1px solid #cbd5e1;">${head2Txt}</th></tr>`; // Row 4, NEW: height
+                        // REQ 3: Add gap row with border
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px; border: 1px solid #cbd5e1;"></td></tr>`; // Row 5
+                        
+                        // Column Headers (Row 6)
+                        previewHtml += `<tr style="height: 25.2px;">`; // NEW: height
+                        for (let c = 0; c < colsN; c++) {
+                            // REQ 1: Add size 20
+                            previewHtml += `<th style="border: 1px solid #cbd5e1; font-weight: bold; padding: 4px; font-size: 20px;">Column ${c + 1}</th>`;
+                        }
+                        previewHtml += `</tr>`;
+                        previewHtml += `</thead>`;
+                        previewHtml += '<tbody>';
+
+                        // NEW: Build the HTML table by iterating over the pre-filled grid
+                        // This is now row-major, which is what HTML tables expect
+                        for (let r = 0; r < rowsM; r++) {
+                            previewHtml += '<tr>';
+                            for (let c = 0; c < colsN; c++) {
+                                // Get the item from our grid
+                                const item = previewGrid[r][c];
+                                
+                                // Get style based on key. Use 'x' as fallback if key is bad.
+                                const style = styles[item.styleKey] || styles['x'];
+                                previewHtml += `<td style="color: ${style.colorHex}; font-size: ${style.size}px; border: 1px solid #cbd5e1; padding: 8px 4px; height: 60px; white-space: nowrap; vertical-align: middle;">${item.value}</td>`;
+                            }
+                            previewHtml += '</tr>';
+                        }
+                        previewHtml += '</tbody></table>';
+                        // --- End One HTML Preview Table ---
+
+                        sheetCount++;
+                    } // End of while loop
 
                     document.getElementById('previewArea').innerHTML = previewHtml;
+                    // --- End HTML Preview Table ---
 
                     statusEl.textContent = "Preview updated!";
                     setTimeout(() => {
@@ -511,8 +572,95 @@
                     }, 2000);
 
                 } else { // outputType === 'excel'
-                    // 6. Save File
-                    statusEl.textContent = "Generating file...";
+                    // REQ 2: Generate Excel with Carry-over Logic
+                    statusEl.textContent = "Generating file with all data...";
+                    const wb = new ExcelJS.Workbook();
+
+                    // Pointers must be initialized *inside* the excel block
+                    // to reset every time generate is clicked.
+                    // DELETED: Pointers are now initialized outside
+                    // let ptrX = (activeMode === 'matrix') ? 1 : 0; ...
+                    // let ptrY = (activeMode === 'matrix') ? 1 : 0; ...
+
+                    let sheetCount = 1;
+                    // Run loop as long as there is data left in EITHER array
+                    while (ptrX < dataX.length || ptrY < dataY.length) {
+                        const ws = wb.addWorksheet(`Matrix Result ${sheetCount}`);
+                        
+                        // --- Start Sheet Generation Logic ---
+                        // Copied from preview logic
+                        ws.mergeCells(3, 1, 3, colsN);
+                        ws.getRow(3).height = 30; // NEW: Height 30
+                        const cellH1 = ws.getCell(3, 1);
+                        cellH1.value = head1Txt;
+                        cellH1.font = { color: styles.h1.color, size: styles.h1.size, bold: true };
+                        cellH1.alignment = { horizontal: 'center' };
+                        cellH1.border = allBorders; // REQ 3
+
+                        ws.mergeCells(4, 1, 4, colsN);
+                        ws.getRow(4).height = 35.1; // NEW: Height 35.1
+                        const cellH2 = ws.getCell(4, 1);
+                        cellH2.value = head2Txt;
+                        cellH2.font = { color: styles.h2.color, size: styles.h2.size, bold: true, underline: true };
+                        cellH2.alignment = { horizontal: 'center' };
+                        cellH2.border = allBorders; // REQ 3
+
+                        ws.mergeCells(5, 1, 5, colsN);
+                        const cellGap = ws.getCell(5, 1);
+                        cellGap.border = allBorders; // REQ 3
+
+                        ws.getRow(6).height = 25.2; // NEW: Height 25.2
+                        for (let c = 0; c < colsN; c++) {
+                            const colHeaderCell = ws.getCell(6, c + 1);
+                            colHeaderCell.value = `Column ${c + 1}`;
+                            colHeaderCell.font = { bold: true, size: 20 }; // REQ 1: Size 20
+                            colHeaderCell.alignment = { horizontal: 'center' };
+                            colHeaderCell.border = allBorders;
+                        }
+
+                        const startRow = 7;
+                        
+                        // Set column widths first
+                        for (let c = 0; c < colsN; c++) {
+                            ws.getColumn(c + 1).width = 27;
+                        }
+
+                        // NEW: Swapped loops to be COLUMN-MAJOR (outer loop c, inner loop r)
+                        // This matches the original seating logic.
+                        for (let c = 0; c < colsN; c++) {
+                            for (let r = 0; r < rowsM; r++) {
+                                // Set row height (only needs to be done on first column)
+                                if (c === 0) {
+                                    ws.getRow(startRow + r).height = 60;
+                                }
+
+                                const cell = ws.getCell(startRow + r, c + 1);
+                                const isTypeX = (r + c) % 2 === 0;
+                                let val, styleKey;
+
+                                if (isTypeX) {
+                                    val = ptrX < dataX.length ? dataX[ptrX] : "";
+                                    styleKey = 'x';
+                                    ptrX++; // Increment pointer
+                                } else {
+                                    val = ptrY < dataY.length ? dataY[ptrY] : "";
+                                    styleKey = 'y';
+                                    ptrY++; // Increment pointer
+                                }
+                                
+                                cell.value = val;
+                                cell.font = { color: styles[styleKey].color, size: styles[styleKey].size };
+                                cell.border = allBorders;
+                                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                            }
+                        }
+                        // --- End Sheet Generation Logic ---
+
+                        sheetCount++;
+                        // Loop will check condition (ptrX < dataX.length || ptrY < dataY.length) again
+                    }
+
+                    // Save File
                     const buffer = await wb.xlsx.writeBuffer();
                     const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
                     saveAs(blob, "matrix_output.xlsx");
@@ -529,7 +677,6 @@
 
             } catch (err) {
                 console.error(err);
-                // MODIFIED: Use custom alert modal
                 showModal("Error processing files. Check console for details.");
                 statusEl.textContent = "Error";
                 generateBtn.disabled = false;
@@ -572,8 +719,6 @@
         }
 
         // Replace native alert
-        // This is a simple override. For a production app, this is not recommended,
-        // but for this tool it prevents the iframe issue.
         window.alert = showModal;
 
     </script>
