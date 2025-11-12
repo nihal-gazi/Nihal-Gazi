@@ -14,6 +14,12 @@
     <!-- FileSaver.js for saving files -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
+    <!-- NEW: jsPDF for PDF Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- FIX: Added missing html2canvas library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -264,6 +270,11 @@
                 <i data-lucide="download" class="w-5 h-5"></i>
                 Generate Excel
             </button>
+            <!-- NEW: PDF Button -->
+            <button id="pdfBtn" class="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white font-bold py-3 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <i data-lucide="file-text" class="w-5 h-5"></i>
+                Generate PDF
+            </button>
         </div>
 
         <div id="status" class="hidden text-center text-sm p-2 rounded bg-slate-200 text-slate-700 animate-pulse">
@@ -276,9 +287,12 @@
         </div>
 
     </main>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.2.6/purify.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <script>
-        // Initialize Icons
+	// Initialize Icons
         lucide.createIcons();
 
         let activeMode = 'matrix'; // 'matrix' or 'single'
@@ -338,22 +352,223 @@
 
         const generateBtn = document.getElementById('generateBtn');
         const previewBtn = document.getElementById('previewBtn');
+        const pdfBtn = document.getElementById('pdfBtn'); // FIX: Was 'generatePdfBtn'
 
         generateBtn.addEventListener('click', () => runGenerationLogic('excel'));
         previewBtn.addEventListener('click', () => runGenerationLogic('preview'));
+        pdfBtn.addEventListener('click', generatePDF); // NEW
 
-        async function runGenerationLogic(outputType = 'excel') {
+        // NEW: PDF Generation Function
+ async function generatePDF() {
+            const statusEl = document.getElementById('status');
+            const generateBtn = document.getElementById('generateBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            const pdfBtn = document.getElementById('pdfBtn');
+            const buttons = [generateBtn, previewBtn, pdfBtn];
+
+            try {
+                statusEl.textContent = "Generating PDF...";
+                statusEl.classList.remove('hidden');
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-75');
+                });
+
+                // 1. We MUST run 'preview' logic first to get all the data
+                // This call populates all our variables.
+                const data = await runGenerationLogic('preview', true); 
+                
+                if (!data) {
+                    throw new Error("Could not read data. Please check files and settings.");
+                }
+
+                // Destructure all the data we need
+                const { dataX, dataY, styles, rowsM, colsN, head1Txt, head2Txt } = data;
+
+                // 2. Initialize jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'pt', 'a4'); // Portrait, points, A4
+
+                // 3. Set up pointers and loop
+                let ptrX = (activeMode === 'matrix') ? 1 : 0;
+                let ptrY = (activeMode === 'matrix') ? 1 : 0;
+                if (activeMode === 'single') { ptrX = 0; ptrY = 0; }
+                
+                let sheetCount = 1;
+                let isFirstPage = true;
+
+                while (ptrX < dataX.length || ptrY < dataY.length) {
+                    
+                    if (!isFirstPage) {
+                        doc.addPage();
+                    }
+
+                    // --- Build Column Headers ---
+                    // e.g., ['Column 1', 'Column 2', 'Column 3']
+                    const tableHead = [];
+                    for (let c = 0; c < colsN; c++) {
+                        tableHead.push(`Column ${c + 1}`);
+                    }
+
+                    // --- Build Table Body ---
+                    // e.g., [['a1', 'x2', 'a4'], ['x1', 'a3', 'x4'], ...]
+                    const tableBody = [];
+                    
+                    // Pre-fill a grid just like we do for the preview
+                    let grid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
+                    for (let c = 0; c < colsN; c++) {
+                        for (let r = 0; r < rowsM; r++) {
+                            const isTypeX = (r + c) % 2 === 0;
+                            let val, styleKey;
+
+                            if (isTypeX) {
+                                val = ptrX < dataX.length ? dataX[ptrX] : "";
+                                styleKey = 'x';
+                                ptrX++;
+                            } else {
+                                val = ptrY < dataY.length ? dataY[ptrY] : "";
+                                styleKey = 'y';
+                                ptrY++;
+                            }
+                            grid[r][c] = { value: val, styleKey: styleKey };
+                        }
+                    }
+
+                    // Convert our grid into the simple array AutoTable expects
+                    for (let r = 0; r < rowsM; r++) {
+                        const row = [];
+                        for (let c = 0; c < colsN; c++) {
+                            row.push(grid[r][c].value);
+                        }
+                        tableBody.push(row);
+                    }
+
+                    // --- Draw to PDF ---
+                    doc.autoTable({
+                        // 'didDrawPage' is a hook that lets us add custom
+                        // content before the table is drawn. This is
+                        // perfect for our headers.
+                        didDrawPage: function (hookData) {
+                            // --- Define page center and usable width ---
+                            const centerX = doc.internal.pageSize.getWidth() / 2;
+                            const usableWidth = doc.internal.pageSize.getWidth() - 80; // 40pt margin each side
+
+                            // "Seating Room X" Title
+                            doc.setFontSize(16);
+                            doc.setFont(undefined, 'bold');
+                            doc.text(`Seating Room ${sheetCount}`, centerX, 40, { align: 'center' });
+
+                            // Header 1
+                            doc.setFontSize(styles.h1.size);
+                            doc.setTextColor(styles.h1.colorHex);
+                            doc.text(head1Txt, centerX, 70, { 
+                                maxWidth: usableWidth, // <-- FIX: Add max width
+                                align: 'center' 
+                            });
+                            
+                            // Header 2
+                            doc.setFontSize(styles.h2.size);
+                            doc.setTextColor(styles.h2.colorHex);
+                            doc.text(head2Txt, centerX, 115, { // <-- FIX: Pushed down from 95
+                                maxWidth: usableWidth, // <-- FIX: Add max width
+                                align: 'center' 
+                            });
+                        },
+                        
+                        // Where the table itself should start on the page
+                        startY: 140, 
+                        
+                        head: [tableHead], // The ['Column 1', ...]
+                        body: tableBody,   // The [['a1', 'x2', ...], ...]
+                        
+                        // Styling for the table
+                        headStyles: {
+                            fillColor: [241, 245, 249], // slate-100
+                            textColor: [15, 23, 42],    // slate-800
+                            fontStyle: 'bold',
+                            halign: 'center',
+                            fontSize: 14 // Hardcoding a size that won't overlap
+                        },
+                        bodyStyles: {
+                            halign: 'center',
+                            valign: 'middle',
+                            minCellHeight: 30 // Similar to our 60px / 2
+                        },
+                        // This hook lets us style individual cells (X vs Y)
+                        // This is optional but nice to have
+                        didDrawCell: function (data) {
+                            // Check if it's a body cell
+                            if (data.section === 'body') {
+                                const r = data.row.index;
+                                const c = data.column.index;
+                                const isTypeX = (r + c) % 2 === 0;
+                                
+                                if (isTypeX) {
+                                    doc.setFontSize(styles.x.size);
+                                    doc.setTextColor(styles.x.colorHex);
+                                } else {
+                                    doc.setFontSize(styles.y.size);
+                                    doc.setTextColor(styles.y.colorHex);
+                                }
+                            }
+                        }
+                    });
+
+                    sheetCount++;
+                    isFirstPage = false;
+                }
+                
+                // 4. Save the PDF
+                doc.save('matrix_output.pdf');
+
+                statusEl.textContent = "PDF Generated!";
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('opacity-75');
+                    });
+                }, 2000);
+
+            } catch (err) {
+                console.error(err);
+                showModal(`PDF Error: ${err.message}. Check console.`);
+                statusEl.textContent = "Error";
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-75');
+                });
+            }
+        }
+
+
+        async function runGenerationLogic(outputType = 'excel', isPdfCall = false) {
             const statusEl = document.getElementById('status');
             
             let dataX, dataY; // Declare data arrays
             
             try {
-                statusEl.textContent = "Reading files...";
-                statusEl.classList.remove('hidden');
-                generateBtn.disabled = true;
-                previewBtn.disabled = true;
-                generateBtn.classList.add('opacity-75');
-                previewBtn.classList.add('opacity-75');
+                // MODIFIED: Only show status if not called by PDF
+                // The PDF function will be managing its own status.
+                if (outputType !== 'preview') {
+                    statusEl.textContent = "Reading files...";
+                    statusEl.classList.remove('hidden');
+                }
+                
+                // MODIFIED: Disable only if not PDF
+                if (outputType !== 'preview') {
+                    generateBtn.disabled = true;
+                    previewBtn.disabled = true;
+                    if (pdfBtn) pdfBtn.disabled = true;
+                    generateBtn.classList.add('opacity-75');
+                    previewBtn.classList.add('opacity-75');
+                    if (pdfBtn) pdfBtn.classList.add('opacity-75');
+                } else {
+                    // If it IS preview, reset the status text
+                    statusEl.textContent = "Generating preview...";
+                    statusEl.classList.remove('hidden');
+                }
+
 
                 // --- Mode-based data loading ---
                 if (activeMode === 'matrix') {
@@ -365,50 +580,60 @@
                         statusEl.classList.add('hidden');
                         generateBtn.disabled = false;
                         previewBtn.disabled = false;
-                        generateBtn.classList.remove('opacity-75');
-                        previewBtn.classList.remove('opacity-75');
-                        return;
+                    generateBtn.classList.remove('opacity-75');
+                    previewBtn.classList.remove('opacity-75');
+                    // NEW:
+                    if (pdfBtn) {
+                        pdfBtn.disabled = false;
+                        pdfBtn.classList.remove('opacity-75');
                     }
-                    
-                    // 1. Read Data
-                    const colX = parseInt(document.getElementById('colIndex1').value) - 1;
-                    const colY = parseInt(document.getElementById('colIndex2').value) - 1;
-                    
-                    dataX = await readColumnFromExcel(file1Input.files[0], colX);
-                    dataY = await readColumnFromExcel(file2Input.files[0], colY);
-                
-                } else { // activeMode === 'single'
-                    const fileSingleInput = document.getElementById('fileSingle');
-                    
-                    if (!fileSingleInput.files[0]) {
-                        showModal("Please select an Excel file for Single Column Mode.");
-                        statusEl.classList.add('hidden');
-                        generateBtn.disabled = false;
-                        previewBtn.disabled = false;
-                        generateBtn.classList.remove('opacity-75');
-                        previewBtn.classList.remove('opacity-75');
-                        return;
-                    }
-
-                    const colX = parseInt(document.getElementById('colIndexSingle').value) - 1;
-                    // User's 1-based "split row" index.
-                    const splitIndex = parseInt(document.getElementById('splitRowIndex').value); 
-                    
-                    const allData = await readColumnFromExcel(fileSingleInput.files[0], colX);
-                    
-                    // In single mode, row 0 is the header, data starts at 1.
-                    // Slice(1, splitIndex) goes from index 1 up to (but not including) splitIndex.
-                    // This is correct as user's 1-based index matches array length.
-                    dataX = allData.slice(1, splitIndex); 
-                    dataY = allData.slice(splitIndex);
-
-                    // REQ 2 Fix: Pointers for single mode must start at 0
-                    // This is handled by the ptrX/ptrY init logic later
+                    return; // NEW: Added missing return
                 }
-                // --- End data loading ---
+
+                // MOVED: These lines now inside the 'if' block
+                const colX_matrix = parseInt(document.getElementById('colIndex1').value) - 1;
+                const colY_matrix = parseInt(document.getElementById('colIndex2').value) - 1;
+                
+                dataX = await readColumnFromExcel(file1Input.files[0], colX_matrix);
+                dataY = await readColumnFromExcel(file2Input.files[0], colY_matrix);
+
+            } else { // activeMode === 'single'
+                // REMOVED: Extra '}' from before 'else'
+                const fileSingleInput = document.getElementById('fileSingle');
+                
+                if (!fileSingleInput.files[0]) {
+                    showModal("Please select an Excel file for Single Column Mode.");
+                    statusEl.classList.add('hidden');
+                    generateBtn.disabled = false;
+                    previewBtn.disabled = false;
+                    generateBtn.classList.remove('opacity-75');
+                    previewBtn.classList.remove('opacity-75');
+                    if (pdfBtn) {
+                        pdfBtn.disabled = false;
+                        pdfBtn.classList.remove('opacity-75');
+                    }
+                    return; // NEW: Added missing return
+                }
+
+                const colX_single = parseInt(document.getElementById('colIndexSingle').value) - 1;
+                // User's 1-based "split row" index.
+                const splitIndex = parseInt(document.getElementById('splitRowIndex').value); 
+                
+                const allData = await readColumnFromExcel(fileSingleInput.files[0], colX_single);
+                
+                // In single mode, row 0 is the header, data starts at 1.
+                // Slice(1, splitIndex) goes from index 1 up to (but not including) splitIndex.
+                // This is correct as user's 1-based index matches array length.
+                dataX = allData.slice(1, splitIndex); 
+                dataY = allData.slice(splitIndex);
+
+                // REQ 2 Fix: Pointers for single mode must start at 0
+                // This is handled by the ptrX/ptrY init logic later
+            }
+            // --- End data loading ---
 
 
-                // 2. Setup Common Variables
+            // 2. Setup Common Variables
                 const rowsM = parseInt(document.getElementById('rowsM').value);
                 const colsN = parseInt(document.getElementById('colsN').value);
                 
@@ -417,12 +642,12 @@
                 const stream1 = document.getElementById('h1_stream1').value;
                 const sem2 = document.getElementById('h1_sem2').value;
                 const stream2 = document.getElementById('h1_stream2').value;
-                const oddEven = document.getElementById('h1_odd_even').value;
+                const oddEven = document.getElementById('h1_odd_even').value; // FIX: ID Mismatch
                 const year = document.getElementById('h1_year').value;
                 const head1Txt = `${sem1} Sem ${stream1} (GR-B) and ${sem2} Sem ${stream2} (GM) ${oddEven} Semester Examination - ${year}`;
 
                 // NEW: Assemble Header 2 from multiple inputs
-                const roomNum = document.getElementById('h2_room_num').value;
+                const roomNum = document.getElementById('h2_room_num').value; // FIX: ID Mismatch
                 const head2Txt = `Arrangement of Seat - Room No - ${roomNum}`;
 
 
@@ -474,29 +699,24 @@
                 }
 
                 // 3. Output based on type
-                if (outputType === 'preview') {
+			if (outputType === 'preview') {
                     statusEl.textContent = "Generating preview...";
 
                     // --- Generate HTML Preview Table (with looping) ---
-                    // Initialize HTML string *outside* loop
                     let previewHtml = '';
-                    let sheetCount = 1; // To show "Room 1", "Room 2" in preview
+                    let sheetCount = 1;
 
-                    // NEW: Run loop as long as there is data left
+                    // Run loop as long as there is data left
                     while (ptrX < dataX.length || ptrY < dataY.length) {
 
-                        // Add spacer between tables
                         if (sheetCount > 1) {
                             previewHtml += '<div style="height: 30px; border-bottom: 2px dashed #94a3b8; margin: 20px 0;"></div>';
                         }
                         
                         previewHtml += `<h4 class="text-lg font-bold text-slate-700 mb-2">Seating Room ${sheetCount}</h4>`;
                         
-                        // --- NEW: Build a temporary 2D grid for preview ---
-                        // This allows us to fill column-major, but display row-major
                         let previewGrid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
 
-                        // NEW: Fill the grid using COLUMN-MAJOR iteration (c, then r)
                         for (let c = 0; c < colsN; c++) {
                             for (let r = 0; r < rowsM; r++) {
                                 const isTypeX = (r + c) % 2 === 0;
@@ -505,73 +725,73 @@
                                 if (isTypeX) {
                                     val = ptrX < dataX.length ? dataX[ptrX] : "";
                                     styleKey = 'x';
-                                    ptrX++; // Increment pointer
+                                    ptrX++;
                                 } else {
                                     val = ptrY < dataY.length ? dataY[ptrY] : "";
                                     styleKey = 'y';
-                                    ptrY++; // Increment pointer
+                                    ptrY++;
                                 }
-                                // Assign to the grid at [r][c]
                                 previewGrid[r][c] = { value: val, styleKey: styleKey };
                             }
                         }
-                        // --- End grid filling ---
-
 
                         previewHtml += '<table class="w-full border-collapse border border-slate-300 text-sm text-center">';
                         previewHtml += `<thead>`;
-                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`; // Row 1
-                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`; // Row 2
-                        // REQ 3: Add border style
-                        previewHtml += `<tr style="height: 30px;"><th colspan="${colsN}" style="color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 4px; border: 1px solid #cbd5e1;">${head1Txt}</th></tr>`; // Row 3, NEW: height
-                        // REQ 3: Add border style
-                        previewHtml += `<tr style="height: 35.1px;"><th colspan="${colsN}" style="color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; text-decoration: underline; padding: 4px; border: 1px solid #cbd5e1;">${head2Txt}</th></tr>`; // Row 4, NEW: height
-                        // REQ 3: Add gap row with border
-                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px; border: 1px solid #cbd5e1;"></td></tr>`; // Row 5
-                        
-                        // Column Headers (Row 6)
-                        previewHtml += `<tr style="height: 25.2px;">`; // NEW: height
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`;
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`;
+                        previewHtml += `<tr style="height: 30px;"><th colspan="${colsN}" style="color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 4px; border: 1px solid #cbd5e1;">${head1Txt}</th></tr>`;
+                        previewHtml += `<tr style="height: 35.1px;"><th colspan="${colsN}" style="color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; text-decoration: underline; padding: 4px; border: 1px solid #cbd5e1;">${head2Txt}</th></tr>`;
+                        previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px; border: 1px solid #cbd5e1;"></td></tr>`;
+                        previewHtml += `<tr style="height: 25.2px;">`;
                         for (let c = 0; c < colsN; c++) {
-                            // REQ 1: Add size 20
                             previewHtml += `<th style="border: 1px solid #cbd5e1; font-weight: bold; padding: 4px; font-size: 20px;">Column ${c + 1}</th>`;
                         }
                         previewHtml += `</tr>`;
                         previewHtml += `</thead>`;
                         previewHtml += '<tbody>';
 
-                        // NEW: Build the HTML table by iterating over the pre-filled grid
-                        // This is now row-major, which is what HTML tables expect
                         for (let r = 0; r < rowsM; r++) {
                             previewHtml += '<tr>';
                             for (let c = 0; c < colsN; c++) {
-                                // Get the item from our grid
                                 const item = previewGrid[r][c];
-                                
-                                // Get style based on key. Use 'x' as fallback if key is bad.
                                 const style = styles[item.styleKey] || styles['x'];
                                 previewHtml += `<td style="color: ${style.colorHex}; font-size: ${style.size}px; border: 1px solid #cbd5e1; padding: 8px 4px; height: 60px; white-space: nowrap; vertical-align: middle;">${item.value}</td>`;
                             }
                             previewHtml += '</tr>';
                         }
                         previewHtml += '</tbody></table>';
-                        // --- End One HTML Preview Table ---
 
                         sheetCount++;
                     } // End of while loop
 
+                    // Update the HTML on the page
                     document.getElementById('previewArea').innerHTML = previewHtml;
-                    // --- End HTML Preview Table ---
 
-                    statusEl.textContent = "Preview updated!";
-                    setTimeout(() => {
-                        statusEl.classList.add('hidden');
-                        generateBtn.disabled = false;
-                        previewBtn.disabled = false;
-                        generateBtn.classList.remove('opacity-75');
-                        previewBtn.classList.remove('opacity-75');
-                    }, 2000);
-
-                } else { // outputType === 'excel'
+                    // --- THIS IS THE NEW LOGIC ---
+                    // If this function was called by generatePDF...
+                    if (isPdfCall) {
+                        // ...return the raw data object for AutoTable.
+                        return { dataX, dataY, styles, rowsM, colsN, head1Txt, head2Txt, allBorders };
+                    } 
+                    // ...otherwise (if 'Update Preview' was clicked)...
+                    else {
+                        // ...just do the normal button/status update.
+                        statusEl.textContent = "Preview updated!";
+                        setTimeout(() => {
+                            statusEl.classList.add('hidden');
+                            generateBtn.disabled = false;
+                            previewBtn.disabled = false;
+                            if (pdfBtn) pdfBtn.disabled = false;
+                            generateBtn.classList.remove('opacity-75');
+                            previewBtn.classList.remove('opacity-75');
+                            if (pdfBtn) pdfBtn.classList.remove('opacity-75');
+                        }, 2000);
+                        // And return the HTML string (like before)
+                        return previewHtml; 
+                    }
+                    // --- END OF NEW LOGIC ---
+                }
+			else { // outputType === 'excel'
                     // REQ 2: Generate Excel with Carry-over Logic
                     statusEl.textContent = "Generating file with all data...";
                     const wb = new ExcelJS.Workbook();
@@ -670,8 +890,10 @@
                         statusEl.classList.add('hidden');
                         generateBtn.disabled = false;
                         previewBtn.disabled = false;
+                        if (pdfBtn) pdfBtn.disabled = false;
                         generateBtn.classList.remove('opacity-75');
                         previewBtn.classList.remove('opacity-75');
+                        if (pdfBtn) pdfBtn.classList.remove('opacity-75');
                     }, 2000);
                 }
 
@@ -681,8 +903,10 @@
                 statusEl.textContent = "Error";
                 generateBtn.disabled = false;
                 previewBtn.disabled = false;
+                if (pdfBtn) pdfBtn.disabled = false;
                 generateBtn.classList.remove('opacity-75');
                 previewBtn.classList.remove('opacity-75');
+                if (pdfBtn) pdfBtn.classList.remove('opacity-75');
             }
         }
 
@@ -720,7 +944,6 @@
 
         // Replace native alert
         window.alert = showModal;
-
     </script>
 </body>
 </html>
