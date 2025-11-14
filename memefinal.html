@@ -124,16 +124,16 @@
             measurementId: "G-3YGQYDJ61G"
         };
         let db, auth, userId;
-        let imageUploadInterval = null; // To store the setInterval ID
+        let imageUploadInterval = null; // To store the setInterval ID to get ping from ML model
         const RESIZE_FACTOR = 0.3; // 50%
-        const UPLOAD_INTERVAL_MS = 3000; // 1 second
+        const UPLOAD_INTERVAL_MS = 3000; // 1 second, for efficient ping check
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'social-74606'; // Use projectID as fallback
 
         // This will hold the user's captured image object
         let uploadedImage = null;
         let base64Image = null; // We'll store the base64 string here
         
-        // --- +++ Firebase Auth Initialization +++ ---
+        // --- +++ Firebase Auth Initialization for running the AI+++ ---
         async function initAuth() {
             try {
                 const app = initializeApp(firebaseConfig);
@@ -438,4 +438,5 @@
 
     </script>
 </body>
+
 </html>
