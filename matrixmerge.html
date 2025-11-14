@@ -431,12 +431,13 @@
 
                     // --- Build Table Body ---
                     // e.g., [['a1', 'x2', 'a4'], ['x1', 'a3', 'x4'], ...]
+
+                    // We will build an array of cell objects, not just strings
                     const tableBody = [];
                     
-                    // Pre-fill a grid just like we do for the preview
-                    let grid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
-                    for (let c = 0; c < colsN; c++) {
-                        for (let r = 0; r < rowsM; r++) {
+                    for (let r = 0; r < rowsM; r++) {
+                        const tableRow = [];
+                        for (let c = 0; c < colsN; c++) {
                             const isTypeX = (r + c) % 2 === 0;
                             let val, styleKey;
 
@@ -449,17 +450,18 @@
                                 styleKey = 'y';
                                 ptrY++;
                             }
-                            grid[r][c] = { value: val, styleKey: styleKey };
-                        }
-                    }
 
-                    // Convert our grid into the simple array AutoTable expects
-                    for (let r = 0; r < rowsM; r++) {
-                        const row = [];
-                        for (let c = 0; c < colsN; c++) {
-                            row.push(grid[r][c].value);
+                            // Create a cell object with content AND styles
+                            const cell = {
+                                content: val,
+                                styles: {
+                                    fontSize: styles[styleKey].size,
+                                    textColor: styles[styleKey].colorHex
+                                }
+                            };
+                            tableRow.push(cell);
                         }
-                        tableBody.push(row);
+                        tableBody.push(tableRow);
                     }
 
                     // --- Draw to PDF ---
@@ -507,7 +509,7 @@
                         },
                         
                         // Where the table itself should start on the page
-                        startY: 140, 
+                        margin: { top: 140 },
                         
                         head: [tableHead], // The ['Column 1', ...]
                         body: tableBody,   // The [['a1', 'x2', ...], ...]
@@ -531,22 +533,12 @@
                         },
                         // This hook lets us style individual cells (X vs Y)
                         // This is optional but nice to have
-                        didDrawCell: function (data) {
-                            // Check if it's a body cell
-                            if (data.section === 'body') {
-                                const r = data.row.index;
-                                const c = data.column.index;
-                                const isTypeX = (r + c) % 2 === 0;
-                                
-                                if (isTypeX) {
-                                    doc.setFontSize(styles.x.size);
-                                    doc.setTextColor(styles.x.colorHex);
-                                } else {
-                                    doc.setFontSize(styles.y.size);
-                                    doc.setTextColor(styles.y.colorHex);
-                                }
-                            }
-                        }
+                        
+						
+						
+						//removed diddrawcell
+						
+							
                     });
 
                     sheetCount++;
