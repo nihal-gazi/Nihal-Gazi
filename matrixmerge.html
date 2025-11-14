@@ -59,6 +59,7 @@
         </div>
 
         <!-- Step 1: File Inputs -->
+        <!-- Step 1: File Inputs -->
         <section class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
             <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span class="bg-blue-100 text-blue-600 w-6 h-6 rounded-full flex items-center justify-center text-xs">1</span>
@@ -69,11 +70,25 @@
             <div id="fileInputsMatrix" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium mb-1 text-slate-700">File 1 (Data X)</label>
-                    <input type="file" id="file1" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                    <!-- NEW: Wrapper div -->
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="file1" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                        <!-- NEW: Clear Button -->
+                        <button id="clearFile1Btn" class="flex-shrink-0 p-2 rounded-full text-slate-400 hover:bg-red-100 hover:text-red-600 transition-colors" title="Clear File 1">
+                            <i data-lucide="x-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1 text-slate-700">File 2 (Data Y)</label>
-                    <input type="file" id="file2" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"/>
+                    <!-- NEW: Wrapper div -->
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="file2" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"/>
+                        <!-- NEW: Clear Button -->
+                        <button id="clearFile2Btn" class="flex-shrink-0 p-2 rounded-full text-slate-400 hover:bg-red-100 hover:text-red-600 transition-colors" title="Clear File 2">
+                            <i data-lucide="x-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -81,7 +96,14 @@
             <div id="fileInputsSingle" class="space-y-4 hidden">
                 <div>
                     <label class="block text-sm font-medium mb-1 text-slate-700">Excel File</label>
-                    <input type="file" id="fileSingle" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                    <!-- NEW: Wrapper div -->
+                    <div class="flex items-center gap-2">
+                        <input type="file" id="fileSingle" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                        <!-- NEW: Clear Button -->
+                        <button id="clearFileSingleBtn" class="flex-shrink-0 p-2 rounded-full text-slate-400 hover:bg-red-100 hover:text-red-600 transition-colors" title="Clear File">
+                            <i data-lucide="x-circle" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -316,6 +338,24 @@
         const fileInputsSingle = document.getElementById('fileInputsSingle');
         const colInputsMatrix = document.getElementById('colInputsMatrix');
         const colInputsSingle = document.getElementById('colInputsSingle');
+		
+		var file1Input = document.getElementById('file1');
+        var file2Input = document.getElementById('file2');
+		var fileSingleInput = document.getElementById('fileSingle');
+		
+		
+		document.getElementById('clearFile1Btn').addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent any form submission
+            file1Input.value = ''; // This clears the file input
+        });
+        document.getElementById('clearFile2Btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            file2Input.value = '';
+        });
+        document.getElementById('clearFileSingleBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            fileSingleInput.value = '';
+        });
 
         modeMatrixBtn.addEventListener('click', () => {
             activeMode = 'matrix';
@@ -340,6 +380,8 @@
             fileInputsMatrix.classList.add('hidden');
             colInputsMatrix.classList.add('hidden');
         });
+		
+
         // --- End Mode Toggles ---
 
 
@@ -599,8 +641,8 @@
 
                 // --- Mode-based data loading ---
                 if (activeMode === 'matrix') {
-                    const file1Input = document.getElementById('file1');
-                    const file2Input = document.getElementById('file2');
+                    file1Input = document.getElementById('file1');
+                    file2Input = document.getElementById('file2');
 
                     if (!file1Input.files[0] || !file2Input.files[0]) {
                         showModal("Please select both Excel files for Matrix Mode.");
@@ -626,7 +668,7 @@
 
             } else { // activeMode === 'single'
                 // REMOVED: Extra '}' from before 'else'
-                const fileSingleInput = document.getElementById('fileSingle');
+                fileSingleInput = document.getElementById('fileSingle');
                 
                 if (!fileSingleInput.files[0]) {
                     showModal("Please select an Excel file for Single Column Mode.");
