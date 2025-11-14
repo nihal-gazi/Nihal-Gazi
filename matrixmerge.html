@@ -571,7 +571,8 @@
                             valign: 'middle',
                             minCellHeight: 30, // Similar to our 60px / 2
 							lineColor: [100, 116, 139], // A gray slate border
-                            lineWidth: 0.5
+                            lineWidth: 0.5,
+							fontStyle: 'bold'
                         },
                         // This hook lets us style individual cells (X vs Y)
                         // This is optional but nice to have
@@ -847,7 +848,7 @@
                             for (let c = 0; c < colsN; c++) {
                                 const item = previewGrid[r][c];
                                 const style = styles[item.styleKey] || styles['x'];
-                                previewHtml += `<td style="color: ${style.colorHex}; font-size: ${style.size}px; border: 1px solid #cbd5e1; padding: 8px 4px; height: 60px; white-space: nowrap; vertical-align: middle;">${item.value}</td>`;
+                                previewHtml += `<td style="color: ${style.colorHex}; font-size: ${style.size}px; border: 1px solid #cbd5e1; padding: 8px 4px; height: 60px; white-space: nowrap; vertical-align: middle;"><b>${item.value}</b></td>`;
                             }
                             previewHtml += '</tr>';
                         }
@@ -974,7 +975,7 @@
                                 }
                                 
                                 cell.value = val;
-                                cell.font = { color: styles[styleKey].color, size: styles[styleKey].size };
+                                cell.font = { color: styles[styleKey].color, size: styles[styleKey].size , bold: true};
                                 cell.border = allBorders;
                                 cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true};
                             }
