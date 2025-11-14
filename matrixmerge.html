@@ -136,7 +136,7 @@
                             </select>
                             <span class="text-sm text-slate-700">Sem</span>
                             <input type="text" id="h1_stream1" placeholder="Stream" class="flex-1 p-2 border rounded-lg bg-white min-w-[100px]">
-                            <span class="text-sm text-slate-700">(GR-B) and</span>
+                            <span class="text-sm text-slate-700"> and</span>
                         </div>
                         <!-- Row 2: Sem 2 Stream 2 -->
                         <div class="flex flex-wrap items-center gap-2">
@@ -148,7 +148,7 @@
                             </select>
                             <span class="text-sm text-slate-700">Sem</span>
                             <input type="text" id="h1_stream2" placeholder="Stream" class="flex-1 p-2 border rounded-lg bg-white min-w-[100px]">
-                            <span class="text-sm text-slate-700">(GM)</span>
+                            <span class="text-sm text-slate-700"></span>
                         </div>
                         <!-- Row 3: Exam Year -->
                         <div class="flex flex-wrap items-center gap-2">
@@ -169,6 +169,17 @@
                     </div>
                 </div>
             </div>
+			
+			
+			
+			<div class="flex items-center gap-3 p-3 border rounded-lg bg-slate-50">
+				<input type="checkbox" id="autoIncrementRoom" class="h-5 w-5 rounded text-blue-600 focus:ring-blue-500 border-slate-300">
+				<label for="autoIncrementRoom" class="text-sm font-medium text-slate-700">
+					Auto-increment sub-room number (e.g., 3.1, 3.2...)
+				</label>
+			</div>
+
+			<br>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -358,13 +369,16 @@
         previewBtn.addEventListener('click', () => runGenerationLogic('preview'));
         pdfBtn.addEventListener('click', generatePDF); // NEW
 
-        // NEW: PDF Generation Function
+        // PDF Generation Function
  async function generatePDF() {
             const statusEl = document.getElementById('status');
             const generateBtn = document.getElementById('generateBtn');
             const previewBtn = document.getElementById('previewBtn');
             const pdfBtn = document.getElementById('pdfBtn');
+			var room_increment = document.getElementById("autoIncrementRoom").checked;
             const buttons = [generateBtn, previewBtn, pdfBtn];
+			
+			
 
             try {
                 statusEl.textContent = "Generating PDF...";
@@ -384,15 +398,20 @@
 
                 // Destructure all the data we need
                 const { dataX, dataY, styles, rowsM, colsN, head1Txt, head2Txt } = data;
+				var room_data = head2Txt.split(/\./);
+				var room_prefix = room_data[0];
+				var room_suffix = room_data[1];
 
                 // 2. Initialize jsPDF
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'pt', 'a4'); // Portrait, points, A4
+                const doc = new jsPDF('l', 'pt', 'a4'); // Portrait, points, A4
 
                 // 3. Set up pointers and loop
                 let ptrX = (activeMode === 'matrix') ? 1 : 0;
                 let ptrY = (activeMode === 'matrix') ? 1 : 0;
                 if (activeMode === 'single') { ptrX = 0; ptrY = 0; }
+				
+				
                 
                 let sheetCount = 1;
                 let isFirstPage = true;
@@ -444,6 +463,18 @@
                     }
 
                     // --- Draw to PDF ---
+					
+					
+					
+					var head2Txt_pdf = `Arrangement of Seat - Room No - ${room_prefix}.${room_suffix}`;
+					
+					// lol...just increase cuz thats what was told
+					if(room_increment){
+						room_suffix++;
+					}
+					
+					
+					
                     doc.autoTable({
                         // 'didDrawPage' is a hook that lets us add custom
                         // content before the table is drawn. This is
@@ -469,7 +500,7 @@
                             // Header 2
                             doc.setFontSize(styles.h2.size);
                             doc.setTextColor(styles.h2.colorHex);
-                            doc.text(head2Txt, centerX, 115, { // <-- FIX: Pushed down from 95
+                            doc.text(head2Txt_pdf, centerX, 115, { // <-- FIX: Pushed down from 95
                                 maxWidth: usableWidth, // <-- FIX: Add max width
                                 align: 'center' 
                             });
@@ -487,12 +518,16 @@
                             textColor: [15, 23, 42],    // slate-800
                             fontStyle: 'bold',
                             halign: 'center',
-                            fontSize: 14 // Hardcoding a size that won't overlap
+                            fontSize: 14, // Hardcoding a size that won't overlap
+							lineColor: [100, 116, 139], // A gray slate border
+                            lineWidth: 0.5
                         },
                         bodyStyles: {
                             halign: 'center',
                             valign: 'middle',
-                            minCellHeight: 30 // Similar to our 60px / 2
+                            minCellHeight: 30, // Similar to our 60px / 2
+							lineColor: [100, 116, 139], // A gray slate border
+                            lineWidth: 0.5
                         },
                         // This hook lets us style individual cells (X vs Y)
                         // This is optional but nice to have
@@ -637,18 +672,26 @@
                 const rowsM = parseInt(document.getElementById('rowsM').value);
                 const colsN = parseInt(document.getElementById('colsN').value);
                 
-                // NEW: Assemble Header 1 from multiple inputs
+                // Assemble Header 1 from multiple inputs
                 const sem1 = document.getElementById('h1_sem1').value;
                 const stream1 = document.getElementById('h1_stream1').value;
                 const sem2 = document.getElementById('h1_sem2').value;
                 const stream2 = document.getElementById('h1_stream2').value;
-                const oddEven = document.getElementById('h1_odd_even').value; // FIX: ID Mismatch
+                const oddEven = document.getElementById('h1_odd_even').value; 
                 const year = document.getElementById('h1_year').value;
-                const head1Txt = `${sem1} Sem ${stream1} (GR-B) and ${sem2} Sem ${stream2} (GM) ${oddEven} Semester Examination - ${year}`;
+				var room_increment = document.getElementById("autoIncrementRoom").checked;
+                const head1Txt = `${sem1} Sem ${stream1} and ${sem2} Sem ${stream2} ${oddEven} Semester Examination - ${year}`;
 
-                // NEW: Assemble Header 2 from multiple inputs
-                const roomNum = document.getElementById('h2_room_num').value; // FIX: ID Mismatch
-                const head2Txt = `Arrangement of Seat - Room No - ${roomNum}`;
+                // Assemble Header 2 from multiple inputs
+                const roomNum = document.getElementById('h2_room_num').value; 
+				
+				var room_data = roomNum.split(/\./);
+				var room_prefix = room_data[0];
+				var room_suffix = room_data[1];
+				// console.log(room_data)
+				
+                var head2Txt = roomNum + "";
+				
 
 
                 // Styles
@@ -734,7 +777,22 @@
                                 previewGrid[r][c] = { value: val, styleKey: styleKey };
                             }
                         }
+						
+						//only increase room suffix, as no other instruction was given lol
+						console.log(room_increment);
+						  
+						
+						var head2Txt = `Arrangement of Seat - Room No - ${room_prefix}.${room_suffix}`;
+						
+						
+						
+						console.log(head2Txt);	
+						
+						if(room_increment){
+							room_suffix++;
+						}
 
+						
                         previewHtml += '<table class="w-full border-collapse border border-slate-300 text-sm text-center">';
                         previewHtml += `<thead>`;
                         previewHtml += `<tr><td colspan="${colsN}" style="padding: 4px;"></td></tr>`;
@@ -771,6 +829,7 @@
                     // If this function was called by generatePDF...
                     if (isPdfCall) {
                         // ...return the raw data object for AutoTable.
+						head2Txt = roomNum + "";
                         return { dataX, dataY, styles, rowsM, colsN, head1Txt, head2Txt, allBorders };
                     } 
                     // ...otherwise (if 'Update Preview' was clicked)...
@@ -804,8 +863,20 @@
 
                     let sheetCount = 1;
                     // Run loop as long as there is data left in EITHER array
+					
+					room_data = head2Txt.split(/\./);
+					room_prefix = room_data[0];
+					room_suffix = room_data[1];
+					
                     while (ptrX < dataX.length || ptrY < dataY.length) {
                         const ws = wb.addWorksheet(`Matrix Result ${sheetCount}`);
+
+						head2Txt = `Arrangement of Seat - Room No - ${room_prefix}.${room_suffix}`;
+
+						// lol only suffix inc, cuz thats what we r told
+						if(room_increment){
+							room_suffix++;
+						}
                         
                         // --- Start Sheet Generation Logic ---
                         // Copied from preview logic
@@ -871,7 +942,7 @@
                                 cell.value = val;
                                 cell.font = { color: styles[styleKey].color, size: styles[styleKey].size };
                                 cell.border = allBorders;
-                                cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true};
                             }
                         }
                         // --- End Sheet Generation Logic ---
