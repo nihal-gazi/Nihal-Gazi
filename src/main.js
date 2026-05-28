@@ -75,9 +75,11 @@ function cleanUpActiveView() {
 function handleRoute() {
   cleanUpActiveView();
 
-  const hash = window.location.hash || '#/';
+  const path = window.location.pathname || '/';
   const container = document.getElementById('scroll-container');
   if (!container) return;
+
+  const isHome = path === '/' || path === '/home' || path.endsWith('/index.html');
 
   // Toggle active class on Utopian Nav links
   const navItems = document.querySelectorAll('#nav-list li');
@@ -85,14 +87,14 @@ function handleRoute() {
     item.classList.remove('active');
     const text = item.textContent.trim().toLowerCase();
     
-    if (hash === '#/' || hash === '#/home') {
+    if (isHome) {
       if (text === 'home') item.classList.add('active');
     } else {
-      if (hash === '#/' + text) item.classList.add('active');
+      if (path === '/' + text || path.endsWith('/' + text)) item.classList.add('active');
     }
   });
 
-  if (hash === '#/' || hash === '#/home') {
+  if (isHome) {
     // 1. Mount Home Sections
     container.innerHTML = topSection + beyondSection + automationSection + towardsSection + theoreticalSection + limitSection + excellenceSection;
 
@@ -112,7 +114,7 @@ function handleRoute() {
 
     // 4. Ignite
     loop.start();
-  } else if (hash === '#/about') {
+  } else if (path === '/about' || path.endsWith('/about')) {
     container.innerHTML = aboutSection;
     
     // Dynamically calculate age based on DOB: November 9, 2006
@@ -165,33 +167,34 @@ function handleRoute() {
       }, null, 2);
       document.head.appendChild(script);
     }
-  } else if (hash === '#/projects') {
+  } else if (path === '/projects' || path.endsWith('/projects')) {
     container.innerHTML = projectsSection;
-  } else if (hash === '#/honors') {
+  } else if (path === '/honors' || path.endsWith('/honors')) {
     container.innerHTML = honorsSection;
-  } else if (hash === '#/secret') {
+  } else if (path === '/secret' || path.endsWith('/secret')) {
     document.body.style.overflow = 'hidden';
     container.innerHTML = secretSection;
     runSecretTimeline();
   } else {
     // Standard fallback route
-    window.location.hash = '#/';
+    window.history.replaceState(null, '', '/');
+    handleRoute();
   }
 }
 
 // 3. Bind routing events
-window.addEventListener('hashchange', handleRoute);
+window.addEventListener('popstate', handleRoute);
 window.addEventListener('DOMContentLoaded', handleRoute);
 
-// 4. Bind navbar item clicks to trigger hash routing
+// 4. Bind navbar item clicks to trigger history routing
 const navItems = document.querySelectorAll('#nav-list li');
 navItems.forEach(item => {
   item.addEventListener('click', () => {
     const route = item.textContent.trim().toLowerCase();
-    if (route === 'home') {
-      window.location.hash = '#/home';
-    } else {
-      window.location.hash = '#/' + route;
+    const targetPath = route === 'home' ? '/' : '/' + route;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState(null, '', targetPath);
+      handleRoute();
     }
   });
 });
