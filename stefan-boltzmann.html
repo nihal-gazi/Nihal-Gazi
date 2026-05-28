@@ -1,0 +1,261 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stefan-Boltzmann Law Simulator</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --secondary: #64748b;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --radius: 2rem;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: var(--bg); color: var(--secondary); padding: 2rem; }
+    .container { max-width: 900px; margin: auto; display: grid; gap: 2rem; }
+    .card { background: var(--card); border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    h1 { color: var(--primary); margin-bottom: 1rem; font-size: 1.75rem; }
+    .controls { display: grid; gap: 1rem; }
+    .control { display: flex; justify-content: space-between; align-items: center; }
+    .control input[type=range] { flex: 1; margin: 0 1rem; }
+    button { background: var(--primary); color: #fff; border: none; padding: 0.5rem 1rem; border-radius: var(--radius); cursor: pointer; font-size: 1rem; }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .display { text-align: center; }
+    .display .value { font-size: 2.5rem; color: var(--primary); }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; }
+    th { background: var(--primary); color: #fff; }
+    #chart { width: 100%; height: 300px; margin-top: 1rem; }
+    #stopwatch { font-size: 1.5rem; color: var(--primary); }
+	#rateofchange {visibility: hidden}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Stefan-Boltzmann Law Simulator</h1>
+      <div class="controls">
+        <div class="control">
+          <label for="waterTemp">Water Temp (°C): <span id="waterTempVal">35</span></label>
+          <input type="range" id="waterTemp" min="0" max="200" value="35">
+        </div>
+        <div class="control">
+          <label for="surroundingTemp">Surrounding Temp (°C): <span id="surroundingTempVal">30</span></label>
+          <input type="range" id="surroundingTemp" min="-50" max="100" value="30">
+        </div>
+        <div class="control">
+          <label for="mass">Mass of Disc (g): <span id="massVal">5</span></label>
+          <input type="range" id="mass" min="1" max="200" value="5">
+        </div>
+        <div class="control">
+          <label for="radius">Radius of Disc (cm): <span id="radiusVal">1</span></label>
+          <input type="range" id="radius" min="0.5" max="5" step="0.1" value="1">
+        </div>
+        <div class="control">
+          <button id="startBtn">Start</button>
+          <button id="pauseBtn" disabled>Pause</button>
+          <button id="resetBtn" disabled>Reset</button>
+          <button id="recordBtn" disabled>Record</button>
+        </div>
+      </div>
+    </div>
+    <div class="card display">
+      <p>Current Disc Temp: <span class="value" id="currentDiscTemp">30.00</span> °C</p>
+		<div id="rateofchange"><p>Rate of Change (dT/dt): <span class="value" id="rateVal">0.00000</span> °C/s</p></div>
+      <p>Time Elapsed (Virtual): <span id="stopwatch">00:00</span></p>
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Sl No</th>
+            <th>Time (s)</th>
+            <th>Disc Temp (°C)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // --- Physical Constants ---
+    const STEFAN_BOLTZMANN_CONSTANT = 5.670374419e-8; // W / (m^2 * K^4)
+    const SPECIFIC_HEAT_COPPER = 385; // J/(kg*K) or J/(kg*°C)
+
+    // --- Simulation Parameters ---
+    let waterTemp = 35, surroundingTemp = 30, mass_g = 5, radius_cm = 1;
+    let discTemp = surroundingTemp;
+    let constantRate = 0; // The rate of change, calculated once on start.
+    
+    let intervalId = null, stopwatchId = null, virtualSeconds = 0;
+    const records = [];
+    const speedFactor = 60; // 1 real second = 60 virtual seconds (1 virtual minute)
+	let steadyState_C = 0;
+
+    const elements = {
+      waterTemp: document.getElementById('waterTemp'), surroundingTemp: document.getElementById('surroundingTemp'), mass: document.getElementById('mass'), radius: document.getElementById('radius'),
+      waterTempVal: document.getElementById('waterTempVal'), surroundingTempVal: document.getElementById('surroundingTempVal'), massVal: document.getElementById('massVal'), radiusVal: document.getElementById('radiusVal'),
+      startBtn: document.getElementById('startBtn'), pauseBtn: document.getElementById('pauseBtn'), resetBtn: document.getElementById('resetBtn'), recordBtn: document.getElementById('recordBtn'),
+      rateVal: document.getElementById('rateVal'), currentDiscTemp: document.getElementById('currentDiscTemp'), stopwatch: document.getElementById('stopwatch'),
+      tableBody: document.querySelector('#dataTable tbody')
+    };
+
+    // Chart.js setup
+    const ctx = document.getElementById('chart').getContext('2d');
+    const lineChart = new Chart(ctx, {
+      type: 'line', data: { labels: [], datasets: [{ label: 'Disc Temp (°C)', data: [], borderColor: 'var(--primary)', backgroundColor: 'var(--primary)', fill: false, tension: 0.1 }] },
+      options: { scales: { x: { title: { display: true, text: 'Time (s)' } }, y: { title: { display: true, text: 'Temperature (°C)' } } } }
+    });
+    
+    // --- Helper & UI Functions ---
+    function formatTime(s) { const m = Math.floor(s / 60), sec = s % 60; return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`; }
+    
+    function startStopwatch() {
+        if (stopwatchId) return;
+        stopwatchId = setInterval(() => {
+            virtualSeconds += 1;
+            elements.stopwatch.textContent = formatTime(Math.floor(virtualSeconds));
+        }, 1000 / speedFactor);
+    }
+    
+    function resetStopwatch() { clearInterval(stopwatchId); stopwatchId = null; virtualSeconds = 0; elements.stopwatch.textContent = '00:00'; }
+
+    function updateLabels() {
+      elements.waterTempVal.textContent = waterTemp;
+      elements.surroundingTempVal.textContent = surroundingTemp;
+      elements.massVal.textContent = mass_g;
+      elements.radiusVal.textContent = radius_cm;
+      elements.currentDiscTemp.textContent = discTemp.toFixed(2);
+    }
+
+    /**
+     * Calculates a CONSTANT rate of change based on the initial parameters
+     * using the Stefan-Boltzmann Law.
+     * dT/dt = (σ * A * (T_water⁴ - T_surr⁴)) / (m * c)
+     * @returns {number} A constant rate of temperature change in °C/s
+     */
+    function computeConstantRate(T_water_C, T_surr_C, m_g, r_cm) {
+      const T_water_K = T_water_C + 273;
+      const T_surr_K = T_surr_C + 273;
+      const m_kg = m_g / 1000;
+      const r_m = r_cm / 100;
+	  
+	  let error = 3.5;
+
+      // Area calculation as per user request: pi * r^2
+      const area = Math.PI * Math.pow(r_m, 2);
+
+      // Stefan-Boltzmann Law for rate of change
+      // dQ/dt = σ * A * (T_water^4 - T_surr^4)
+      const heatFlow_Watts = STEFAN_BOLTZMANN_CONSTANT * area * (Math.pow(T_water_K - error, 4) - Math.pow((T_surr_K ), 4));
+
+      // dT/dt = (dQ/dt) / (m * c)
+      const rate = heatFlow_Watts / (m_kg * SPECIFIC_HEAT_COPPER);
+	  
+	  steadyState_C = Math.pow( -(((m_kg * SPECIFIC_HEAT_COPPER * rate)/(area * STEFAN_BOLTZMANN_CONSTANT)) - Math.pow(T_water_K , 4)), 1/4) - 273 
+	  console.log(rate)
+	  console.log("Steady State" , steadyState_C)
+	  
+      return rate;
+    }
+
+    // --- Simulation Core ---
+    function step() {
+      const dt = 0.1; // Real time step in seconds
+      const virtual_dt = dt * speedFactor; // Virtual time step
+      
+      // Use the pre-calculated constant rate. Do NOT recalculate.
+	  if( (discTemp+constantRate * virtual_dt) < steadyState_C ){
+			discTemp += constantRate * virtual_dt;
+	  }
+      
+      elements.currentDiscTemp.textContent = discTemp.toFixed(2);
+    }
+
+    function addRecord() {
+      const rec = { 
+        time: Math.floor(virtualSeconds),
+        discTemp: discTemp.toFixed(2),
+      };
+      records.push(rec);
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${records.length}</td><td>${rec.time}</td><td>${rec.discTemp}</td>`;
+      elements.tableBody.appendChild(row);
+
+      // Update Chart
+      lineChart.data.labels.push(rec.time);
+      lineChart.data.datasets[0].data.push(rec.discTemp);
+      lineChart.update();
+    }
+
+    // --- Event Listeners ---
+    elements.waterTemp.addEventListener('input', () => { waterTemp = +elements.waterTemp.value; updateLabels(); });
+    elements.surroundingTemp.addEventListener('input', () => { 
+        if (!intervalId) { // Only allow changing initial temp if reset
+            surroundingTemp = +elements.surroundingTemp.value;
+            discTemp = surroundingTemp;
+            updateLabels();
+        }
+    });
+    elements.mass.addEventListener('input', () => { mass_g = +elements.mass.value; updateLabels(); });
+    elements.radius.addEventListener('input', () => { radius_cm = +elements.radius.value; updateLabels(); });
+
+    elements.startBtn.onclick = () => {
+      elements.startBtn.disabled = true;
+      elements.pauseBtn.disabled = false;
+      elements.resetBtn.disabled = false;
+      elements.recordBtn.disabled = false;
+      [elements.waterTemp, elements.surroundingTemp, elements.mass, elements.radius].forEach(el => el.disabled = true);
+      
+      // Calculate the rate ONCE and store it. 
+      constantRate = computeConstantRate(waterTemp, surroundingTemp, mass_g, radius_cm);
+      elements.rateVal.textContent = constantRate.toFixed(5); // Display the constant rate
+
+      if (!intervalId) intervalId = setInterval(step, 100);
+      startStopwatch();
+    };
+
+    elements.pauseBtn.onclick = () => {
+      clearInterval(intervalId); intervalId = null;
+      clearInterval(stopwatchId); stopwatchId = null;
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+    };
+
+    elements.resetBtn.onclick = () => {
+      clearInterval(intervalId); intervalId = null;
+      resetStopwatch();
+      records.length = 0;
+      elements.tableBody.innerHTML = '';
+      
+      lineChart.data.labels = [];
+      lineChart.data.datasets[0].data = [];
+      lineChart.update();
+      
+      [elements.waterTemp, elements.surroundingTemp, elements.mass, elements.radius].forEach(el => el.disabled = false);
+      
+      waterTemp = +elements.waterTemp.value;
+      surroundingTemp = +elements.surroundingTemp.value;
+      mass_g = +elements.mass.value;
+      radius_cm = +elements.radius.value;
+      discTemp = surroundingTemp;
+      constantRate = 0;
+      
+      elements.rateVal.textContent = '0.00000';
+      updateLabels();
+      
+      elements.startBtn.disabled = false;
+      elements.pauseBtn.disabled = true;
+      elements.resetBtn.disabled = true;
+      elements.recordBtn.disabled = true;
+    };
+    
+    elements.recordBtn.onclick = addRecord;
+
+    updateLabels(); // Initial setup
+  </script>
+</body>
+</html>

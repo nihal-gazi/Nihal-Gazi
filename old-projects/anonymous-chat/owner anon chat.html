@@ -1,0 +1,322 @@
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<title>Chat Room</title>
+		<link rel="stylesheet" type="text/css" href="chat_style.css">
+		<link href='https://unpkg.com/css.gg@2.0.0/icons/css/arrow-right-o.css' rel='stylesheet'>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+		
+		
+	</head>
+	<body>
+		<h1>Anonymous Chat Room</h1>
+		
+		<div id="user_form">
+			<input type="text" id="username" placeholder="Type any username">
+			<button id="login" onclick="startChat()">Let's go!</button>
+			<br><br>
+			<p>Note: Your username should not contain any space.</p>
+		</div>
+		
+		
+		
+		
+	<center>
+		<div id="chat_view">
+
+			<div id="user_data">
+			
+			</div>
+
+<br>
+
+			<div id="chatDisplay">
+				<!-- Chat messages will be displayed here -->
+			</div>
+			<div id="message_form">
+				<textarea id="messageInput" oninput="auto_grow(this)" placeholder="Enter a message"></textarea>
+				<button id="send">
+				<center>
+					<svg
+					  viewBox="0 0 24 24"
+					  fill="none"
+					  xmlns="http://www.w3.org/2000/svg"
+					>
+					  <path
+						d="M12.0519 14.8285L13.4661 16.2427L17.7088 12L13.4661 7.7574L12.0519 9.17161L13.8804 11H6.34321V13H13.8803L12.0519 14.8285Z"
+						fill="currentColor"
+					  />
+					  <path
+						fill-rule="evenodd"
+						clip-rule="evenodd"
+						d="M19.7782 19.7782C24.0739 15.4824 24.0739 8.51759 19.7782 4.22183C15.4824 -0.0739417 8.51759 -0.0739417 4.22183 4.22183C-0.0739417 8.51759 -0.0739417 15.4824 4.22183 19.7782C8.51759 24.0739 15.4824 24.0739 19.7782 19.7782ZM18.364 18.364C21.8787 14.8492 21.8787 9.15076 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604C2.12132 9.15076 2.12132 14.8492 5.63604 18.364C9.15076 21.8787 14.8492 21.8787 18.364 18.364Z"
+						fill="currentColor"
+					  />
+					</svg>
+				</center>
+				</button>
+			</div>
+		</div>
+	</center>    
+	
+	<br>
+	<br>
+	<div id="about">
+	<h2>Features</h2>
+	<br>
+	<p><b>AI Image Generation:</b> Type "img_gen:" followed by your prompt. For ex- "img_gen:a cat" will generate an image of cat. Be patient if it is taking time. Don't worry, if nothing appears, as the image generator may fail to generate sometimes (however, it is rare).</p>
+	<br>
+	<p><b>Supports Mark-Down formatting:</b> You can type "*hello*" and that becomes "<i>hello</i>" or "**Hey!**" to write "<b>Hey!</b>". Use "# hi" or "## hi" or "### hi" to write Large Headings. And many more markdown features.</p>
+	<br>
+	<p><b>Shift+Enter to send message:</b> If you are on PC, type Shift+Enter to send message.</p>
+	
+	
+	
+	<br>
+	<br>
+	
+	<center><font size=2vh color=gray><i>Developed by Nihal Gazi</i></font></center>
+	
+	</div>
+
+		<!-- Firebase SDK scripts at the end of the body -->
+		
+		
+	<!-- Firebase SDK scripts -->
+	<script type="module">
+
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+		import { getDatabase , ref, set, child, get, onChildAdded, onChildChanged, onChildRemoved} from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+		
+		
+			// Initialize Firebase
+		const firebaseConfig = {
+			apiKey: "AIzaSyBo3U6qKN4a0rGOFGjK2Z_0ghZ9IfplqNo",
+			authDomain: "social-74606.firebaseapp.com",
+			databaseURL: "https://social-74606-default-rtdb.firebaseio.com",
+			projectId: "social-74606",
+			storageBucket: "social-74606.appspot.com",
+			messagingSenderId: "409425584439",
+			appId: "1:409425584439:web:aad7c6b3bd67c39e113ab2",
+			measurementId: "G-3YGQYDJ61G"
+		};
+		
+		const app = initializeApp(firebaseConfig);
+		const database = getDatabase(app);
+		const chatsRef = ref(database, 'chat');
+		const seedsRef = ref(database, 'chat_seed');
+		
+		
+		var test = true;
+		
+		
+		get_message();
+
+		var input = document.getElementById("messageInput");
+
+		input.addEventListener("keypress", function(event) {
+		  // If the user presses the "Enter" key on the keyboard
+		  if (event.key === "Enter" && event.shiftKey) {
+			console.log("Enter pressed");
+			// Cancel the default action, if needed
+			event.preventDefault();
+			// Trigger the button element with a click
+			document.getElementById("send").click();
+		  }
+		});
+
+		
+		var user_name = "";
+		document.getElementById('send').addEventListener("click", sendMessage);
+		export function sendMessage(){
+			let input_message = document.getElementById('messageInput').value;
+			if(input_message.trim()==""){
+			alert("Please enter a proper message");
+			}
+			else{
+			
+			if(input_message.includes("img_gen:")){
+				var prompt = input_message.split("img_gen:")[1];
+				var img_url = "https://image.pollinations.ai/prompt/"+encodeURI(prompt.replace("."," "))+"?width=500&height=500&nologo=true&seed="+generateSeed();
+				var img_holder = "<br><img  src=\""+img_url+"\"><br><p>"+prompt+"</p>";
+				send(img_holder);
+				console.log(img_url);
+				document.getElementById('messageInput').value = "";
+				auto_grow(document.getElementById("messageInput"));
+			}
+			else{
+				send(document.getElementById('messageInput').value);
+				document.getElementById('messageInput').value = "";
+				auto_grow(document.getElementById("messageInput"));
+				}
+				
+			}
+		}
+
+		// Send a message to the Realtime Database
+		function send(message) {
+		
+			user_name = document.getElementById('username').value;
+			
+			var modified_message = marked.parse(message).replace("\n","<br>");
+			console.log("modified message: "+modified_message);
+		
+			set(ref(database, 'chat'), {
+			name: user_name,
+			message: modified_message
+			});
+
+			
+			
+			set(ref(database, 'chat_seed'), {
+			seed: generateSeed()
+			});
+		}
+
+		// Set the list map on the HTML
+		function setListMap(messages) {
+		  const chatDisplay = document.getElementById('chatDisplay');
+		  chatDisplay.innerHTML = ''; // Clear previous messages
+		  messages.forEach(message => {
+			const messageElement = document.createElement('div');
+			messageElement.textContent = `${message.name}: ${message.message}`;
+			chatDisplay.appendChild(messageElement);
+		  });
+		}
+		
+		
+		function add_message(msg, user){
+		 var chat = document.getElementById('chatDisplay').innerHTML;
+		 chat = "<div id=\"msg\"><b>"+user+"</b>: "+msg+"</div><br>" + chat;
+		 document.getElementById('chatDisplay').innerHTML = chat;
+		}
+
+
+		
+		
+		onChildChanged(seedsRef, (data) => {
+		  var snapshot = data;
+			  if (snapshot.exists()) {
+				get_message();
+			  } else {
+				console.log("No data available in on ChildChanged");
+			  }
+		});
+		
+		var name = "";
+		var message = "";
+		
+		function get_message(){
+			//get name
+			get(child(chatsRef, 'name')).then((snapshot) => {
+			  if (snapshot.exists()) {
+				console.log("name:" + snapshot.val());
+				name = snapshot.val();
+			  } else {
+				console.log("No data available");
+			  }
+			}).catch((error) => {
+			  console.error(error);
+			  alert("Chatroom is at Full Capacity! Come back later.");
+			});
+			
+			
+			//get message
+			get(child(chatsRef, 'message')).then((snapshot) => {console.log(snapshot);
+			  if (snapshot.exists()) {
+				console.log("message:" + snapshot.val());
+				message = snapshot.val();
+				console.log("name: "+name+"; message: "+message);
+				add_message(message, name);
+			  } else {
+				console.log("No data available");
+			  }
+			}).catch((error) => {
+			  console.error(error);
+			});
+			
+			
+		}
+		
+		
+		function get_all_message(){
+		
+		get(child(fullChatRef, 'full_chat')).then((snapshot) => {
+			  if (snapshot.exists()) {
+				console.log("full chat: " + snapshot.val());
+				var prev_chat = snapshot.val();
+				document.getElementById('chatDisplay').innerHTML = prev_chat;
+			  } else {
+				console.log("No data available");
+			  }
+			}).catch((error) => {
+			  console.error(error);
+			  alert("Chatroom is at Full Capacity! Come back later.");
+			});
+		
+		}
+
+		// Function to generate random usernames
+		function generateRandomUsername() {
+		  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+		  let username = '';
+		  for (let i = 0; i < 8; i++) {
+			username += characters.charAt(Math.floor(Math.random() * characters.length));
+		  }
+		  return username;
+		}
+		
+		function generateSeed() {
+		  const characters = '0123456789';
+		  let seed = '';
+		  for (let i = 0; i < 25; i++) {
+			seed += characters.charAt(Math.floor(Math.random() * characters.length));
+		  }
+		  return seed;
+		}
+
+
+		
+	</script>
+
+	<script>
+	
+	document.getElementById('chat_view').style.display = 'none';
+	document.getElementById('about').style.display = 'none';
+	function startChat(){
+		if(false){
+			document.getElementById('username').value = "test_name";
+		}
+		
+		var user_name = document.getElementById('username').value + " <font color=\"red\">[Creator]</font>";
+		document.getElementById('username').value = user_name;
+
+		if(false){
+			alert("Please enter a proper username");
+		}
+		else{
+			document.getElementById('chat_view').style.display = 'block';
+			document.getElementById('user_form').style.display = 'none';
+			document.getElementById('about').style.display = 'block';
+			auto_grow(document.getElementById("messageInput"));
+			document.getElementById('user_data').innerHTML = "<b>Username : "+user_name+"</b>";
+			console.log(user_name);
+		}
+		
+		
+	}
+	
+	
+	function auto_grow(element) {
+		  element.style.height = "5px";
+		  element.style.height = (element.scrollHeight) + "px";
+		
+	}
+
+	
+
+
+
+	</script>
+	</body>
+	</html>
