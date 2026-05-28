@@ -546,7 +546,7 @@ This portfolio operates on that same frequency. The computational physics, the 1
         <!-- Center Aligned Footer -->
         <div class="blog-footer">
           <p class="conclusion-text font-body">
-            Sometimes, in life, we need to slow down, and just put a little <a href="${y.footer.arxivUrl}" target="_blank" rel="noopener noreferrer" class="hidden-attention-link">attention</a>. It's a good habit. And remember, every good habit, starts at <a href="/" class="home-router-link">home</a>.
+            Sometimes, in life, we need to slow down, and just put a little <a href="${y.footer.arxivUrl}" target="_blank" rel="noopener noreferrer" class="hidden-attention-link">attention</a>. It's a good habit. And remember, every good habit, starts at <a href="/home" class="home-router-link">home</a>.
           </p>
         </div>
         
