@@ -1,0 +1,21 @@
+:root {
+  --color-bg: #000000;
+  --color-text: #ffffff;
+  --color-text-muted: #888888;
+  --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Fallback until fonts load */
+  --font-geometric: 'Syncopate', sans-serif; /* Replace with your specific geometric font */
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  overflow-x: hidden; /* Prevents horizontal scroll from stretched text */
+  overscroll-behavior: none;
+}

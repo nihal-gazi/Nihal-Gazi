@@ -1,0 +1,453 @@
+/* The Nav is fixed and stays put while the page scrolls */
+#molecular-nav {
+  position: fixed;
+  top: 5vh;
+  left: 5vw;
+  z-index: 100;
+}
+
+#nav-bonds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible; /* Prevents lines from clipping if they swing out */
+  z-index: -1;       /* Puts the lines BEHIND the text */
+  pointer-events: none;
+}
+
+#nav-chain {
+  position: relative;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Aligns all text nodes centrally */
+  gap: 2rem;           /* Spaces them out evenly */
+  padding: 0;
+  margin: 0;
+}
+
+.nav-nodes {
+  list-style: none;
+  margin-top: 4rem;
+  margin-left: 4rem;
+}
+
+.nav-nodes li {
+  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  /* Transitions will be handled by JS physics, so no CSS transition here */
+}
+
+/* Organic Framing */
+#organic-frame {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none; /* Crucial: Lets clicks pass through to the menu/content */
+  z-index: 50;
+}
+
+.frame-img {
+  position: absolute;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.8));
+}
+
+.top-right {
+  top: -5%;
+  right: -5%;
+  width: 30vw;
+}
+
+.bottom-left {
+  bottom: -10%;
+  left: 20%;
+  width: 25vw;
+}
+
+/* Scroll Container & Sections */
+#scroll-container {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column; /* Stacks them vertically */
+}
+
+.viewport-section {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh; /* Ensures each section takes up exactly one screen */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  overflow-x: hidden;
+}
+
+.center-stage {
+  width: 40vw;
+  height: 60vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.hero-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(1.2);
+}
+
+/* Glassmorphic Utopian Navbar */
+#utopian-nav {
+  position: fixed;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(40, 40, 40, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+  padding: 0.75rem 2rem;
+  z-index: 1000;
+}
+
+#utopian-nav ul {
+  display: flex;
+  gap: 3rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#utopian-nav li {
+  font-family: var(--font-light);
+  font-size: 1.1rem;
+  color: #ffffff;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+#utopian-nav li:hover {
+  color: #a8e6cf; /* A subtle organic green hover */
+}
+
+/* ========================================================= */
+/* Academic Paper Component (LaTeX Style)                   */
+/* ========================================================= */
+.academic-paper {
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Times New Roman', Times, serif;
+  padding: 2.5rem 2rem;
+  border-radius: 4px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  text-align: left;
+  max-width: 520px;
+  width: 100%;
+  max-height: 62vh;
+  overflow-y: auto;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+  position: relative;
+  /* Premium LaTeX touch: soft warm-white academic paper tint */
+  background: linear-gradient(135deg, #fcfcf9 0%, #f7f7f3 100%);
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.academic-paper:hover {
+  transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 20px rgba(168, 230, 207, 0.15);
+}
+
+.academic-paper::-webkit-scrollbar {
+  width: 5px;
+}
+
+.academic-paper::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.academic-paper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ========================================================= */
+/* Image-based Academic Paper Container                      */
+/* ========================================================= */
+.academic-paper-image {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0a0a0a;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  max-width: 480px;
+  width: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+  position: relative;
+}
+
+.academic-paper-image:hover {
+  transform: translateY(-8px) rotateX(2deg) rotateY(-2deg);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 20px rgba(168, 230, 207, 0.15);
+}
+
+/* ========================================================= */
+/* RESPONSIVE DESIGN (Mobile & Tablets)                      */
+/* ========================================================= */
+@media (max-width: 768px) {
+  .viewport-section {
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+  }
+
+  /* Circular Glassmorphic Floating Nav & Hamburger Menu */
+  #utopian-nav {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    left: auto;
+    transform: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1000;
+  }
+  
+  #utopian-nav ul {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* Hamburger Icon */
+  .hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 22px;
+    height: 15px;
+    cursor: pointer;
+    z-index: 1001;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  .hamburger-icon span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background-color: #ffffff;
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  /* Morph open state */
+  #utopian-nav.open {
+    width: 180px;
+    height: 270px;
+    border-radius: 20px;
+    padding: 1.5rem;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+  }
+  
+  #utopian-nav.open .hamburger-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    left: auto;
+    transform: none;
+  }
+  
+  #utopian-nav.open .hamburger-icon span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  
+  #utopian-nav.open .hamburger-icon span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  #utopian-nav.open .hamburger-icon span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  #utopian-nav.open ul {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+    gap: 1.1rem;
+    margin-top: 2.2rem;
+    padding: 0;
+    opacity: 1;
+  }
+  
+  #utopian-nav.open ul li {
+    font-size: 1.1rem;
+    list-style: none;
+  }
+
+  /* Limit full width override to bleed perfectly to screen edges without horizontal scrollbars */
+  .limit-canvas-container {
+    width: calc(100% + 10vw) !important;
+    margin-left: -5vw !important;
+    margin-right: -5vw !important;
+  }
+  
+  #canvas-limit {
+    width: 100% !important;
+  }
+
+  /* Excellence Text Sizing Overrides to Prevent Bounds Overflows */
+  #excellence h2 {
+    font-size: clamp(2rem, 8vw, 4.2rem) !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  /* Top Section */
+  .top-grid-container {
+    grid-template-columns: 1fr !important; /* Stack items */
+    height: auto !important;
+    min-height: 100vh;
+    padding-top: 15vh;
+    padding-bottom: 10vh;
+    text-align: center;
+  }
+  
+  .intro-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center !important;
+    text-align: center !important;
+    padding-left: 0 !important;
+  }
+  
+  .intro-text > div {
+    justify-content: center;
+  }
+  
+  .hero-visuals {
+    height: 50vh !important;
+    margin-top: 2rem;
+  }
+
+  .aloe-bg {
+    opacity: 0.35 !important;
+    right: -10vw !important;
+    max-width: 55vw !important;
+    width: 55vw !important;
+    height: 65vh !important;
+  }
+
+  /* Beyond Section */
+  .beyond-flex-container {
+    gap: 2rem !important;
+  }
+  .proof-image {
+    flex: 1 1 100% !important; /* Force to take full width */
+  }
+
+  /* Automation Section */
+  .center-stage {
+    width: 90vw;
+    height: 40vh;
+  }
+
+  .academic-paper {
+    max-height: 50vh;
+    padding: 1.5rem 1.2rem;
+  }
+
+  /* Premium Scaling for Leaf Elements on Mobile Viewports */
+  img[src*="mint.png"] {
+    width: 18vw !important;
+    max-width: 140px !important;
+  }
+  
+  img[src*="bg-leaf"] {
+    width: 35vw !important;
+    max-width: 260px !important;
+  }
+  
+  img[src*="nature-bar"] {
+    width: 32vw !important;
+    max-width: 240px !important;
+  }
+  
+  /* Specific mobile overrides for leaves positioning */
+  #limit img[src*="mint.png"] {
+    left: -4vw !important;
+    width: 18vw !important;
+    max-width: 140px !important;
+  }
+  
+  #excellence img[src*="mint.png"] {
+    right: -3vw !important;
+    width: 18vw !important;
+    max-width: 140px !important;
+  }
+}
+
+/* ========================================================= */
+/* Responsive Minimalist Social Links                         */
+/* ========================================================= */
+.social-links {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  align-items: center;
+}
+
+.social-icon {
+  color: #888888;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.social-icon svg {
+  fill: currentColor;
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  transform: translateY(-3px);
+  color: #a8e6cf !important;
+  filter: drop-shadow(0 4px 8px rgba(168, 230, 207, 0.3));
+}
+
+.social-icon.hf-icon {
+  color: #cccccc;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.15));
+}
+
+.social-icon.hf-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.social-icon.hf-icon:hover {
+  color: #a8e6cf !important;
+  filter: drop-shadow(0 4px 10px rgba(168, 230, 207, 0.4)) drop-shadow(0 0 10px rgba(168, 230, 207, 0.2));
+}

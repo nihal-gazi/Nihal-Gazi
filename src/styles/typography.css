@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Gruppo&display=swap');
+
+/* Load Local Fonts */
+@font-face {
+  font-family: 'AgrandirHeavy';
+  src: url('/fonts/Agrandir-GrandHeavy.otf') format('opentype');
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: 'AgrandirLight';
+  src: url('/fonts/Agrandir-GrandLight.otf') format('opentype');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'AraHamah';
+  src: url('/fonts/Ara Hamah 1982 Regular.ttf') format('truetype');
+  font-weight: normal;
+}
+
+/* Global Font Variables */
+:root {
+  --font-heavy: 'AgrandirHeavy', sans-serif;
+  --font-light: 'AgrandirLight', sans-serif;
+  --font-display: 'AraHamah', sans-serif;
+  --font-subsub: 'Gruppo', sans-serif;
+  --font-body: 'Helvetica Neue', Arial, sans-serif; /* Your small descriptor font */
+}
+
+/* Specific Typographic Classes */
+.font-display { font-family: var(--font-display); }
+.font-heavy { font-family: var(--font-heavy); }
+.font-light { font-family: var(--font-light); }
+.font-subsub { font-family: var(--font-subsub); }
+.font-body { font-family: var(--font-body); }
+
+/* The text stretching infinitely off-screen */
+.bg-text-stretch {
+  font-family: var(--font-heavy);
+  font-size: 7vw; /* Massive scaling */
+  color: #1a1a1a;
+  white-space: nowrap;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  user-select: none;
+  letter-spacing: -0.05em;
+}
