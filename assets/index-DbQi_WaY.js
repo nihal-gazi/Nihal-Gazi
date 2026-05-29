@@ -12,7 +12,7 @@
         </div>
         
         <p class="font-body" style="font-size: 0.95rem; color: #aaaaaa; max-width: 400px; line-height: 1.7;">
-          An AI Researcher, Developer, Systems Architect, VFX Artist and Founder of KindSynapse based in India. I engineer CPU-efficient neural architectures, 1-bit weight quantization models, and novel machine learning solutions. My work stretches <b>beyond automation, towards theoretical limit excellence </b>, stripping away computational bloat to build artificial intelligence that operates elegantly under absolute physical constraints.
+          An AI Researcher, Developer and Founder of KindSynapse based in India. I engineer CPU-efficient neural architectures, 1-bit weight quantization models, and novel machine learning solutions. My work stretches <b>beyond automation, towards theoretical limit excellence </b>, stripping away computational bloat to build artificial intelligence that operates elegantly under absolute physical constraints.
         </p>
 
         <div class="social-links">
