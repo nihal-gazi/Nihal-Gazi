@@ -23,7 +23,7 @@ export const beyondSection = `
           
           <p>
           
-          Global AI development is is an active struggle against algorithmic ceilings and not just about parameter scaling. Ranked #21 globally on the Hugging Face TCTF Leaderboard for individual open-source contributions (Dec 2025), I actively push the frontiers of edge computing, model compression, and accessible artificial intelligence.
+          Global AI development is an active struggle against algorithmic ceilings and not just about parameter scaling. Ranked #21 globally on the Hugging Face TCTF Leaderboard for individual open-source contributions (Dec 2025), I actively push the frontiers of edge computing, model compression, and accessible artificial intelligence.
           </p>
         
         

@@ -1,7 +1,7 @@
 export const aboutData = {
   dob: "2006-11-09",
   name: "Nihal Gazi",
-  subtitle: "AI Researcher & Data Science Enthusiast",
+  subtitle: "AI Developer, Researcher & VFX Creator",
   location: "Kolkata, India",
   summary: "I am a 19-year-old AI researcher with a strong focus on data science, mathematics, and efficient artificial intelligence. My work centers on 1-bit weight quantization, sparse neural architectures, and building high-performance models that run effectively with limited resources. I am the founder of KindSynapse, an open-source AI research collective. I am currently pursuing a B.Tech in Computer Science and Engineering (AI & ML) at the Institute of Engineering and Management (IEM), Kolkata (Class of 2029).",
   

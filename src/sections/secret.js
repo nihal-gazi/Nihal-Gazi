@@ -4,6 +4,8 @@ const sectionsHtml = secretData.sections.map(s => {
   let bodyFormatted = s.body
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    .replace(/\$([A-Za-z]+)_\{?([0-9A-Za-z]+)\}?\$/g, '<span class="math-expr">$1<sub>$2</sub></span>')
+    .replace(/\$([A-Za-z]+)\$/g, '<span class="math-expr">$1</span>')
     .replace(/\n/g, '<br>');
   return `
     <h3 class="blog-section-hdr font-heavy">${s.num}. ${s.title}</h3>
@@ -14,6 +16,22 @@ const sectionsHtml = secretData.sections.map(s => {
 const introHtml = secretData.intro.replace(/\n/g, '<br>');
 
 export const secretSection = `
+  <style>
+    .math-expr {
+      font-family: "Times New Roman", Times, serif;
+      font-size: 1.15em;
+      font-style: italic;
+      letter-spacing: 0.02em;
+    }
+    .math-expr sub {
+      font-size: 0.75em;
+      font-style: normal;
+      position: relative;
+      bottom: -0.25em;
+      line-height: 0;
+      vertical-align: baseline;
+    }
+  </style>
   <div class="secret-container" style="background-color: #000000; min-height: 100vh; color: #ffffff; position: relative;">
     
     <!-- Phase 1: Cinematic Void Layer -->

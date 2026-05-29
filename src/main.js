@@ -56,11 +56,7 @@ function cleanUpActiveView() {
     limitFluidInstance = null;
   }
   
-  // 3.8 Remove dynamic SEO JSON-LD block
-  const seoScript = document.getElementById('about-jsonld');
-  if (seoScript) {
-    seoScript.remove();
-  }
+  // Note: Global static JSON-LD block is kept in index.html to ensure complete indexing on all page accesses.
 
   // 4. Clean container and posture scroll position
   const container = document.getElementById('scroll-container');
@@ -95,6 +91,8 @@ function handleRoute() {
   });
 
   if (isHome) {
+    document.title = "Nihal Gazi - AI Researcher, Developer & Founder";
+    
     // 1. Mount Home Sections
     container.innerHTML = topSection + beyondSection + automationSection + towardsSection + theoreticalSection + limitSection + excellenceSection;
 
@@ -115,6 +113,7 @@ function handleRoute() {
     // 4. Ignite
     loop.start();
   } else if (path === '/about' || path.endsWith('/about')) {
+    document.title = "About Nihal Gazi - AI Research & Core Philosophy";
     container.innerHTML = aboutSection;
     
     // Dynamically calculate age based on DOB: November 9, 2006
@@ -129,49 +128,14 @@ function handleRoute() {
       }
       ageEl.textContent = calculatedAge;
     }
-
-    // Inject dynamic JSON-LD Schema into head for Google Knowledge Panel SEO
-    let script = document.getElementById('about-jsonld');
-    if (!script) {
-      script = document.createElement('script');
-      script.type = 'application/ld+json';
-      script.id = 'about-jsonld';
-      script.textContent = JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Nihal Gazi",
-        "jobTitle": [
-          "AI Researcher",
-          "Hardware Engineer",
-          "Founder"
-        ],
-        "worksFor": {
-          "@type": "Organization",
-          "name": "KindSynapse"
-        },
-        "alumniOf": {
-          "@type": "EducationalOrganization",
-          "name": "Institute of Engineering and Management"
-        },
-        "homeLocation": {
-          "@type": "Place",
-          "name": "Kolkata, West Bengal, India"
-        },
-        "description": "AI Researcher specializing in CPU-efficient neural architectures, 1-bit weight quantization, and computational physics.",
-        "sameAs": [
-          "https://huggingface.co/NihalGazi",
-          "https://github.com/nihal-gazi",
-          "https://x.com/NihalGazi_",
-          "https://www.linkedin.com/in/nihal-gazi/"
-        ]
-      }, null, 2);
-      document.head.appendChild(script);
-    }
   } else if (path === '/projects' || path.endsWith('/projects')) {
+    document.title = "Nihal Gazi - AI Projects & Custom Architectures";
     container.innerHTML = projectsSection;
   } else if (path === '/honors' || path.endsWith('/honors')) {
+    document.title = "Nihal Gazi - Honors, Awards & Academic Research";
     container.innerHTML = honorsSection;
   } else if (path === '/secret' || path.endsWith('/secret')) {
+    document.title = "Nihal Gazi - Deep Sandbox & Hidden Timeline";
     document.body.style.overflow = 'hidden';
     container.innerHTML = secretSection;
     runSecretTimeline();
