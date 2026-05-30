@@ -1,7 +1,7 @@
 export const beyondSection = `
   <section id="beyond" class="viewport-section" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 10vh 5vw; position: relative; overflow: hidden;">
     
-    <h2 class="font-heavy" style="font-size: 11vw; color: #1a1a1a; white-space: nowrap; letter-spacing: -0.05em; margin: 0; line-height: 0.8; user-select: none;">
+    <h2 class="font-heavy" style="font-size: 11vw; color: #333333; white-space: nowrap; letter-spacing: -0.05em; margin: 0; line-height: 0.8; user-select: none;">
       BBBBBBEYONDDDDD
     </h2>
     

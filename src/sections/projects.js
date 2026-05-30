@@ -9,6 +9,7 @@ function getButtonLabel(url, disabled) {
   if (url.includes('youtube.com')) return 'Watch Interview';
   if (url.includes('github.com')) return 'Access Repository';
   if (url.includes('nihalgazi.com')) return 'Access Page';
+  if (url.includes('doi.org')) return 'Research Paper';
   return 'Access Project';
 }
 

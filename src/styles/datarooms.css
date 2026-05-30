@@ -1086,3 +1086,161 @@
     font-size: 0.75rem !important;
   }
 }
+
+/* ========================================================= */
+/* Academic Publications Ledger (Sterile API-Response Style) */
+/* ========================================================= */
+.publications-ledger {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.publication-card {
+  background: #000000 !important;
+  border: 1px solid #ffffff !important;
+  border-radius: 0 !important; /* Sharp, geometric borders */
+  padding: 2.5rem;
+  box-shadow: none !important;
+  transition: border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.publication-card:hover {
+  border-color: #a8e6cf !important; /* Subtle highlight on hover */
+  transform: none !important; /* Keep it still and stable */
+  box-shadow: none !important;
+}
+
+.pub-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.pub-tag {
+  font-family: 'Gruppo', sans-serif;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  padding: 0.25rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.pub-tag.published {
+  color: #a8e6cf;
+  border: 1px solid #a8e6cf;
+  box-shadow: 0 0 10px rgba(168, 230, 207, 0.3);
+  text-shadow: 0 0 8px rgba(168, 230, 207, 0.5);
+}
+
+.pub-tag.accepted {
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+
+.pub-date {
+  font-family: 'Gruppo', sans-serif;
+  font-size: 0.9rem;
+  color: #888888;
+  letter-spacing: 0.05em;
+}
+
+.pub-title {
+  font-family: 'AgrandirHeavy', sans-serif;
+  font-size: clamp(1.4rem, 4vw, 1.8rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.pub-authors {
+  font-family: 'Inter', 'Helvetica', sans-serif;
+  font-size: 1rem;
+  color: #ffffff;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pub-authors strong {
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: #a8e6cf;
+}
+
+.pub-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-family: 'Inter', 'Helvetica', sans-serif;
+  font-size: 0.95rem;
+  color: #888888;
+}
+
+.pub-meta-info span strong {
+  color: #ffffff;
+}
+
+.pub-actions {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-academic {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-family: 'Gruppo', sans-serif;
+  font-size: 0.9rem;
+  font-weight: bold;
+  padding: 0.8rem 1.6rem;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s ease;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.btn-academic:hover {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.btn-academic.secondary {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.btn-academic.secondary:hover {
+  border-color: #ffffff;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 600px) {
+  .publication-card {
+    padding: 1.5rem;
+    gap: 1.2rem;
+  }
+  .pub-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+  .btn-academic {
+    width: 100%;
+  }
+}
+

@@ -37,8 +37,8 @@ export const projectsData = [
     title: "ARGUS (Research Project)",
     pitch: "Hierarchical Sparse Vision Transformers designed for real-time particle track reconstruction in high-energy physics. Secured the Gold Medal at IEMPHYS-26.",
     constraints: ["O(N) Linear Time Complexity", "Theoretical Sparse Attention"],
-    url: "#",
-    disabled: true
+    url: "https://doi.org/10.1051/epjconf/202637001032",
+    disabled: false
   },
   {
     id: "[06]",

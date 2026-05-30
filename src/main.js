@@ -12,6 +12,7 @@ import { excellenceSection } from './sections/excellence.js';
 // Import Data Room Sections
 import { aboutSection } from './sections/about.js';
 import { projectsSection } from './sections/projects.js';
+import { publicationsSection } from './sections/publications.js';
 import { honorsSection } from './sections/honors.js';
 import { secretSection, runSecretTimeline, clearSecretTimeline } from './sections/secret.js';
 
@@ -56,6 +57,10 @@ function cleanUpActiveView() {
     limitFluidInstance = null;
   }
   
+  // Prune publications custom JSON-LD block
+  const pubSchema = document.getElementById('publications-jsonld');
+  if (pubSchema) pubSchema.remove();
+
   // Note: Global static JSON-LD block is kept in index.html to ensure complete indexing on all page accesses.
 
   // 4. Clean container and posture scroll position
@@ -131,6 +136,54 @@ function handleRoute() {
   } else if (path === '/projects' || path.endsWith('/projects')) {
     document.title = "Nihal Gazi - AI Projects & Custom Architectures";
     container.innerHTML = projectsSection;
+  } else if (path === '/publications' || path.endsWith('/publications')) {
+    document.title = "Nihal Gazi - Peer-Reviewed Academic Publications & Research";
+    container.innerHTML = publicationsSection;
+    
+    // Inject dynamic ScholarlyArticle JSON-LD schema
+    if (!document.getElementById('publications-jsonld')) {
+      const script = document.createElement('script');
+      script.id = 'publications-jsonld';
+      script.type = 'application/ld+json';
+      script.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "ScholarlyArticle",
+        "headline": "ARGUS: The AI Eye for CERN - Solving Extreme Computational Physics",
+        "author": [
+          {
+            "@type": "Person",
+            "name": "Nihal Gazi"
+          },
+          {
+            "@type": "Person",
+            "name": "Aditya K. Biswas"
+          },
+          {
+            "@type": "Person",
+            "name": "Aihik Basu"
+          },
+          {
+            "@type": "Person",
+            "name": "Anirban Chattopadhyay"
+          },
+          {
+            "@type": "Person",
+            "name": "Sayan Pratihar"
+          }
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "EPJ Web of Conferences"
+        },
+        "datePublished": "2026-05-29",
+        "isPartOf": {
+          "@type": "PublicationIssue",
+          "issueNumber": "370"
+        },
+        "sameAs": "https://doi.org/10.1051/epjconf/202637001032"
+      }, null, 2);
+      document.head.appendChild(script);
+    }
   } else if (path === '/honors' || path.endsWith('/honors')) {
     document.title = "Nihal Gazi - Honors, Awards & Academic Research";
     container.innerHTML = honorsSection;
