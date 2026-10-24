@@ -1146,6 +1146,13 @@
   border: 1px solid #ffffff;
 }
 
+.pub-tag.preprint {
+  color: #8be9fd;
+  border: 1px solid #8be9fd;
+  box-shadow: 0 0 10px rgba(139, 233, 253, 0.3);
+  text-shadow: 0 0 8px rgba(139, 233, 253, 0.5);
+}
+
 .pub-date {
   font-family: 'Gruppo', sans-serif;
   font-size: 0.9rem;

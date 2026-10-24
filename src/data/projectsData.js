@@ -1,10 +1,10 @@
 export const projectsData = [
   {
     id: "[01]",
-    category: "DEEP SPEECH / scaling",
+    category: "DEEP SPEECH / SCALING",
     title: "Text-To-Speech Unlimited",
-    pitch: "A highly realistic and CPU-efficient TTS model, reverse-engineered and scaled single-handedly. Hit 300K+ total visits and won \"Space of the Week\" on Hugging Face.",
-    constraints: ["300K+ Total Visits", "10K+ Weekly Scale"],
+    pitch: "I have developed “Realistic Text to Speech” app on HuggingFace, which got an userbase of 310,000+ users, 10,000+ monthly users and honored with “Spaces of the Week” on June 2nd by HuggingFace. It got featured on KI:Connect.nrw as an official GDPR compliant demo by the Government of Germany. It got 1.73k likes and 303 forks on HuggingFace.",
+    constraints: ["310K+ Total Users", "10K+ Monthly Scale", "1.73k Likes & 303 Forks"],
     url: "https://huggingface.co/spaces/NihalGazi/Text-To-Speech-Unlimited"
   },
   {
@@ -17,11 +17,11 @@ export const projectsData = [
   },
   {
     id: "[03]",
-    category: "MEDIA / DISSEMINATION",
-    title: "dotTV Broadcast Interview",
-    pitch: "A comprehensive broadcast feature detailing my open-source AI architectures, SCNTSE national recognition, and software engineering ideology.",
-    constraints: ["National Broadcast Feature", "AI Education"],
-    url: "https://www.youtube.com/watch?v=qo0qlc-pUe0"
+    category: "AGENTIC SEARCH / DISTRIBUTED LLM",
+    title: "OreoLook — Agentic AI Web Search",
+    pitch: "An open-source, OpenAI-compatible agentic web search and deep-research engine featuring multi-source retrieval, three-layer caching, and vector indexing with Redis & Qdrant.",
+    constraints: ["OpenAI-Compatible API", "3-Layer CPU Caching", "Multi-Agent Retrieval"],
+    url: "https://github.com/pollinations/search.elixpo"
   },
   {
     id: "[04]",
@@ -37,7 +37,7 @@ export const projectsData = [
     title: "ARGUS (Research Project)",
     pitch: "Hierarchical Sparse Vision Transformers designed for real-time particle track reconstruction in high-energy physics. Secured the Gold Medal at IEMPHYS-26.",
     constraints: ["O(N) Linear Time Complexity", "Theoretical Sparse Attention"],
-    url: "https://doi.org/10.1051/epjconf/202637001032",
+    url: "https://github.com/nihal-gazi/ARGUS-LHC-Tracking",
     disabled: false
   },
   {
@@ -54,15 +54,15 @@ export const projectsData = [
     title: "Fast Color Transfer Algorithm",
     pitch: "A novel and extremely fast mathematical non-neural algorithm for transferring color profiles between target images without using neural layers.",
     constraints: ["Pure Non-Neural Math", "0ms Latency Bounds"],
-    url: "https://nihalgazi.com/fast%20color%20transfer.html"
+    url: "/old-projects/vecore/vecore.html"
   },
   {
     id: "[08]",
-    category: "CURVES / SPATIAL SYNTHESIS",
-    title: "Fast Non-Neural Handwriting Generator",
-    pitch: "A novel handwriting generation algorithm built without neural nets (Zero GAN). Recreates cursive writing profiles through basic curve fitting and clever coordinate manipulation.",
-    constraints: ["Zero GAN reliance", "Mathematical Curve Fitting"],
-    url: "#",
-    disabled: true
+    category: "DATA STRUCTURES / ALGORITHMS",
+    title: "LinkedListTree (TreeLinkedList)",
+    pitch: "A lightweight, dependency-free N-ary tree data structure library implemented in pure Java using LinkedLists for intuitive tree traversal and node management.",
+    constraints: ["Pure Java JDK", "Zero External Dependencies"],
+    url: "https://github.com/nihal-gazi/LinkedListTree",
+    disabled: false
   }
 ];

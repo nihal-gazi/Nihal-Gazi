@@ -13,7 +13,7 @@ export const aboutData = {
     "SCNTSE 2025 National Talent Search: Ranked in National Top 10 with my CPU-only FaceFlux architecture and received a ₹1 Lakh grant [PROOF_LINK:https://www.youtube.com/watch?v=qo0qlc-pUe0:Award News ↗].",
     "Hugging Face Contributions: My Text-to-Speech Space reached 300K+ visits and was featured as Space of the Week [PROOF_LINK:https://huggingface.co/spaces/NihalGazi/Text-To-Speech-Unlimited:HF Space ↗]. My FLUX Pro Unlimited Space has surpassed 536K+ visits [PROOF_LINK:https://huggingface.co/spaces/NihalGazi/FLUX-Unlimited:HF Space ↗].",
     "Ranked #21 globally on the Hugging Face TCTF Leaderboard (November 2025) [PROOF_LINK:https://tctf-tctf.static.hf.space/spaces.html:Leaderboard ↗].",
-    "GSoC Mentor for Pollinations.ai. [PROOF_LINK:https://gsoc.pollinations.ai/mentors:PollinationsAI↗]",
+    "AI Research @ Pollinations.ai [PROOF_LINK:https://gsoc.pollinations.ai/mentors:PollinationsAI ↗].",
     "Achieved a 9.40 SGPA in my first semester."
   ],
   
@@ -21,7 +21,12 @@ export const aboutData = {
   achievementsList2026: [
     "Awarded Gold Medal at IEMPHYS-26 International Conference for the ARGUS Project (O(N) sparse vision transformer for track reconstruction).",
     "1st Runner Up at Phycathon-26 [PROOF_LINK_DISABLED:Phycathon ↗].",
-    "Top 10 Best Poster at Spectrum 2026 for Native Binarization in 1-bit diffusion networks."
+    "Top 10 Best Poster at Spectrum 2026 for Native Binarization in 1-bit diffusion networks.",
+    "Got promoted to a part of AI Research @ PollinationsAI.",
+    "Finally, got endorsed on arXiv cs.AI, and helped establish P-Research on HuggingFace, and the first pre-print with PollinationsAI.",
+    "Became a Core Contributor at Elixpo.",
+    "Invited as 2x Speaker at JISU, and judge for their Gemma For Bharat 2026 Hackathon, hosted by their GDG of 2025-26.",
+    "Became a part of Elixpo’s research team, and got recognized for my contribution in Elixpo."
   ],
   
   foundingClosing: "In April 2026, I founded KindSynapse to foster open collaboration in efficient AI and data science.",
@@ -39,9 +44,10 @@ export const aboutData = {
   evidenceLedger: [
     { label: "Hugging Face TCTF Leaderboard ↗", url: "https://tctf-tctf.static.hf.space/spaces.html" },
     { label: "SCNTSE 2025 Press Release ↗", url: "https://huggingface.co/spaces/NihalGazi/FaceFlux-Face-Swapper" },
+    { label: "dotTV Broadcast Interview ↗", url: "https://www.youtube.com/watch?v=qo0qlc-pUe0" },
     { label: "IEMPHYS-26 Proceedings ↗", url: "#", disabled: true },
     { label: "Spectrum 2026 Proceedings ↗", url: "#", disabled: true },
     { label: "GitHub: azinet Core ↗", url: "https://github.com/nihal-gazi/Azinet-Simple-Java-Neural-Network-library-for-beginners" },
-    { label: "GitHub: ARGUS Transformer ↗", url: "#", disabled: true }
+    { label: "GitHub: ARGUS Transformer ↗", url: "https://github.com/nihal-gazi/ARGUS-LHC-Tracking" }
   ]
 };

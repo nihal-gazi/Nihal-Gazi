@@ -6,12 +6,18 @@ const honorsHtml = honorsData.map(h => {
     const isMultiple = h.proofs.length > 1;
     proofsHtml = `
       <div class="proof-gallery ${isMultiple ? 'multiple-proofs' : ''}">
-        ${h.proofs.map(p => `
-          <figure class="proof-figure">
-            <img src="${p.src}" alt="${p.alt}" class="proof-image" />
-            <figcaption class="proof-caption font-subsub">${p.caption}</figcaption>
-          </figure>
-        `).join('')}
+        ${h.proofs.map(p => {
+          const imgHtml = `<img src="${p.src}" alt="${p.alt}" class="proof-image" />`;
+          const captionHtml = p.url 
+            ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: underline;">${p.caption}</a>` 
+            : p.caption;
+          return `
+            <figure class="proof-figure">
+              ${p.url ? `<a href="${p.url}" target="_blank" rel="noopener noreferrer">${imgHtml}</a>` : imgHtml}
+              <figcaption class="proof-caption font-subsub">${captionHtml}</figcaption>
+            </figure>
+          `;
+        }).join('')}
       </div>
     `;
   }

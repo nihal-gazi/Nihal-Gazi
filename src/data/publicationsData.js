@@ -29,15 +29,27 @@ export const publicationsData = [
   },
   {
     id: "pub-02",
-    status: "accepted",
-    statusLabel: "ACCEPTED / IN PRESS",
-    date: "FORTHCOMING",
-    title: "Native Binarization: Preventing Collapse in 1-Bit Diffusion",
+    status: "preprint",
+    statusLabel: "PREPRINT / ARXIV",
+    date: "SEP 2026",
+    title: "A Three-Layer Caching Architecture for Low-Latency LLM Web Search on Commodity CPU Hardware",
     authors: [
+      { name: "Ayushman Bhattacharya" },
       { name: "Nihal Gazi", isMe: true }
     ],
-    publisher: "Accepted for Top 10 Best Poster Presentation",
-    conference: "Spectrum 2026 International Conference",
-    scope: "Binarized weights & stabilization algorithms for edge diffusion models"
+    publisher: "arXiv (arXiv:2609.05463 [cs.DC])",
+    conference: "PollinationsAI Research",
+    scope: "Distributed low-latency LLM web search caching architectures & commodity CPU optimization",
+    actions: [
+      {
+        label: "View on arXiv ↗",
+        url: "https://arxiv.org/abs/2609.05463"
+      },
+      {
+        label: "Download PDF",
+        url: "https://arxiv.org/pdf/2609.05463",
+        isSecondary: true
+      }
+    ]
   }
 ];

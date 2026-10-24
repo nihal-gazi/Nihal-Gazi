@@ -1,5 +1,20 @@
 export const honorsData = [
   {
+    metric: "CONTRIBUTION",
+    title: "Recognition of Contribution - Elixpo",
+    date: "OCT_2026",
+    desc: "For my contribution to Elixpo's open research and public technical work.",
+    hash: "RECORD_HASH::ELIXPO-REC-2026-006",
+    proofs: [
+      {
+        src: "/images/elixpo-elx-app-2026-006.png",
+        alt: "Recognition of Contribution - Elixpo",
+        caption: "OFFICIAL VERIFICATION: https://elixpo.com/recognition/elx-app-2026-006 ↗",
+        url: "https://elixpo.com/recognition/elx-app-2026-006"
+      }
+    ]
+  },
+  {
     metric: "#21 GLOBAL",
     title: "Hugging Face Leaderboard Standing",
     date: "DEC_2025",
