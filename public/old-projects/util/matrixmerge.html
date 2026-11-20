@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Matrix Merger — Lab Utility</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#EEF2FF',
+                            100: '#E0E7FF',
+                            200: '#C7D2FE',
+                            500: '#6366F1',
+                            600: '#4F46E5',
+                            700: '#4338CA',
+                            900: '#312E81',
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03)',
+                        'card': '0 10px 30px -4px rgba(15, 23, 42, 0.06), 0 4px 10px -2px rgba(15, 23, 42, 0.03)',
+                        'elevated': '0 20px 40px -6px rgba(79, 70, 229, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- ExcelJS & FileSaver -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background-color: #F8FAFC;
+            color: #0F172A;
+        }
+
+        /* Prevent zoom on mobile inputs */
+        input[type="number"], input[type="text"], select {
+            font-size: 15px;
+        }
+        @media (max-width: 640px) {
+            input[type="number"], input[type="text"], select {
+                font-size: 16px;
+            }
+        }
+
+        /* Custom Scrollbar for preview table */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+
+        /* Liquid smooth transitions */
+        .liquid-transition {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Subtle checkerboard pattern for preview background */
+        .grid-bg {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+                    <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Excel Matrix Merger</h1>
+                        <span class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-2 py-0.5 rounded-full">v2.0</span>
+                    </div>
+                    <p class="text-xs text-slate-500 font-medium hidden sm:block">Automated checkerboard interleaver & formatted table generator</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="demoDataBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200/70 liquid-transition active:scale-95">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600"></i>
+                    <span>Try Demo Data</span>
+                </button>
+                <div class="h-4 w-px bg-slate-200 hidden sm:block"></div>
+                <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="hidden md:inline">100% In-Browser</span>
+                    <span class="md:hidden">Local</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+
+            <!-- LEFT COLUMN: Controls & Setup (lg:col-span-5) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <!-- Mode Switcher Pill -->
+                <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-soft">
+                    <div class="relative grid grid-cols-2 p-0.5 bg-slate-100/90 rounded-xl text-xs font-semibold text-slate-600">
+                        <!-- Sliding Indicator -->
+                        <div id="modePill" class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] bg-white rounded-lg shadow-sm border border-slate-200/60 liquid-transition"></div>
+                        
+                        <button id="modeMatrixBtn" type="button" class="relative z-10 py-2.5 px-3 rounded-lg text-indigo-700 flex items-center justify-center gap-2 liquid-transition">
+                            <i data-lucide="layers" class="w-4 h-4"></i>
+                            <span>Dual Files (X + Y)</span>
+                        </button>
+                        <button id="modeSingleBtn" type="button" class="relative z-10 py-2.5 px-3 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 liquid-transition">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                            <span>Single File (Split)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 1: Upload Files Card -->
+                <section class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">1</span>
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900">Source Files</h2>
+                                <p class="text-xs text-slate-500">Upload Excel spreadsheet (.xlsx, .xls)</p>
+                            </div>
+                        </div>
+                        <span id="filesBadge" class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Waiting files</span>
+                    </div>
+
+                    <!-- Dual Files Mode Inputs -->
+                    <div id="fileInputsMatrix" class="space-y-3.5">
+                        <!-- File 1 (Data X) Dropzone -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    File 1 &mdash; Data X
+                                </label>
+                                <span id="file1Info" class="text-[11px] text-slate-400 font-mono">Not selected</span>
+                            </div>
+                            <div id="dropzone1" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-4 text-center cursor-pointer liquid-transition group">
+                                <input type="file" id="file1" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="flex items-center justify-center gap-3 pointer-events-none">
+                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition">
+                                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p id="file1Name" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 line-clamp-1">Click or drag File 1 here</p>
+                                        <p class="text-[11px] text-slate-400">Takes even indices: (r+c)%2 = 0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File 2 (Data Y) Dropzone -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    File 2 &mdash; Data Y
+                                </label>
+                                <span id="file2Info" class="text-[11px] text-slate-400 font-mono">Not selected</span>
+                            </div>
+                            <div id="dropzone2" class="relative border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-emerald-50/40 rounded-xl p-4 text-center cursor-pointer liquid-transition group">
+                                <input type="file" id="file2" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="flex items-center justify-center gap-3 pointer-events-none">
+                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:border-emerald-300 shadow-sm liquid-transition">
+                                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p id="file2Name" class="text-xs font-semibold text-slate-700 group-hover:text-emerald-900 line-clamp-1">Click or drag File 2 here</p>
+                                        <p class="text-[11px] text-slate-400">Takes odd indices: (r+c)%2 = 1</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Single File Mode Input (Hidden by default) -->
+                    <div id="fileInputsSingle" class="space-y-3.5 hidden">
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    Combined Excel File
+                                </label>
+                                <span id="fileSingleInfo" class="text-[11px] text-slate-400 font-mono">Not selected</span>
+                            </div>
+                            <div id="dropzoneSingle" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-5 text-center cursor-pointer liquid-transition group">
+                                <input type="file" id="fileSingle" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+                                <div class="flex items-center justify-center gap-3 pointer-events-none">
+                                    <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition">
+                                        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-left">
+                                        <p id="fileSingleName" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 line-clamp-1">Click or drag single workbook here</p>
+                                        <p class="text-[11px] text-slate-400">Contains continuous column to be split into X & Y</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 2: Dimensions & Columns Card -->
+                <section class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">2</span>
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900">Matrix Geometry & Columns</h2>
+                                <p class="text-xs text-slate-500">Define table shape & reading coordinates</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Selector for Matrix Mode -->
+                    <div id="colInputsMatrix" class="grid grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Col Index X <span class="text-slate-400 font-normal">(File 1, A=1)</span></label>
+                            <div class="relative">
+                                <input type="number" id="colIndex1" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Col Index Y <span class="text-slate-400 font-normal">(File 2, A=1)</span></label>
+                            <div class="relative">
+                                <input type="number" id="colIndex2" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Selector for Single Mode -->
+                    <div id="colInputsSingle" class="grid grid-cols-2 gap-3 sm:gap-4 hidden">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Column <span class="text-slate-400 font-normal">(A=1)</span></label>
+                            <input type="number" id="colIndexSingle" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Split Row Index <span class="text-slate-400 font-normal">(X &le; row)</span></label>
+                            <input type="number" id="splitRowIndex" value="10" min="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                    </div>
+
+                    <!-- Matrix Dimensions (Rows M x Cols N) -->
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4 pt-1">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                                <span>Rows (M)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono">Height</span>
+                            </label>
+                            <input type="number" id="rowsM" value="10" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+                                <span>Columns (N)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono">Width</span>
+                            </label>
+                            <input type="number" id="colsN" value="3" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                    </div>
+
+                    <!-- Headers Text -->
+                    <div class="space-y-3 pt-1 border-t border-slate-100">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Primary Header Title</label>
+                            <input type="text" id="headerText1" value="Project Alpha &mdash; Experimental Measurements" placeholder="e.g. Project Alpha" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Secondary Header / Subtitle</label>
+                            <input type="text" id="headerText2" value="Checkerboard Composite Matrix (X vs Y)" placeholder="e.g. Q3 Report" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 3: Typography & Colors (Accordion / Expandable) -->
+                <section class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
+                    <button id="stylingToggleBtn" type="button" class="w-full p-5 sm:p-6 text-left flex items-center justify-between hover:bg-slate-50/60 liquid-transition">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">3</span>
+                            <div>
+                                <h2 class="text-sm font-bold text-slate-900">Styling & Appearance</h2>
+                                <p class="text-xs text-slate-500">Colors, fonts, and cell styling presets</p>
+                            </div>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 liquid-transition group-hover:bg-slate-200" id="stylingChevron">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </button>
+
+                    <div id="stylingContent" class="p-5 sm:p-6 pt-0 border-t border-slate-100 space-y-4">
+                        <!-- Header 1 Styling -->
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-700">Header 1 (Top)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">Row 1</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">BG Color</label>
+                                    <div class="flex items-center gap-1.5 h-8 bg-white px-2 rounded-lg border border-slate-200">
+                                        <input type="color" id="h1Bg" value="#4F46E5" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span id="h1BgHex" class="text-[10px] font-mono text-slate-600">#4F46E5</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Font Color</label>
+                                    <div class="flex items-center gap-1.5 h-8 bg-white px-2 rounded-lg border border-slate-200">
+                                        <input type="color" id="h1Color" value="#ffffff" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span id="h1ColorHex" class="text-[10px] font-mono text-slate-600">#FFF</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Font Size</label>
+                                    <input type="number" id="h1Size" value="16" min="8" max="32" class="w-full h-8 px-2 text-xs border border-slate-200 rounded-lg bg-white font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Header 2 Styling -->
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-xs font-bold text-slate-700">Header 2 (Sub)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">Row 2</span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">BG Color</label>
+                                    <div class="flex items-center gap-1.5 h-8 bg-white px-2 rounded-lg border border-slate-200">
+                                        <input type="color" id="h2Bg" value="#6366F1" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span id="h2BgHex" class="text-[10px] font-mono text-slate-600">#6366F1</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Font Color</label>
+                                    <div class="flex items-center gap-1.5 h-8 bg-white px-2 rounded-lg border border-slate-200">
+                                        <input type="color" id="h2Color" value="#ffffff" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent">
+                                        <span id="h2ColorHex" class="text-[10px] font-mono text-slate-600">#FFF</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-500 mb-1">Font Size</label>
+                                    <input type="number" id="h2Size" value="14" min="8" max="32" class="w-full h-8 px-2 text-xs border border-slate-200 rounded-lg bg-white font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Data X & Data Y Cell Styles -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <!-- X Style -->
+                            <div class="p-3 bg-indigo-50/70 rounded-xl border border-indigo-100">
+                                <span class="block text-xs font-bold text-indigo-900 mb-2">Data X Cells</span>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="text-[10px] font-medium text-indigo-700">Cell Fill</label>
+                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-indigo-200">
+                                            <input type="color" id="xBg" value="#F8FAFC" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
+                                            <span id="xBgHex" class="text-[9px] font-mono text-slate-500">#F8FAFC</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-medium text-indigo-700">Font Color & Size</label>
+                                        <div class="flex gap-1.5">
+                                            <input type="color" id="xColor" value="#0F172A" class="w-7 h-7 rounded border border-indigo-200 p-0 cursor-pointer">
+                                            <input type="number" id="xSize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-indigo-200 rounded bg-white font-mono">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Y Style -->
+                            <div class="p-3 bg-emerald-50/70 rounded-xl border border-emerald-100">
+                                <span class="block text-xs font-bold text-emerald-900 mb-2">Data Y Cells</span>
+                                <div class="space-y-2">
+                                    <div>
+                                        <label class="text-[10px] font-medium text-emerald-700">Cell Fill</label>
+                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-emerald-200">
+                                            <input type="color" id="yBg" value="#F0FDF4" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
+                                            <span id="yBgHex" class="text-[9px] font-mono text-slate-500">#F0FDF4</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-medium text-emerald-700">Font Color & Size</label>
+                                        <div class="flex gap-1.5">
+                                            <input type="color" id="yColor" value="#0F172A" class="w-7 h-7 rounded border border-emerald-200 p-0 cursor-pointer">
+                                            <input type="number" id="ySize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-emerald-200 rounded bg-white font-mono">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Actions Container -->
+                <div class="space-y-3 pt-2">
+                    <button id="generateBtn" type="button" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-elevated flex items-center justify-center gap-2.5 liquid-transition active:scale-[0.98] group">
+                        <i data-lucide="download" class="w-5 h-5 group-hover:-translate-y-0.5 liquid-transition"></i>
+                        <span>Generate &amp; Download Excel (.xlsx)</span>
+                    </button>
+
+                    <div class="flex items-center gap-3">
+                        <button id="previewBtn" type="button" class="flex-1 py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/80 shadow-soft flex items-center justify-center gap-2 liquid-transition active:scale-95">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
+                            <span>Refresh Preview</span>
+                        </button>
+                        <button id="resetBtn" type="button" class="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-600 font-semibold text-xs liquid-transition active:scale-95">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Sticky Live Preview Workbench (lg:col-span-7) -->
+            <div class="lg:col-span-7 mt-8 lg:mt-0 sticky top-20">
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden flex flex-col min-h-[540px]">
+                    
+                    <!-- Preview Bar Header -->
+                    <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3 bg-slate-50/50">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <i data-lucide="eye" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">Live Matrix Preview</h3>
+                                <p id="matrixStats" class="text-xs text-slate-500">Dimensions: 10 &times; 3 &bull; 30 cells total</p>
+                            </div>
+                        </div>
+
+                        <!-- Legend & Status -->
+                        <div class="flex items-center gap-3 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded bg-slate-100 border border-slate-300 inline-block" id="legendBoxX"></span>
+                                <span class="text-slate-600 font-medium">Data X</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-3 rounded bg-emerald-50 border border-emerald-300 inline-block" id="legendBoxY"></span>
+                                <span class="text-slate-600 font-medium">Data Y</span>
+                            </div>
+                            <span id="previewStatusBadge" class="hidden text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/50">
+                                Auto-updated
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Preview Scrollable Canvas -->
+                    <div id="previewContainer" class="flex-1 p-4 sm:p-6 grid-bg overflow-auto custom-scrollbar max-h-[680px] flex items-center justify-center">
+                        
+                        <!-- Empty State Placeholder (Shown initially until files uploaded or demo loaded) -->
+                        <div id="emptyState" class="text-center p-8 max-w-sm space-y-3">
+                            <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center shadow-inner">
+                                <i data-lucide="table-2" class="w-8 h-8"></i>
+                            </div>
+                            <h4 class="text-base font-bold text-slate-800">No Excel Files Loaded</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Upload your File 1 &amp; File 2, or click the button below to populate instant sample data and see the checkerboard matrix in action.</p>
+                            <button id="emptyDemoBtn" class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-500/20 liquid-transition active:scale-95">
+                                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                                <span>Load Demo Matrix</span>
+                            </button>
+                        </div>
+
+                        <!-- Table Canvas Wrapper (Hidden until data ready) -->
+                        <div id="tableWrapper" class="w-full hidden liquid-transition">
+                            <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm bg-white">
+                                <table id="renderedTable" class="w-full border-collapse text-center">
+                                    <!-- Dynamic rows injected here -->
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Preview Footer / Inspector -->
+                    <div class="px-5 py-3 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span id="formulaTip">Checkerboard rule: Cell (row r, col c) &rarr; (r + c) % 2 === 0 ? X : Y</span>
+                        </div>
+                        <div id="readCounts" class="font-mono text-[11px] text-slate-400">
+                            X: 0 &bull; Y: 0
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4"></div>
+
+    <!-- Script Application Logic -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Application State
+        let activeMode = 'matrix'; // 'matrix' or 'single'
+        let cachedDataX = null;
+        let cachedDataY = null;
+        let debounceTimer = null;
+        let isStylingOpen = true;
+
+        // Mode Switching
+        const modeMatrixBtn = document.getElementById('modeMatrixBtn');
+        const modeSingleBtn = document.getElementById('modeSingleBtn');
+        const modePill = document.getElementById('modePill');
+        const fileInputsMatrix = document.getElementById('fileInputsMatrix');
+        const fileInputsSingle = document.getElementById('fileInputsSingle');
+        const colInputsMatrix = document.getElementById('colInputsMatrix');
+        const colInputsSingle = document.getElementById('colInputsSingle');
+
+        modeMatrixBtn.addEventListener('click', () => setMode('matrix'));
+        modeSingleBtn.addEventListener('click', () => setMode('single'));
+
+        function setMode(mode) {
+            activeMode = mode;
+            if (mode === 'matrix') {
+                modePill.style.transform = 'translateX(0)';
+                modeMatrixBtn.classList.add('text-indigo-700');
+                modeMatrixBtn.classList.remove('text-slate-600');
+                modeSingleBtn.classList.remove('text-indigo-700');
+                modeSingleBtn.classList.add('text-slate-600');
+
+                fileInputsMatrix.classList.remove('hidden');
+                colInputsMatrix.classList.remove('hidden');
+                fileInputsSingle.classList.add('hidden');
+                colInputsSingle.classList.add('hidden');
+            } else {
+                modePill.style.transform = 'translateX(100%)';
+                modeSingleBtn.classList.add('text-indigo-700');
+                modeSingleBtn.classList.remove('text-slate-600');
+                modeMatrixBtn.classList.remove('text-indigo-700');
+                modeMatrixBtn.classList.add('text-slate-600');
+
+                fileInputsSingle.classList.remove('hidden');
+                colInputsSingle.classList.remove('hidden');
+                fileInputsMatrix.classList.add('hidden');
+                colInputsMatrix.classList.add('hidden');
+            }
+            triggerAutoPreview();
+        }
+
+        // Styling Accordion Toggle
+        const stylingToggleBtn = document.getElementById('stylingToggleBtn');
+        const stylingContent = document.getElementById('stylingContent');
+        const stylingChevron = document.getElementById('stylingChevron');
+
+        stylingToggleBtn.addEventListener('click', () => {
+            isStylingOpen = !isStylingOpen;
+            if (isStylingOpen) {
+                stylingContent.classList.remove('hidden');
+                stylingChevron.style.transform = 'rotate(0deg)';
+            } else {
+                stylingContent.classList.add('hidden');
+                stylingChevron.style.transform = 'rotate(-90deg)';
+            }
+        });
+
+        // Color Hex Label Synchronization
+        const colorMappings = [
+            { input: 'h1Bg', label: 'h1BgHex' },
+            { input: 'h1Color', label: 'h1ColorHex' },
+            { input: 'h2Bg', label: 'h2BgHex' },
+            { input: 'h2Color', label: 'h2ColorHex' },
+            { input: 'xBg', label: 'xBgHex' },
+            { input: 'yBg', label: 'yBgHex' }
+        ];
+
+        colorMappings.forEach(({ input, label }) => {
+            const inEl = document.getElementById(input);
+            const lblEl = document.getElementById(label);
+            inEl.addEventListener('input', (e) => {
+                lblEl.textContent = e.target.value.toUpperCase();
+                triggerAutoPreview();
+            });
+        });
+
+        // File Drag & Drop Feedback & Updates
+        function setupDropzone(dropzoneId, inputId, nameId, infoId, highlightClass) {
+            const dropzone = document.getElementById(dropzoneId);
+            const input = document.getElementById(inputId);
+            const nameEl = document.getElementById(nameId);
+            const infoEl = document.getElementById(infoId);
+
+            ['dragenter', 'dragover'].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('ring-2', highlightClass);
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(name => {
+                dropzone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('ring-2', highlightClass);
+                });
+            });
+
+            input.addEventListener('change', () => {
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    nameEl.textContent = file.name;
+                    infoEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+                    infoEl.classList.remove('text-slate-400');
+                    infoEl.classList.add('text-indigo-600', 'font-bold');
+                    showToast(`Loaded ${file.name}`, 'info');
+                    triggerAutoPreview(true); // force full re-read
+                }
+            });
+        }
+
+        setupDropzone('dropzone1', 'file1', 'file1Name', 'file1Info', 'ring-indigo-400');
+        setupDropzone('dropzone2', 'file2', 'file2Name', 'file2Info', 'ring-emerald-400');
+        setupDropzone('dropzoneSingle', 'fileSingle', 'fileSingleName', 'fileSingleInfo', 'ring-indigo-400');
+
+        // Reading Columns from Excel
+        async function readColumnFromExcel(file, colIndex) {
+            const workbook = new ExcelJS.Workbook();
+            const arrayBuffer = await file.arrayBuffer();
+            await workbook.xlsx.load(arrayBuffer);
+            
+            const worksheet = workbook.worksheets[0];
+            const data = [];
+            
+            worksheet.eachRow((row) => {
+                const cell = row.getCell(parseInt(colIndex) + 1);
+                const val = cell.value;
+                data.push(val !== null && val !== undefined ? val.toString() : "");
+            });
+            return data;
+        }
+
+        // Demo Data Generator
+        async function loadDemoData() {
+            showToast("Generating synthetic sample matrices...", "info");
+            
+            const sampleX = ["Header X"];
+            const sampleY = ["Header Y"];
+            for (let i = 1; i <= 35; i++) {
+                sampleX.push(`X_${i.toString().padStart(2, '0')}`);
+                sampleY.push(`Y_${i.toString().padStart(2, '0')}`);
+            }
+
+            cachedDataX = sampleX;
+            cachedDataY = sampleY;
+
+            document.getElementById('file1Name').textContent = "demo_dataset_alpha.xlsx (Synthetic)";
+            document.getElementById('file1Info').textContent = "Sample Data";
+            document.getElementById('file2Name').textContent = "demo_dataset_beta.xlsx (Synthetic)";
+            document.getElementById('file2Info').textContent = "Sample Data";
+            document.getElementById('filesBadge').textContent = "Sample Active";
+            document.getElementById('filesBadge').className = "text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full";
+
+            await runGenerationLogic('preview');
+            showToast("Sample data loaded successfully!", "success");
+        }
+
+        document.getElementById('demoDataBtn').addEventListener('click', loadDemoData);
+        document.getElementById('emptyDemoBtn').addEventListener('click', loadDemoData);
+
+        // Auto Preview Trigger with Debounce
+        function triggerAutoPreview(forceReRead = false) {
+            if (forceReRead) {
+                cachedDataX = null;
+                cachedDataY = null;
+            }
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                runGenerationLogic('preview', true);
+            }, 250);
+        }
+
+        // Listen to all parameter inputs for live reactivity
+        const reactiveInputIds = [
+            'rowsM', 'colsN', 'headerText1', 'headerText2',
+            'colIndex1', 'colIndex2', 'colIndexSingle', 'splitRowIndex',
+            'h1Size', 'h2Size', 'xSize', 'ySize'
+        ];
+
+        reactiveInputIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', () => triggerAutoPreview(false));
+            }
+        });
+
+        // Core Generation Logic (Excel & Preview)
+        async function runGenerationLogic(outputType = 'excel', isSilentAuto = false) {
+            const generateBtn = document.getElementById('generateBtn');
+            const previewBtn = document.getElementById('previewBtn');
+            const previewStatusBadge = document.getElementById('previewStatusBadge');
+            
+            let dataX = cachedDataX;
+            let dataY = cachedDataY;
+
+            try {
+                // If data not yet cached, attempt reading from files
+                if (!dataX || !dataY) {
+                    if (activeMode === 'matrix') {
+                        const file1 = document.getElementById('file1').files[0];
+                        const file2 = document.getElementById('file2').files[0];
+
+                        if (!file1 || !file2) {
+                            if (!isSilentAuto) {
+                                showToast("Please select both File 1 (Data X) and File 2 (Data Y).", "error");
+                            }
+                            return;
+                        }
+
+                        const colX = parseInt(document.getElementById('colIndex1').value) - 1;
+                        const colY = parseInt(document.getElementById('colIndex2').value) - 1;
+
+                        dataX = await readColumnFromExcel(file1, colX);
+                        dataY = await readColumnFromExcel(file2, colY);
+                        cachedDataX = dataX;
+                        cachedDataY = dataY;
+
+                    } else { // activeMode === 'single'
+                        const fileSingle = document.getElementById('fileSingle').files[0];
+                        if (!fileSingle) {
+                            if (!isSilentAuto) {
+                                showToast("Please select an Excel file for Single Column Mode.", "error");
+                            }
+                            return;
+                        }
+
+                        const colX = parseInt(document.getElementById('colIndexSingle').value) - 1;
+                        const splitIndex = parseInt(document.getElementById('splitRowIndex').value);
+
+                        const allData = await readColumnFromExcel(fileSingle, colX);
+                        dataX = allData.slice(1, splitIndex);
+                        dataY = allData.slice(splitIndex);
+                        cachedDataX = dataX;
+                        cachedDataY = dataY;
+                    }
+                }
+
+                // Inputs
+                const rowsM = Math.max(1, parseInt(document.getElementById('rowsM').value) || 10);
+                const colsN = Math.max(1, parseInt(document.getElementById('colsN').value) || 3);
+                const head1Txt = document.getElementById('headerText1').value || "";
+                const head2Txt = document.getElementById('headerText2').value || "";
+
+                // Styles
+                const h1ColorHex = document.getElementById('h1Color').value;
+                const h1BgHex = document.getElementById('h1Bg').value;
+                const h2ColorHex = document.getElementById('h2Color').value;
+                const h2BgHex = document.getElementById('h2Bg').value;
+
+                const xColorHex = document.getElementById('xColor').value;
+                const xBgHex = document.getElementById('xBg').value;
+                const yColorHex = document.getElementById('yColor').value;
+                const yBgHex = document.getElementById('yBg').value;
+
+                const styles = {
+                    h1: { 
+                        color: { argb: h1ColorHex.replace('#', 'FF') },
+                        size: parseInt(document.getElementById('h1Size').value) || 16,
+                        bg: { argb: h1BgHex.replace('#', 'FF') },
+                        colorHex: h1ColorHex,
+                        bgHex: h1BgHex
+                    },
+                    h2: { 
+                        color: { argb: h2ColorHex.replace('#', 'FF') },
+                        size: parseInt(document.getElementById('h2Size').value) || 14,
+                        bg: { argb: h2BgHex.replace('#', 'FF') },
+                        colorHex: h2ColorHex,
+                        bgHex: h2BgHex
+                    },
+                    x: { 
+                        color: { argb: xColorHex.replace('#', 'FF') },
+                        size: parseInt(document.getElementById('xSize').value) || 11,
+                        bg: { argb: xBgHex.replace('#', 'FF') },
+                        colorHex: xColorHex,
+                        bgHex: xBgHex
+                    },
+                    y: { 
+                        color: { argb: yColorHex.replace('#', 'FF') },
+                        size: parseInt(document.getElementById('ySize').value) || 11,
+                        bg: { argb: yBgHex.replace('#', 'FF') },
+                        colorHex: yColorHex,
+                        bgHex: yBgHex
+                    }
+                };
+
+                // Checkerboard Logic
+                let ptrX = (activeMode === 'matrix') ? 1 : 0;
+                let ptrY = (activeMode === 'matrix') ? 1 : 0;
+                let previewGrid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
+
+                for (let c = 0; c < colsN; c++) {
+                    for (let r = 0; r < rowsM; r++) {
+                        const isTypeX = (r + c) % 2 === 0;
+                        let val, styleKey;
+
+                        if (isTypeX) {
+                            val = ptrX < dataX.length ? dataX[ptrX] : "";
+                            styleKey = 'x';
+                            ptrX++;
+                        } else {
+                            val = ptrY < dataY.length ? dataY[ptrY] : "";
+                            styleKey = 'y';
+                            ptrY++;
+                        }
+                        previewGrid[r][c] = { value: val, styleKey: styleKey };
+                    }
+                }
+
+                // Update Stats
+                document.getElementById('matrixStats').textContent = `Dimensions: ${rowsM} \u00D7 ${colsN} \u2022 ${rowsM * colsN} cells total`;
+                document.getElementById('readCounts').textContent = `X Used: ${ptrX} / ${dataX.length} \u2022 Y Used: ${ptrY} / ${dataY.length}`;
+
+                // --- BRANCH: PREVIEW RENDERING ---
+                if (outputType === 'preview') {
+                    const emptyState = document.getElementById('emptyState');
+                    const tableWrapper = document.getElementById('tableWrapper');
+                    const renderedTable = document.getElementById('renderedTable');
+
+                    let tableHtml = '<thead>';
+                    if (head1Txt.trim().length > 0) {
+                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h1.bgHex}; color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 10px 14px; border: 1px solid #cbd5e1;">${escapeHtml(head1Txt)}</th></tr>`;
+                    }
+                    if (head2Txt.trim().length > 0) {
+                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h2.bgHex}; color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; padding: 8px 14px; border: 1px solid #cbd5e1;">${escapeHtml(head2Txt)}</th></tr>`;
+                    }
+                    tableHtml += '</thead><tbody>';
+
+                    for (let r = 0; r < rowsM; r++) {
+                        tableHtml += '<tr>';
+                        for (let c = 0; c < colsN; c++) {
+                            const item = previewGrid[r][c];
+                            if (item) {
+                                const s = styles[item.styleKey];
+                                const badgeClass = item.styleKey === 'x' ? 'text-indigo-600' : 'text-emerald-600';
+                                tableHtml += `<td style="color: ${s.colorHex}; font-size: ${s.size}px; background-color: ${s.bgHex}; border: 1px solid #e2e8f0; padding: 6px 12px; white-space: nowrap; font-family: 'JetBrains Mono', monospace;">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <span class="text-[9px] font-bold ${badgeClass} uppercase opacity-60">(${item.styleKey.toUpperCase()})</span>
+                                        <span>${escapeHtml(item.value)}</span>
+                                    </div>
+                                </td>`;
+                            } else {
+                                tableHtml += '<td style="border: 1px solid #e2e8f0; padding: 6px 12px; background-color: #fff;"></td>';
+                            }
+                        }
+                        tableHtml += '</tr>';
+                    }
+                    tableHtml += '</tbody>';
+
+                    renderedTable.innerHTML = tableHtml;
+                    emptyState.classList.add('hidden');
+                    tableWrapper.classList.remove('hidden');
+
+                    previewStatusBadge.classList.remove('hidden');
+                    setTimeout(() => {
+                        previewStatusBadge.classList.add('hidden');
+                    }, 2200);
+
+                // --- BRANCH: EXCEL GENERATION & DOWNLOAD ---
+                } else {
+                    generateBtn.disabled = true;
+                    generateBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                    showToast("Compiling styled Excel workbook...", "info");
+
+                    const wb = new ExcelJS.Workbook();
+                    const ws = wb.addWorksheet('Matrix Result');
+
+                    let excelStartRow = 1;
+                    if (head1Txt.trim().length > 0) {
+                        ws.mergeCells(excelStartRow, 1, excelStartRow, colsN);
+                        const cellH1 = ws.getCell(excelStartRow, 1);
+                        cellH1.value = head1Txt;
+                        cellH1.font = { color: styles.h1.color, size: styles.h1.size, bold: true };
+                        cellH1.fill = { type: 'pattern', pattern: 'solid', fgColor: styles.h1.bg };
+                        cellH1.alignment = { horizontal: 'center', vertical: 'middle' };
+                        ws.getRow(excelStartRow).height = styles.h1.size * 1.8;
+                        excelStartRow++;
+                    }
+
+                    if (head2Txt.trim().length > 0) {
+                        ws.mergeCells(excelStartRow, 1, excelStartRow, colsN);
+                        const cellH2 = ws.getCell(excelStartRow, 1);
+                        cellH2.value = head2Txt;
+                        cellH2.font = { color: styles.h2.color, size: styles.h2.size, bold: true };
+                        cellH2.fill = { type: 'pattern', pattern: 'solid', fgColor: styles.h2.bg };
+                        cellH2.alignment = { horizontal: 'center', vertical: 'middle' };
+                        ws.getRow(excelStartRow).height = styles.h2.size * 1.6;
+                        excelStartRow++;
+                    }
+
+                    // Populate Cells
+                    for (let c = 0; c < colsN; c++) {
+                        for (let r = 0; r < rowsM; r++) {
+                            const cell = ws.getCell(excelStartRow + r, c + 1);
+                            const item = previewGrid[r][c];
+                            const s = styles[item.styleKey];
+
+                            cell.value = item.value;
+                            cell.font = { color: s.color, size: s.size };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: s.bg };
+                            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                            cell.border = {
+                                top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                                left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                                bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                                right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+                            };
+                        }
+                    }
+
+                    // Set column widths
+                    for (let c = 1; c <= colsN; c++) {
+                        ws.getColumn(c).width = 18;
+                    }
+
+                    const buffer = await wb.xlsx.writeBuffer();
+                    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+                    saveAs(blob, "matrix_output.xlsx");
+
+                    showToast("Downloaded matrix_output.xlsx!", "success");
+                    generateBtn.disabled = false;
+                    generateBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                }
+
+            } catch (err) {
+                console.error("Matrix Processing Error:", err);
+                showToast(err.message || "An error occurred while processing data.", "error");
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+            }
+        }
+
+        // HTML Escaping Helper
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Event Listeners for explicit buttons
+        document.getElementById('generateBtn').addEventListener('click', () => runGenerationLogic('excel'));
+        document.getElementById('previewBtn').addEventListener('click', () => {
+            showToast("Updating matrix preview...", "info");
+            runGenerationLogic('preview');
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            document.getElementById('file1').value = "";
+            document.getElementById('file2').value = "";
+            document.getElementById('fileSingle').value = "";
+            document.getElementById('file1Name').textContent = "Click or drag File 1 here";
+            document.getElementById('file2Name').textContent = "Click or drag File 2 here";
+            document.getElementById('fileSingleName').textContent = "Click or drag single workbook here";
+            document.getElementById('file1Info').textContent = "Not selected";
+            document.getElementById('file2Info').textContent = "Not selected";
+            document.getElementById('fileSingleInfo').textContent = "Not selected";
+            document.getElementById('filesBadge').textContent = "Waiting files";
+            document.getElementById('filesBadge').className = "text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full";
+
+            cachedDataX = null;
+            cachedDataY = null;
+            document.getElementById('emptyState').classList.remove('hidden');
+            document.getElementById('tableWrapper').classList.add('hidden');
+            document.getElementById('renderedTable').innerHTML = "";
+            showToast("Form has been reset.", "info");
+        });
+
+        // Floating Modern Toast Notification
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const typeConfig = {
+                success: { bg: 'bg-emerald-600', icon: 'check-circle-2' },
+                error: { bg: 'bg-rose-600', icon: 'alert-circle' },
+                info: { bg: 'bg-slate-900', icon: 'info' }
+            }[type] || { bg: 'bg-slate-900', icon: 'info' };
+
+            toast.className = `flex items-center gap-3 p-3.5 rounded-xl shadow-elevated text-white text-xs font-semibold ${typeConfig.bg} pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0`;
+            toast.innerHTML = `
+                <i data-lucide="${typeConfig.icon}" class="w-4 h-4 flex-shrink-0"></i>
+                <span class="flex-1">${escapeHtml(message)}</span>
+            `;
+
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+
+            // Animate In
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            });
+
+            // Auto Dismiss
+            setTimeout(() => {
+                toast.classList.add('translate-y-3', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3600);
+        }
+    </script>
+</body>
+</html>
