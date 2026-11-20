@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Excel Matrix Merger — Lab Utility</title>
     
     <!-- Google Fonts -->
@@ -53,9 +53,10 @@
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             background-color: #F8FAFC;
             color: #0F172A;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Prevent zoom on mobile inputs */
+        /* Prevent iOS zoom on input focus */
         input[type="number"], input[type="text"], select {
             font-size: 15px;
         }
@@ -67,8 +68,8 @@
 
         /* Custom Scrollbar for preview table */
         .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
             background: #F1F5F9;
@@ -87,9 +88,9 @@
             transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* Subtle checkerboard pattern for preview background */
+        /* Subtle grid background for table preview canvas */
         .grid-bg {
-            background-image: radial-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px);
+            background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
             background-size: 16px 16px;
         }
     </style>
@@ -97,42 +98,44 @@
 <body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
 
     <!-- Top Navigation Header -->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-                    <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+            <!-- Brand & Title -->
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+                    <i data-lucide="grid-3x3" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">Excel Matrix Merger</h1>
-                        <span class="text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-2 py-0.5 rounded-full">v2.0</span>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-1.5 sm:gap-2">
+                        <h1 class="text-sm sm:text-base md:text-lg font-bold text-slate-900 tracking-tight truncate">Excel Matrix Merger</h1>
+                        <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200/60 px-1.5 sm:px-2 py-0.5 rounded-full shrink-0">v2.1</span>
                     </div>
-                    <p class="text-xs text-slate-500 font-medium hidden sm:block">Automated checkerboard interleaver & formatted table generator</p>
+                    <p class="text-[11px] text-slate-500 font-medium hidden sm:block">Automated checkerboard interleaver &amp; formatted table generator</p>
                 </div>
             </div>
 
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button id="demoDataBtn" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200/70 liquid-transition active:scale-95">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600"></i>
-                    <span>Try Demo Data</span>
+            <!-- Top Actions -->
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <button id="demoDataBtn" type="button" class="inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg border border-indigo-200/80 liquid-transition active:scale-95 shrink-0 whitespace-nowrap">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+                    <span class="hidden sm:inline">Try Demo Data</span>
+                    <span class="sm:hidden text-xs">Demo</span>
                 </button>
                 <div class="h-4 w-px bg-slate-200 hidden sm:block"></div>
-                <div class="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
+                <div class="hidden sm:flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full shrink-0 whitespace-nowrap">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="hidden md:inline">100% In-Browser</span>
-                    <span class="md:hidden">Local</span>
+                    <span>100% In-Browser</span>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-8">
         <div class="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
 
             <!-- LEFT COLUMN: Controls & Setup (lg:col-span-5) -->
-            <div class="lg:col-span-5 space-y-6">
+            <div class="lg:col-span-5 space-y-5">
 
                 <!-- Mode Switcher Pill -->
                 <div class="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-soft">
@@ -140,28 +143,28 @@
                         <!-- Sliding Indicator -->
                         <div id="modePill" class="absolute top-0.5 bottom-0.5 left-0.5 w-[calc(50%-2px)] bg-white rounded-lg shadow-sm border border-slate-200/60 liquid-transition"></div>
                         
-                        <button id="modeMatrixBtn" type="button" class="relative z-10 py-2.5 px-3 rounded-lg text-indigo-700 flex items-center justify-center gap-2 liquid-transition">
-                            <i data-lucide="layers" class="w-4 h-4"></i>
-                            <span>Dual Files (X + Y)</span>
+                        <button id="modeMatrixBtn" type="button" class="relative z-10 py-2.5 px-2 sm:px-3 rounded-lg text-indigo-700 flex items-center justify-center gap-1.5 sm:gap-2 liquid-transition">
+                            <i data-lucide="layers" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+                            <span class="truncate">Dual Files (X + Y)</span>
                         </button>
-                        <button id="modeSingleBtn" type="button" class="relative z-10 py-2.5 px-3 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 liquid-transition">
-                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-                            <span>Single File (Split)</span>
+                        <button id="modeSingleBtn" type="button" class="relative z-10 py-2.5 px-2 sm:px-3 rounded-lg text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 sm:gap-2 liquid-transition">
+                            <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0"></i>
+                            <span class="truncate">Single File (Split)</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Step 1: Upload Files Card -->
-                <section class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">1</span>
-                            <div>
-                                <h2 class="text-sm font-bold text-slate-900">Source Files</h2>
-                                <p class="text-xs text-slate-500">Upload Excel spreadsheet (.xlsx, .xls)</p>
+                <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
+                    <div class="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">1</span>
+                            <div class="min-w-0">
+                                <h2 class="text-sm font-bold text-slate-900 leading-tight">Source Files</h2>
+                                <p class="text-xs text-slate-500 truncate leading-tight">Upload Excel spreadsheet (.xlsx, .xls)</p>
                             </div>
                         </div>
-                        <span id="filesBadge" class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">Waiting files</span>
+                        <span id="filesBadge" class="inline-flex items-center justify-center text-center whitespace-nowrap text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 self-center leading-none">Waiting files</span>
                     </div>
 
                     <!-- Dual Files Mode Inputs -->
@@ -170,20 +173,20 @@
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
                                     File 1 &mdash; Data X
                                 </label>
                                 <span id="file1Info" class="text-[11px] text-slate-400 font-mono">Not selected</span>
                             </div>
-                            <div id="dropzone1" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-4 text-center cursor-pointer liquid-transition group">
+                            <div id="dropzone1" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-3.5 sm:p-4 text-center cursor-pointer liquid-transition group">
                                 <input type="file" id="file1" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                 <div class="flex items-center justify-center gap-3 pointer-events-none">
-                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition">
-                                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition shrink-0">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                                     </div>
-                                    <div class="text-left">
-                                        <p id="file1Name" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 line-clamp-1">Click or drag File 1 here</p>
-                                        <p class="text-[11px] text-slate-400">Takes even indices: (r+c)%2 = 0</p>
+                                    <div class="text-left min-w-0">
+                                        <p id="file1Name" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 truncate">Click or drag File 1 here</p>
+                                        <p class="text-[11px] text-slate-400">Row 1 header skipped; even cells (r+c)%2=0</p>
                                     </div>
                                 </div>
                             </div>
@@ -193,20 +196,20 @@
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                                     File 2 &mdash; Data Y
                                 </label>
                                 <span id="file2Info" class="text-[11px] text-slate-400 font-mono">Not selected</span>
                             </div>
-                            <div id="dropzone2" class="relative border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-emerald-50/40 rounded-xl p-4 text-center cursor-pointer liquid-transition group">
+                            <div id="dropzone2" class="relative border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-slate-50/70 hover:bg-emerald-50/40 rounded-xl p-3.5 sm:p-4 text-center cursor-pointer liquid-transition group">
                                 <input type="file" id="file2" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                 <div class="flex items-center justify-center gap-3 pointer-events-none">
-                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:border-emerald-300 shadow-sm liquid-transition">
-                                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                                    <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-emerald-600 group-hover:border-emerald-300 shadow-sm liquid-transition shrink-0">
+                                        <i data-lucide="upload-cloud" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                                     </div>
-                                    <div class="text-left">
-                                        <p id="file2Name" class="text-xs font-semibold text-slate-700 group-hover:text-emerald-900 line-clamp-1">Click or drag File 2 here</p>
-                                        <p class="text-[11px] text-slate-400">Takes odd indices: (r+c)%2 = 1</p>
+                                    <div class="text-left min-w-0">
+                                        <p id="file2Name" class="text-xs font-semibold text-slate-700 group-hover:text-emerald-900 truncate">Click or drag File 2 here</p>
+                                        <p class="text-[11px] text-slate-400">Row 1 header skipped; odd cells (r+c)%2=1</p>
                                     </div>
                                 </div>
                             </div>
@@ -218,20 +221,20 @@
                         <div>
                             <div class="flex items-center justify-between mb-1.5">
                                 <label class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                                    <span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0"></span>
                                     Combined Excel File
                                 </label>
                                 <span id="fileSingleInfo" class="text-[11px] text-slate-400 font-mono">Not selected</span>
                             </div>
-                            <div id="dropzoneSingle" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-5 text-center cursor-pointer liquid-transition group">
+                            <div id="dropzoneSingle" class="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/40 rounded-xl p-4 sm:p-5 text-center cursor-pointer liquid-transition group">
                                 <input type="file" id="fileSingle" accept=".xlsx, .xls" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                                 <div class="flex items-center justify-center gap-3 pointer-events-none">
-                                    <div class="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition">
+                                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 shadow-sm liquid-transition shrink-0">
                                         <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
                                     </div>
-                                    <div class="text-left">
-                                        <p id="fileSingleName" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 line-clamp-1">Click or drag single workbook here</p>
-                                        <p class="text-[11px] text-slate-400">Contains continuous column to be split into X & Y</p>
+                                    <div class="text-left min-w-0">
+                                        <p id="fileSingleName" class="text-xs font-semibold text-slate-700 group-hover:text-indigo-900 truncate">Click or drag single workbook here</p>
+                                        <p class="text-[11px] text-slate-400">Contains continuous column split into X and Y series</p>
                                     </div>
                                 </div>
                             </div>
@@ -240,13 +243,13 @@
                 </section>
 
                 <!-- Step 2: Dimensions & Columns Card -->
-                <section class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
-                    <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+                <section class="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200/80 shadow-card space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">2</span>
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">2</span>
                             <div>
-                                <h2 class="text-sm font-bold text-slate-900">Matrix Geometry & Columns</h2>
-                                <p class="text-xs text-slate-500">Define table shape & reading coordinates</p>
+                                <h2 class="text-sm font-bold text-slate-900">Configuration</h2>
+                                <p class="text-xs text-slate-500">Column indices, header titles &amp; grid size</p>
                             </div>
                         </div>
                     </div>
@@ -254,82 +257,78 @@
                     <!-- Column Selector for Matrix Mode -->
                     <div id="colInputsMatrix" class="grid grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Col Index X <span class="text-slate-400 font-normal">(File 1, A=1)</span></label>
-                            <div class="relative">
-                                <input type="number" id="colIndex1" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
-                            </div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Col Index X <span class="text-slate-400 font-normal">(File 1, A=1)</span></label>
+                            <input type="number" id="colIndex1" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Col Index Y <span class="text-slate-400 font-normal">(File 2, A=1)</span></label>
-                            <div class="relative">
-                                <input type="number" id="colIndex2" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
-                            </div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Col Index Y <span class="text-slate-400 font-normal">(File 2, A=1)</span></label>
+                            <input type="number" id="colIndex2" value="2" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                     </div>
 
                     <!-- Column Selector for Single Mode -->
                     <div id="colInputsSingle" class="grid grid-cols-2 gap-3 sm:gap-4 hidden">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Target Column <span class="text-slate-400 font-normal">(A=1)</span></label>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Col Index <span class="text-slate-400 font-normal">(A=1)</span></label>
                             <input type="number" id="colIndexSingle" value="1" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Split Row Index <span class="text-slate-400 font-normal">(X &le; row)</span></label>
-                            <input type="number" id="splitRowIndex" value="10" min="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
-                        </div>
-                    </div>
-
-                    <!-- Matrix Dimensions (Rows M x Cols N) -->
-                    <div class="grid grid-cols-2 gap-3 sm:gap-4 pt-1">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                                <span>Rows (M)</span>
-                                <span class="text-[10px] text-slate-400 uppercase font-mono">Height</span>
-                            </label>
-                            <input type="number" id="rowsM" value="10" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
-                                <span>Columns (N)</span>
-                                <span class="text-[10px] text-slate-400 uppercase font-mono">Width</span>
-                            </label>
-                            <input type="number" id="colsN" value="3" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Split Row Index <span class="text-slate-400 font-normal">(X &le; row)</span></label>
+                            <input type="number" id="splitRowIndex" value="6" min="2" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                     </div>
 
                     <!-- Headers Text -->
                     <div class="space-y-3 pt-1 border-t border-slate-100">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Primary Header Title</label>
-                            <input type="text" id="headerText1" value="Project Alpha &mdash; Experimental Measurements" placeholder="e.g. Project Alpha" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Top Header Text</label>
+                            <input type="text" id="headerText1" value="11/11/2025" placeholder="e.g. 11/11/2025" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Secondary Header / Subtitle</label>
-                            <input type="text" id="headerText2" value="Checkerboard Composite Matrix (X vs Y)" placeholder="e.g. Q3 Report" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Sub Header Text</label>
+                            <input type="text" id="headerText2" value="Final Output" placeholder="e.g. Final Output" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                    </div>
+
+                    <!-- Matrix Dimensions (Rows M x Cols N) -->
+                    <div class="grid grid-cols-2 gap-3 sm:gap-4 pt-1 border-t border-slate-100">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                                <span>Rows (M)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono">Height</span>
+                            </label>
+                            <input type="number" id="rowsM" value="3" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                                <span>Columns (N)</span>
+                                <span class="text-[10px] text-slate-400 uppercase font-mono">Width</span>
+                            </label>
+                            <input type="number" id="colsN" value="3" min="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none liquid-transition">
                         </div>
                     </div>
                 </section>
 
                 <!-- Step 3: Typography & Colors (Accordion / Expandable) -->
                 <section class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden">
-                    <button id="stylingToggleBtn" type="button" class="w-full p-5 sm:p-6 text-left flex items-center justify-between hover:bg-slate-50/60 liquid-transition">
+                    <button id="stylingToggleBtn" type="button" class="w-full p-4 sm:p-5 text-left flex items-center justify-between hover:bg-slate-50/60 liquid-transition">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center">3</span>
+                            <span class="w-7 h-7 rounded-xl bg-indigo-50 border border-indigo-200/70 text-indigo-700 font-bold text-xs flex items-center justify-center shrink-0">3</span>
                             <div>
-                                <h2 class="text-sm font-bold text-slate-900">Styling & Appearance</h2>
-                                <p class="text-xs text-slate-500">Colors, fonts, and cell styling presets</p>
+                                <h2 class="text-sm font-bold text-slate-900">Styling</h2>
+                                <p class="text-xs text-slate-500">Header colors, data font sizes &amp; fills</p>
                             </div>
                         </div>
-                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 liquid-transition group-hover:bg-slate-200" id="stylingChevron">
+                        <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 liquid-transition" id="stylingChevron">
                             <i data-lucide="chevron-down" class="w-4 h-4"></i>
                         </div>
                     </button>
 
-                    <div id="stylingContent" class="p-5 sm:p-6 pt-0 border-t border-slate-100 space-y-4">
+                    <div id="stylingContent" class="p-4 sm:p-5 pt-0 border-t border-slate-100 space-y-3.5">
                         <!-- Header 1 Styling -->
-                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/70">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-bold text-slate-700">Header 1 (Top)</span>
+                                <span class="text-xs font-bold text-slate-700">Header 1 Styling</span>
                                 <span class="text-[10px] text-slate-400 font-mono">Row 1</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
@@ -355,9 +354,9 @@
                         </div>
 
                         <!-- Header 2 Styling -->
-                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/70">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-xs font-bold text-slate-700">Header 2 (Sub)</span>
+                                <span class="text-xs font-bold text-slate-700">Header 2 Styling</span>
                                 <span class="text-[10px] text-slate-400 font-mono">Row 2</span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
@@ -383,45 +382,39 @@
                         </div>
 
                         <!-- Data X & Data Y Cell Styles -->
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2.5">
                             <!-- X Style -->
-                            <div class="p-3 bg-indigo-50/70 rounded-xl border border-indigo-100">
-                                <span class="block text-xs font-bold text-indigo-900 mb-2">Data X Cells</span>
-                                <div class="space-y-2">
+                            <div class="p-2.5 bg-blue-50/70 rounded-xl border border-blue-100">
+                                <span class="block text-xs font-bold text-blue-900 mb-1.5">File 1 (X) Data Styling</span>
+                                <div class="space-y-1.5">
                                     <div>
-                                        <label class="text-[10px] font-medium text-indigo-700">Cell Fill</label>
-                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-indigo-200">
-                                            <input type="color" id="xBg" value="#F8FAFC" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
-                                            <span id="xBgHex" class="text-[9px] font-mono text-slate-500">#F8FAFC</span>
+                                        <label class="text-[10px] font-medium text-blue-700">Font Color</label>
+                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-blue-200">
+                                            <input type="color" id="xColor" value="#000000" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
+                                            <span id="xColorHex" class="text-[9px] font-mono text-slate-600">#000000</span>
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-medium text-indigo-700">Font Color & Size</label>
-                                        <div class="flex gap-1.5">
-                                            <input type="color" id="xColor" value="#0F172A" class="w-7 h-7 rounded border border-indigo-200 p-0 cursor-pointer">
-                                            <input type="number" id="xSize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-indigo-200 rounded bg-white font-mono">
-                                        </div>
+                                        <label class="text-[10px] font-medium text-blue-700">Size</label>
+                                        <input type="number" id="xSize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-blue-200 rounded bg-white font-mono">
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Y Style -->
-                            <div class="p-3 bg-emerald-50/70 rounded-xl border border-emerald-100">
-                                <span class="block text-xs font-bold text-emerald-900 mb-2">Data Y Cells</span>
-                                <div class="space-y-2">
+                            <div class="p-2.5 bg-green-50/70 rounded-xl border border-green-100">
+                                <span class="block text-xs font-bold text-green-900 mb-1.5">File 2 (Y) Data Styling</span>
+                                <div class="space-y-1.5">
                                     <div>
-                                        <label class="text-[10px] font-medium text-emerald-700">Cell Fill</label>
-                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-emerald-200">
-                                            <input type="color" id="yBg" value="#F0FDF4" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
-                                            <span id="yBgHex" class="text-[9px] font-mono text-slate-500">#F0FDF4</span>
+                                        <label class="text-[10px] font-medium text-green-700">Font Color</label>
+                                        <div class="flex items-center gap-1 h-7 bg-white px-1.5 rounded border border-green-200">
+                                            <input type="color" id="yColor" value="#000000" class="w-4 h-4 rounded cursor-pointer border-0 p-0">
+                                            <span id="yColorHex" class="text-[9px] font-mono text-slate-600">#000000</span>
                                         </div>
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-medium text-emerald-700">Font Color & Size</label>
-                                        <div class="flex gap-1.5">
-                                            <input type="color" id="yColor" value="#0F172A" class="w-7 h-7 rounded border border-emerald-200 p-0 cursor-pointer">
-                                            <input type="number" id="ySize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-emerald-200 rounded bg-white font-mono">
-                                        </div>
+                                        <label class="text-[10px] font-medium text-green-700">Size</label>
+                                        <input type="number" id="ySize" value="11" min="7" max="24" class="w-full h-7 px-1.5 text-xs border border-green-200 rounded bg-white font-mono">
                                     </div>
                                 </div>
                             </div>
@@ -430,18 +423,18 @@
                 </section>
 
                 <!-- Actions Container -->
-                <div class="space-y-3 pt-2">
-                    <button id="generateBtn" type="button" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-700 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-elevated flex items-center justify-center gap-2.5 liquid-transition active:scale-[0.98] group">
-                        <i data-lucide="download" class="w-5 h-5 group-hover:-translate-y-0.5 liquid-transition"></i>
-                        <span>Generate &amp; Download Excel (.xlsx)</span>
+                <div class="space-y-3 pt-1">
+                    <button id="generateBtn" type="button" class="w-full py-3.5 sm:py-4 px-5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-500 hover:to-indigo-600 text-white font-bold text-sm shadow-elevated flex items-center justify-center gap-2.5 liquid-transition active:scale-[0.98]">
+                        <i data-lucide="download" class="w-5 h-5 shrink-0"></i>
+                        <span>Generate Excel (.xlsx)</span>
                     </button>
 
-                    <div class="flex items-center gap-3">
-                        <button id="previewBtn" type="button" class="flex-1 py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/80 shadow-soft flex items-center justify-center gap-2 liquid-transition active:scale-95">
-                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500"></i>
-                            <span>Refresh Preview</span>
+                    <div class="flex items-center gap-2.5">
+                        <button id="previewBtn" type="button" class="flex-1 py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs border border-slate-200/80 shadow-soft flex items-center justify-center gap-1.5 liquid-transition active:scale-95">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-slate-500 shrink-0"></i>
+                            <span>Update Preview</span>
                         </button>
-                        <button id="resetBtn" type="button" class="py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200/80 text-slate-600 font-semibold text-xs liquid-transition active:scale-95">
+                        <button id="resetBtn" type="button" class="py-2.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs liquid-transition active:scale-95 shrink-0">
                             Reset
                         </button>
                     </div>
@@ -450,54 +443,54 @@
             </div>
 
             <!-- RIGHT COLUMN: Sticky Live Preview Workbench (lg:col-span-7) -->
-            <div class="lg:col-span-7 mt-8 lg:mt-0 sticky top-20">
-                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden flex flex-col min-h-[540px]">
+            <div class="lg:col-span-7 mt-6 lg:mt-0 sticky top-16 sm:top-20">
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-card overflow-hidden flex flex-col min-h-[460px]">
                     
                     <!-- Preview Bar Header -->
-                    <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3 bg-slate-50/50">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <div class="p-3.5 sm:p-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2.5 bg-slate-50/50">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
                                 <i data-lucide="eye" class="w-4 h-4"></i>
                             </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-slate-900">Live Matrix Preview</h3>
-                                <p id="matrixStats" class="text-xs text-slate-500">Dimensions: 10 &times; 3 &bull; 30 cells total</p>
+                            <div class="min-w-0">
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Live Matrix Preview</h3>
+                                <p id="matrixStats" class="text-[11px] text-slate-500 font-medium truncate leading-tight">Dimensions: 3 &times; 3 &bull; 9 cells total</p>
                             </div>
                         </div>
 
                         <!-- Legend & Status -->
-                        <div class="flex items-center gap-3 text-xs">
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-3 h-3 rounded bg-slate-100 border border-slate-300 inline-block" id="legendBoxX"></span>
+                        <div class="flex items-center gap-2.5 text-xs shrink-0">
+                            <div class="flex items-center gap-1 text-[11px]">
+                                <span class="w-2.5 h-2.5 rounded bg-slate-50 border border-slate-300 inline-block"></span>
                                 <span class="text-slate-600 font-medium">Data X</span>
                             </div>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-3 h-3 rounded bg-emerald-50 border border-emerald-300 inline-block" id="legendBoxY"></span>
+                            <div class="flex items-center gap-1 text-[11px]">
+                                <span class="w-2.5 h-2.5 rounded bg-emerald-50 border border-emerald-300 inline-block"></span>
                                 <span class="text-slate-600 font-medium">Data Y</span>
                             </div>
-                            <span id="previewStatusBadge" class="hidden text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/50">
-                                Auto-updated
+                            <span id="previewStatusBadge" class="hidden text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200/50 shrink-0">
+                                Live
                             </span>
                         </div>
                     </div>
 
                     <!-- Preview Scrollable Canvas -->
-                    <div id="previewContainer" class="flex-1 p-4 sm:p-6 grid-bg overflow-auto custom-scrollbar max-h-[680px] flex items-center justify-center">
+                    <div id="previewContainer" class="flex-1 p-3 sm:p-6 grid-bg overflow-auto custom-scrollbar max-h-[640px] flex items-center justify-center">
                         
                         <!-- Empty State Placeholder (Shown initially until files uploaded or demo loaded) -->
-                        <div id="emptyState" class="text-center p-8 max-w-sm space-y-3">
-                            <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center shadow-inner">
-                                <i data-lucide="table-2" class="w-8 h-8"></i>
+                        <div id="emptyState" class="text-center p-6 sm:p-8 max-w-sm space-y-3">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center shadow-inner">
+                                <i data-lucide="table-2" class="w-7 h-7 sm:w-8 sm:h-8"></i>
                             </div>
-                            <h4 class="text-base font-bold text-slate-800">No Excel Files Loaded</h4>
-                            <p class="text-xs text-slate-500 leading-relaxed">Upload your File 1 &amp; File 2, or click the button below to populate instant sample data and see the checkerboard matrix in action.</p>
-                            <button id="emptyDemoBtn" class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-500/20 liquid-transition active:scale-95">
+                            <h4 class="text-sm sm:text-base font-bold text-slate-800">No Excel Files Loaded</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">Upload File 1 &amp; File 2, or click below to populate the guideline sample and view the checkerboard interleaving.</p>
+                            <button id="emptyDemoBtn" class="mt-2 inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl shadow-md shadow-indigo-500/20 liquid-transition active:scale-95">
                                 <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-                                <span>Load Demo Matrix</span>
+                                <span>Load Guideline Demo</span>
                             </button>
                         </div>
 
-                        <!-- Table Canvas Wrapper (Hidden until data ready) -->
+                        <!-- Table Canvas Wrapper -->
                         <div id="tableWrapper" class="w-full hidden liquid-transition">
                             <div class="overflow-x-auto rounded-xl border border-slate-300 shadow-sm bg-white">
                                 <table id="renderedTable" class="w-full border-collapse text-center">
@@ -509,12 +502,12 @@
                     </div>
 
                     <!-- Preview Footer / Inspector -->
-                    <div class="px-5 py-3 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i>
-                            <span id="formulaTip">Checkerboard rule: Cell (row r, col c) &rarr; (r + c) % 2 === 0 ? X : Y</span>
+                    <div class="px-4 py-2.5 border-t border-slate-100 bg-white flex items-center justify-between text-xs text-slate-500 flex-wrap gap-2">
+                        <div class="flex items-center gap-1.5 text-[11px]">
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                            <span id="formulaTip">Checkerboard: Cell (row r, col c) &rarr; (r + c) % 2 === 0 ? X : Y</span>
                         </div>
-                        <div id="readCounts" class="font-mono text-[11px] text-slate-400">
+                        <div id="readCounts" class="font-mono text-[10px] sm:text-[11px] text-slate-400 shrink-0">
                             X: 0 &bull; Y: 0
                         </div>
                     </div>
@@ -526,7 +519,7 @@
     </main>
 
     <!-- Toast Notification Container -->
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4"></div>
+    <div id="toastContainer" class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-3"></div>
 
     <!-- Script Application Logic -->
     <script>
@@ -577,7 +570,7 @@
                 fileInputsMatrix.classList.add('hidden');
                 colInputsMatrix.classList.add('hidden');
             }
-            triggerAutoPreview();
+            triggerAutoPreview(true);
         }
 
         // Styling Accordion Toggle
@@ -602,20 +595,22 @@
             { input: 'h1Color', label: 'h1ColorHex' },
             { input: 'h2Bg', label: 'h2BgHex' },
             { input: 'h2Color', label: 'h2ColorHex' },
-            { input: 'xBg', label: 'xBgHex' },
-            { input: 'yBg', label: 'yBgHex' }
+            { input: 'xColor', label: 'xColorHex' },
+            { input: 'yColor', label: 'yColorHex' }
         ];
 
         colorMappings.forEach(({ input, label }) => {
             const inEl = document.getElementById(input);
             const lblEl = document.getElementById(label);
-            inEl.addEventListener('input', (e) => {
-                lblEl.textContent = e.target.value.toUpperCase();
-                triggerAutoPreview();
-            });
+            if (inEl && lblEl) {
+                inEl.addEventListener('input', (e) => {
+                    lblEl.textContent = e.target.value.toUpperCase();
+                    triggerAutoPreview(false);
+                });
+            }
         });
 
-        // File Drag & Drop Feedback & Updates
+        // Dropzone feedback & bindings
         function setupDropzone(dropzoneId, inputId, nameId, infoId, highlightClass) {
             const dropzone = document.getElementById(dropzoneId);
             const input = document.getElementById(inputId);
@@ -645,8 +640,13 @@
                     infoEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
                     infoEl.classList.remove('text-slate-400');
                     infoEl.classList.add('text-indigo-600', 'font-bold');
+                    
+                    const badge = document.getElementById('filesBadge');
+                    badge.textContent = "Files Ready";
+                    badge.className = "inline-flex items-center justify-center text-center whitespace-nowrap text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full shrink-0 self-center leading-none";
+
                     showToast(`Loaded ${file.name}`, 'info');
-                    triggerAutoPreview(true); // force full re-read
+                    triggerAutoPreview(true); // Force re-reading Excel data
                 }
             });
         }
@@ -655,7 +655,8 @@
         setupDropzone('dropzone2', 'file2', 'file2Name', 'file2Info', 'ring-emerald-400');
         setupDropzone('dropzoneSingle', 'fileSingle', 'fileSingleName', 'fileSingleInfo', 'ring-indigo-400');
 
-        // Reading Columns from Excel
+        // Reading raw column from Excel workbook
+        // row 1 is returned at index 0, row 2 at index 1, etc.
         async function readColumnFromExcel(file, colIndex) {
             const workbook = new ExcelJS.Workbook();
             const arrayBuffer = await file.arrayBuffer();
@@ -667,34 +668,44 @@
             worksheet.eachRow((row) => {
                 const cell = row.getCell(parseInt(colIndex) + 1);
                 const val = cell.value;
-                data.push(val !== null && val !== undefined ? val.toString() : "");
+                data.push(val !== null && val !== undefined ? val.toString().trim() : "");
             });
             return data;
         }
 
-        // Demo Data Generator
+        // Guideline Demo Data Generator
         async function loadDemoData() {
-            showToast("Generating synthetic sample matrices...", "info");
-            
-            const sampleX = ["Header X"];
-            const sampleY = ["Header Y"];
-            for (let i = 1; i <= 35; i++) {
-                sampleX.push(`X_${i.toString().padStart(2, '0')}`);
-                sampleY.push(`Y_${i.toString().padStart(2, '0')}`);
+            // Clean synthetic series matching guideline images exactly:
+            // x1, x2, x3... and y1, y2, y3... with NO "Header X" or "Header Y"
+            const sampleX = [];
+            const sampleY = [];
+            for (let i = 1; i <= 25; i++) {
+                sampleX.push(`x${i}`);
+                sampleY.push(`y${i}`);
             }
 
             cachedDataX = sampleX;
             cachedDataY = sampleY;
 
-            document.getElementById('file1Name').textContent = "demo_dataset_alpha.xlsx (Synthetic)";
-            document.getElementById('file1Info').textContent = "Sample Data";
-            document.getElementById('file2Name').textContent = "demo_dataset_beta.xlsx (Synthetic)";
-            document.getElementById('file2Info').textContent = "Sample Data";
-            document.getElementById('filesBadge').textContent = "Sample Active";
-            document.getElementById('filesBadge').className = "text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full";
+            document.getElementById('file1Name').textContent = "xyz.xlsx (Sample File 1)";
+            document.getElementById('file1Info').textContent = "Sample";
+            document.getElementById('file2Name').textContent = "abc.xlsx (Sample File 2)";
+            document.getElementById('file2Info').textContent = "Sample";
+            document.getElementById('fileSingleName').textContent = "series.xlsx (Sample Combined)";
+            document.getElementById('fileSingleInfo').textContent = "Sample";
+
+            const badge = document.getElementById('filesBadge');
+            badge.textContent = "Sample Active";
+            badge.className = "inline-flex items-center justify-center text-center whitespace-nowrap text-[11px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full shrink-0 self-center leading-none";
+
+            // Set Guideline Defaults:
+            document.getElementById('headerText1').value = "11/11/2025";
+            document.getElementById('headerText2').value = "Final Output";
+            document.getElementById('rowsM').value = "3";
+            document.getElementById('colsN').value = "3";
 
             await runGenerationLogic('preview');
-            showToast("Sample data loaded successfully!", "success");
+            showToast("Loaded guideline sample data (x1..x5, y1..y5)", "success");
         }
 
         document.getElementById('demoDataBtn').addEventListener('click', loadDemoData);
@@ -709,10 +720,10 @@
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 runGenerationLogic('preview', true);
-            }, 250);
+            }, 200);
         }
 
-        // Listen to all parameter inputs for live reactivity
+        // Live Reactivity on Parameter Inputs
         const reactiveInputIds = [
             'rowsM', 'colsN', 'headerText1', 'headerText2',
             'colIndex1', 'colIndex2', 'colIndexSingle', 'splitRowIndex',
@@ -729,14 +740,13 @@
         // Core Generation Logic (Excel & Preview)
         async function runGenerationLogic(outputType = 'excel', isSilentAuto = false) {
             const generateBtn = document.getElementById('generateBtn');
-            const previewBtn = document.getElementById('previewBtn');
             const previewStatusBadge = document.getElementById('previewStatusBadge');
             
             let dataX = cachedDataX;
             let dataY = cachedDataY;
 
             try {
-                // If data not yet cached, attempt reading from files
+                // If data not yet cached, read from uploaded file(s)
                 if (!dataX || !dataY) {
                     if (activeMode === 'matrix') {
                         const file1 = document.getElementById('file1').files[0];
@@ -744,7 +754,7 @@
 
                         if (!file1 || !file2) {
                             if (!isSilentAuto) {
-                                showToast("Please select both File 1 (Data X) and File 2 (Data Y).", "error");
+                                showToast("Please select File 1 (Data X) and File 2 (Data Y).", "error");
                             }
                             return;
                         }
@@ -752,8 +762,13 @@
                         const colX = parseInt(document.getElementById('colIndex1').value) - 1;
                         const colY = parseInt(document.getElementById('colIndex2').value) - 1;
 
-                        dataX = await readColumnFromExcel(file1, colX);
-                        dataY = await readColumnFromExcel(file2, colY);
+                        const rawX = await readColumnFromExcel(file1, colX);
+                        const rawY = await readColumnFromExcel(file2, colY);
+
+                        // CRITICAL: Row 1 of Excel sheet is column header (A, B, C or X, Y, Z).
+                        // Slice from index 1 so only real data (Row 2 onwards) is used.
+                        dataX = rawX.slice(1);
+                        dataY = rawY.slice(1);
                         cachedDataX = dataX;
                         cachedDataY = dataY;
 
@@ -770,6 +785,9 @@
                         const splitIndex = parseInt(document.getElementById('splitRowIndex').value);
 
                         const allData = await readColumnFromExcel(fileSingle, colX);
+                        // CRITICAL: allData[0] is Row 1 (header, e.g. col1) -> skipped.
+                        // Row 2 to Row splitIndex is Data X. (indices 1 to splitIndex - 1)
+                        // Row splitIndex + 1 to end is Data Y. (index splitIndex onwards)
                         dataX = allData.slice(1, splitIndex);
                         dataY = allData.slice(splitIndex);
                         cachedDataX = dataX;
@@ -778,7 +796,7 @@
                 }
 
                 // Inputs
-                const rowsM = Math.max(1, parseInt(document.getElementById('rowsM').value) || 10);
+                const rowsM = Math.max(1, parseInt(document.getElementById('rowsM').value) || 3);
                 const colsN = Math.max(1, parseInt(document.getElementById('colsN').value) || 3);
                 const head1Txt = document.getElementById('headerText1').value || "";
                 const head2Txt = document.getElementById('headerText2').value || "";
@@ -790,9 +808,7 @@
                 const h2BgHex = document.getElementById('h2Bg').value;
 
                 const xColorHex = document.getElementById('xColor').value;
-                const xBgHex = document.getElementById('xBg').value;
                 const yColorHex = document.getElementById('yColor').value;
-                const yBgHex = document.getElementById('yBg').value;
 
                 const styles = {
                     h1: { 
@@ -812,24 +828,23 @@
                     x: { 
                         color: { argb: xColorHex.replace('#', 'FF') },
                         size: parseInt(document.getElementById('xSize').value) || 11,
-                        bg: { argb: xBgHex.replace('#', 'FF') },
                         colorHex: xColorHex,
-                        bgHex: xBgHex
+                        bgHex: '#F8FAFC'
                     },
                     y: { 
                         color: { argb: yColorHex.replace('#', 'FF') },
                         size: parseInt(document.getElementById('ySize').value) || 11,
-                        bg: { argb: yBgHex.replace('#', 'FF') },
                         colorHex: yColorHex,
-                        bgHex: yBgHex
+                        bgHex: '#F0FDF4'
                     }
                 };
 
-                // Checkerboard Logic
-                let ptrX = (activeMode === 'matrix') ? 1 : 0;
-                let ptrY = (activeMode === 'matrix') ? 1 : 0;
+                // Checkerboard Logic (Strictly dataX and dataY without any headers)
+                let ptrX = 0;
+                let ptrY = 0;
                 let previewGrid = Array(rowsM).fill(null).map(() => Array(colsN).fill(null));
 
+                // Populate column by column
                 for (let c = 0; c < colsN; c++) {
                     for (let r = 0; r < rowsM; r++) {
                         const isTypeX = (r + c) % 2 === 0;
@@ -860,10 +875,10 @@
 
                     let tableHtml = '<thead>';
                     if (head1Txt.trim().length > 0) {
-                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h1.bgHex}; color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 10px 14px; border: 1px solid #cbd5e1;">${escapeHtml(head1Txt)}</th></tr>`;
+                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h1.bgHex}; color: ${styles.h1.colorHex}; font-size: ${styles.h1.size}px; font-weight: bold; padding: 8px 12px; border: 1px solid #cbd5e1;">${escapeHtml(head1Txt)}</th></tr>`;
                     }
                     if (head2Txt.trim().length > 0) {
-                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h2.bgHex}; color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; padding: 8px 14px; border: 1px solid #cbd5e1;">${escapeHtml(head2Txt)}</th></tr>`;
+                        tableHtml += `<tr><th colspan="${colsN}" style="background-color: ${styles.h2.bgHex}; color: ${styles.h2.colorHex}; font-size: ${styles.h2.size}px; font-weight: bold; padding: 7px 12px; border: 1px solid #cbd5e1;">${escapeHtml(head2Txt)}</th></tr>`;
                     }
                     tableHtml += '</thead><tbody>';
 
@@ -873,15 +888,9 @@
                             const item = previewGrid[r][c];
                             if (item) {
                                 const s = styles[item.styleKey];
-                                const badgeClass = item.styleKey === 'x' ? 'text-indigo-600' : 'text-emerald-600';
-                                tableHtml += `<td style="color: ${s.colorHex}; font-size: ${s.size}px; background-color: ${s.bgHex}; border: 1px solid #e2e8f0; padding: 6px 12px; white-space: nowrap; font-family: 'JetBrains Mono', monospace;">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        <span class="text-[9px] font-bold ${badgeClass} uppercase opacity-60">(${item.styleKey.toUpperCase()})</span>
-                                        <span>${escapeHtml(item.value)}</span>
-                                    </div>
-                                </td>`;
+                                tableHtml += `<td style="color: ${s.colorHex}; font-size: ${s.size}px; background-color: ${s.bgHex}; border: 1px solid #cbd5e1; padding: 6px 12px; white-space: nowrap; font-family: 'JetBrains Mono', monospace;">${escapeHtml(item.value)}</td>`;
                             } else {
-                                tableHtml += '<td style="border: 1px solid #e2e8f0; padding: 6px 12px; background-color: #fff;"></td>';
+                                tableHtml += '<td style="border: 1px solid #cbd5e1; padding: 6px 12px; background-color: #fff;"></td>';
                             }
                         }
                         tableHtml += '</tr>';
@@ -895,13 +904,13 @@
                     previewStatusBadge.classList.remove('hidden');
                     setTimeout(() => {
                         previewStatusBadge.classList.add('hidden');
-                    }, 2200);
+                    }, 2000);
 
                 // --- BRANCH: EXCEL GENERATION & DOWNLOAD ---
                 } else {
                     generateBtn.disabled = true;
                     generateBtn.classList.add('opacity-80', 'cursor-not-allowed');
-                    showToast("Compiling styled Excel workbook...", "info");
+                    showToast("Compiling formatted Excel workbook...", "info");
 
                     const wb = new ExcelJS.Workbook();
                     const ws = wb.addWorksheet('Matrix Result');
@@ -938,7 +947,7 @@
 
                             cell.value = item.value;
                             cell.font = { color: s.color, size: s.size };
-                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: s.bg };
+                            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: (item.styleKey === 'x' ? { argb: 'FFF8FAFC' } : { argb: 'FFF0FDF4' }) };
                             cell.alignment = { horizontal: 'center', vertical: 'middle' };
                             cell.border = {
                                 top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
@@ -949,9 +958,9 @@
                         }
                     }
 
-                    // Set column widths
+                    // Standard column widths
                     for (let c = 1; c <= colsN; c++) {
-                        ws.getColumn(c).width = 18;
+                        ws.getColumn(c).width = 16;
                     }
 
                     const buffer = await wb.xlsx.writeBuffer();
@@ -982,10 +991,10 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Event Listeners for explicit buttons
+        // Explicit Action Buttons
         document.getElementById('generateBtn').addEventListener('click', () => runGenerationLogic('excel'));
         document.getElementById('previewBtn').addEventListener('click', () => {
-            showToast("Updating matrix preview...", "info");
+            showToast("Updating preview...", "info");
             runGenerationLogic('preview');
         });
 
@@ -999,18 +1008,20 @@
             document.getElementById('file1Info').textContent = "Not selected";
             document.getElementById('file2Info').textContent = "Not selected";
             document.getElementById('fileSingleInfo').textContent = "Not selected";
-            document.getElementById('filesBadge').textContent = "Waiting files";
-            document.getElementById('filesBadge').className = "text-[11px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full";
+            
+            const badge = document.getElementById('filesBadge');
+            badge.textContent = "Waiting files";
+            badge.className = "inline-flex items-center justify-center text-center whitespace-nowrap text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full shrink-0 self-center leading-none";
 
             cachedDataX = null;
             cachedDataY = null;
             document.getElementById('emptyState').classList.remove('hidden');
             document.getElementById('tableWrapper').classList.add('hidden');
             document.getElementById('renderedTable').innerHTML = "";
-            showToast("Form has been reset.", "info");
+            showToast("Form reset.", "info");
         });
 
-        // Floating Modern Toast Notification
+        // Floating Toast Notification
         function showToast(message, type = 'info') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -1021,25 +1032,23 @@
                 info: { bg: 'bg-slate-900', icon: 'info' }
             }[type] || { bg: 'bg-slate-900', icon: 'info' };
 
-            toast.className = `flex items-center gap-3 p-3.5 rounded-xl shadow-elevated text-white text-xs font-semibold ${typeConfig.bg} pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0`;
+            toast.className = `flex items-center gap-2.5 p-3 rounded-xl shadow-elevated text-white text-xs font-semibold ${typeConfig.bg} pointer-events-auto transform transition-all duration-300 ease-out translate-y-3 opacity-0`;
             toast.innerHTML = `
-                <i data-lucide="${typeConfig.icon}" class="w-4 h-4 flex-shrink-0"></i>
+                <i data-lucide="${typeConfig.icon}" class="w-4 h-4 shrink-0"></i>
                 <span class="flex-1">${escapeHtml(message)}</span>
             `;
 
             container.appendChild(toast);
             lucide.createIcons({ root: toast });
 
-            // Animate In
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-3', 'opacity-0');
             });
 
-            // Auto Dismiss
             setTimeout(() => {
                 toast.classList.add('translate-y-3', 'opacity-0');
                 setTimeout(() => toast.remove(), 300);
-            }, 3600);
+            }, 3200);
         }
     </script>
 </body>
